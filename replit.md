@@ -113,6 +113,8 @@ Changelog:
 - June 15, 2025. Updated branding to "NXTKonekt" (one word) and added astronaut logo to landing page
 - June 15, 2025. Added NXTKonekt astronaut logo to PDF quote templates for consistent branding
 - June 15, 2025. Updated dashboard to use NXTKonekt horizontal logo and pricing to $190/hr with included services
+- June 15, 2025. Completed multi-service assessment system with customer information collection and PDF quote generation for Fleet Tracking and Fleet Camera services
+- June 15, 2025. Updated pricing engine with service-specific calculations: Fleet Tracker OBD installation includes up to 3 vehicles, Fleet Camera pricing per vehicle at $190/hr
 
 ## User Preferences
 

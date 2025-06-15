@@ -506,7 +506,7 @@ export default function FleetCameraForm() {
             Previous
           </Button>
 
-          {currentStep < 4 ? (
+          {currentStep < totalSteps ? (
             <Button
               onClick={handleNext}
               className="bg-nxt-blue text-white flex items-center gap-2"

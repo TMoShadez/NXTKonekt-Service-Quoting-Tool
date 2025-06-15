@@ -50,7 +50,7 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
       }
       
       // Company name and title (positioned to right of logo)
-      const serviceTitle = getServiceTitle(assessment.serviceType);
+      const serviceTitle = getServiceTitle(assessment.serviceType ?? undefined);
       doc.fontSize(20)
          .text('NXTKonekt', 120, 50)
          .fontSize(16)
