@@ -8,13 +8,8 @@ export interface PricingBreakdown {
   totalCost: number;
 }
 
-// Base hourly rates
-const HOURLY_RATES = {
-  survey: 125,
-  installation: 95,
-  configuration: 110,
-  training: 85,
-};
+// Base hourly rate (including taxes)
+const HOURLY_RATE = 190;
 
 export function calculatePricing(assessment: Assessment): PricingBreakdown {
   let surveyHours = 4; // Base survey hours
@@ -83,12 +78,12 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
     trainingHours += 1;
   }
 
-  // Calculate costs
-  const surveyCost = Math.round(surveyHours * HOURLY_RATES.survey * 100) / 100;
-  const installationCost = Math.round(installationHours * HOURLY_RATES.installation * 100) / 100;
-  const configurationCost = Math.round(configurationHours * HOURLY_RATES.configuration * 100) / 100;
-  const trainingCost = Math.round(trainingHours * HOURLY_RATES.training * 100) / 100;
-  const totalCost = Math.round((surveyCost + installationCost + configurationCost + trainingCost) * 100) / 100;
+  // Calculate costs - Configuration & Testing and Documentation & Training are included
+  const surveyCost = Math.round(surveyHours * HOURLY_RATE * 100) / 100;
+  const installationCost = Math.round(installationHours * HOURLY_RATE * 100) / 100;
+  const configurationCost = 0; // Included in service
+  const trainingCost = 0; // Included in service
+  const totalCost = Math.round((surveyCost + installationCost) * 100) / 100;
 
   return {
     surveyCost,

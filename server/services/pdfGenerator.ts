@@ -94,11 +94,11 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
       
       currentY += 20;
       doc.text('Configuration & Testing', 50, currentY)
-         .text(`$${quote.configurationCost}`, 400, currentY);
+         .text('Included', 400, currentY);
       
       currentY += 20;
       doc.text('Documentation & Training', 50, currentY)
-         .text(`$${quote.trainingCost}`, 400, currentY);
+         .text('Included', 400, currentY);
 
       // Total line
       currentY += 30;

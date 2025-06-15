@@ -112,6 +112,7 @@ Changelog:
 - June 15, 2025. Added 48-hour SLA disclaimer for installation date selection
 - June 15, 2025. Updated branding to "NXTKonekt" (one word) and added astronaut logo to landing page
 - June 15, 2025. Added NXTKonekt astronaut logo to PDF quote templates for consistent branding
+- June 15, 2025. Updated dashboard to use NXTKonekt horizontal logo and pricing to $190/hr with included services
 
 ## User Preferences
 

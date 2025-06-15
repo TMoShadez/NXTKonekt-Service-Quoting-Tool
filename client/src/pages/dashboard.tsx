@@ -7,8 +7,9 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Wifi, FileText, CheckCircle, Clock, Plus, Download, LogOut, User } from "lucide-react";
+import { FileText, CheckCircle, Clock, Plus, Download, LogOut, User } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import nxtKonektLogo from "@assets/NxtKonekt Logo_1749973360626.png";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -87,9 +88,11 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-nxt-gray-50">
         <div className="text-center">
-          <div className="h-8 w-8 bg-nxt-blue rounded-lg flex items-center justify-center mx-auto mb-4">
-            <Wifi className="text-white" size={20} />
-          </div>
+          <img 
+            src={nxtKonektLogo} 
+            alt="NXTKonekt Logo" 
+            className="h-8 w-auto mx-auto mb-4"
+          />
           <p className="nxt-gray-500">Loading...</p>
         </div>
       </div>
@@ -107,9 +110,11 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <div className="h-8 w-8 bg-nxt-blue rounded-lg flex items-center justify-center">
-                <Wifi className="text-white" size={16} />
-              </div>
+              <img 
+                src={nxtKonektLogo} 
+                alt="NXTKonekt Logo" 
+                className="h-8 w-auto"
+              />
               <span className="ml-3 text-xl font-semibold nxt-gray-800">NXTKonekt</span>
             </div>
             
