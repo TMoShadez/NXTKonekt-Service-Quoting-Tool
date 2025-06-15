@@ -8,6 +8,8 @@ import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Assessment from "@/pages/assessment";
+import FleetTrackingForm from "@/pages/fleet-tracking";
+import FleetCameraForm from "@/pages/fleet-camera";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -23,6 +25,8 @@ function Router() {
         <>
           <Route path="/" component={Dashboard} />
           <Route path="/assessment/:id?" component={Assessment} />
+          <Route path="/fleet-tracking/:id?" component={FleetTrackingForm} />
+          <Route path="/fleet-camera/:id?" component={FleetCameraForm} />
           <Route component={NotFound} />
         </>
       )}
