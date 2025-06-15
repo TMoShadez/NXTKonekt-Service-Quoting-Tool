@@ -106,7 +106,10 @@ The application requires environment variables:
 ## Changelog
 
 Changelog:
-- June 15, 2025. Initial setup
+- June 15, 2025. Initial setup with full assessment workflow
+- June 15, 2025. Fixed database foreign key constraints for organization handling
+- June 15, 2025. Resolved date validation errors in customer information step
+- June 15, 2025. Added 48-hour SLA disclaimer for installation date selection
 
 ## User Preferences
 

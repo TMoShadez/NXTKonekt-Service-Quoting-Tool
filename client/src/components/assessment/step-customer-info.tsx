@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 import type { Assessment } from "@shared/schema";
 
 interface StepCustomerInfoProps {
@@ -112,15 +114,37 @@ export function StepCustomerInfo({ data, onChange }: StepCustomerInfoProps) {
           </div>
           
           <div>
-            <Label className="text-sm font-medium nxt-gray-800 mb-2">
-              Preferred Installation Date
-            </Label>
+            <div className="flex items-center gap-2 mb-2">
+              <Label className="text-sm font-medium nxt-gray-800">
+                Preferred Installation Date
+              </Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-nxt-blue cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <div className="p-2">
+                      <p className="font-medium text-sm mb-1">Installation SLA Notice</p>
+                      <p className="text-xs">
+                        Installation requires a 48-hour SLA to allow for equipment arrival confirmation. 
+                        Please select a date that accommodates this requirement.
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <Input
               type="date"
               value={data.preferredInstallationDate ? new Date(data.preferredInstallationDate).toISOString().split('T')[0] : ''}
               onChange={(e) => handleChange('preferredInstallationDate', new Date(e.target.value))}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
+              min={new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString().split('T')[0]}
             />
+            <p className="text-xs nxt-gray-500 mt-1">
+              Minimum 48 hours from today required for equipment confirmation
+            </p>
           </div>
         </div>
       </CardContent>
