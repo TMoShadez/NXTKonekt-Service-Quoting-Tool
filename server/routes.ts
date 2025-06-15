@@ -55,10 +55,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       
-      // Clean the request body to handle organizationId properly
+      // Clean the request body to handle organizationId and dates properly
       const cleanedBody = { ...req.body };
       if (cleanedBody.organizationId === 0 || cleanedBody.organizationId === null || cleanedBody.organizationId === undefined) {
         delete cleanedBody.organizationId;
+      }
+      
+      // Convert date strings to Date objects
+      if (cleanedBody.preferredInstallationDate && typeof cleanedBody.preferredInstallationDate === 'string') {
+        cleanedBody.preferredInstallationDate = new Date(cleanedBody.preferredInstallationDate);
       }
       
       const assessmentData = insertAssessmentSchema.parse({ 
@@ -86,10 +91,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Assessment not found" });
       }
 
-      // Clean the assessment data to handle organizationId properly
+      // Clean the assessment data to handle organizationId and dates properly
       const cleanedData = { ...req.body };
       if (cleanedData.organizationId === 0 || cleanedData.organizationId === null) {
         delete cleanedData.organizationId;
+      }
+      
+      // Convert date strings to Date objects
+      if (cleanedData.preferredInstallationDate && typeof cleanedData.preferredInstallationDate === 'string') {
+        cleanedData.preferredInstallationDate = new Date(cleanedData.preferredInstallationDate);
       }
       
       const assessmentData = insertAssessmentSchema.partial().parse(cleanedData);
