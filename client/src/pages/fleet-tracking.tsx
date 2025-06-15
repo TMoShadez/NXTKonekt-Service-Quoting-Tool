@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ArrowRight, CheckCircle, Truck } from "lucide-react";
 import type { Assessment } from "@shared/schema";
 import { StepCustomerInfo } from "@/components/assessment/step-customer-info";
+import { StepQuoteGeneration } from "@/components/assessment/step-quote-generation";
 
 export default function FleetTrackingForm() {
   const { id } = useParams();
@@ -313,7 +314,7 @@ export default function FleetTrackingForm() {
           </Card>
         );
 
-      case 3:
+      case 4:
         return (
           <Card>
             <CardHeader>
@@ -369,61 +370,20 @@ export default function FleetTrackingForm() {
           </Card>
         );
 
-      case 4:
+      case 5:
         return (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <CheckCircle className="h-6 w-6 text-nxt-green" />
-                Assessment Summary
+                Quote Generation
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="bg-nxt-gray-50 p-6 rounded-lg">
-                <h3 className="font-semibold nxt-gray-800 mb-4">Fleet Tracking Device Assessment</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium">Fleet Size:</span> {formData.deviceCount || 'Not specified'} vehicles
-                  </div>
-                  <div>
-                    <span className="font-medium">Vehicle Types:</span> {formData.buildingType || 'Not specified'}
-                  </div>
-                  <div>
-                    <span className="font-medium">Operating Hours:</span> {formData.industry || 'Not specified'}
-                  </div>
-                  <div>
-                    <span className="font-medium">Coverage Area:</span> {formData.siteAddress || 'Not specified'}
-                  </div>
-                </div>
-                
-                <div className="mt-4">
-                  <span className="font-medium">Selected Features:</span>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {formData.powerAvailable && <Badge variant="secondary">Real-time GPS</Badge>}
-                    {formData.ethernetRequired && <Badge variant="secondary">Geofencing</Badge>}
-                    {formData.ceilingMount && <Badge variant="secondary">Driver Behavior</Badge>}
-                    {formData.outdoorCoverage && <Badge variant="secondary">Maintenance Scheduling</Badge>}
-                  </div>
-                </div>
-
-                {formData.preferredInstallationDate && (
-                  <div className="mt-4">
-                    <span className="font-medium">Installation Date:</span> {new Date(formData.preferredInstallationDate).toLocaleDateString()}
-                  </div>
-                )}
-              </div>
-
-              <div className="text-center">
-                <p className="nxt-gray-600 mb-4">
-                  Your fleet tracking device assessment is complete. Our team will review your requirements and provide a detailed quote within 24 hours.
-                </p>
-                <Button
-                  onClick={handleFinish}
-                  className="bg-nxt-green text-white px-8 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
-                >
-                  Complete Assessment
-                </Button>
-              </div>
+            <CardContent>
+              <StepQuoteGeneration 
+                assessmentId={parseInt(id!)}
+                data={formData}
+              />
             </CardContent>
           </Card>
         );
@@ -452,7 +412,7 @@ export default function FleetTrackingForm() {
             
             <div className="text-center">
               <h1 className="text-xl font-semibold nxt-gray-800">Fleet & Asset Tracking Device</h1>
-              <p className="text-sm nxt-gray-500">Step {currentStep} of 4</p>
+              <p className="text-sm nxt-gray-500">Step {currentStep} of {totalSteps}</p>
             </div>
             
             <div className="w-24"></div>
@@ -490,7 +450,7 @@ export default function FleetTrackingForm() {
             Previous
           </Button>
 
-          {currentStep < 4 ? (
+          {currentStep < totalSteps ? (
             <Button
               onClick={handleNext}
               className="bg-nxt-blue text-white flex items-center gap-2"
