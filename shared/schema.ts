@@ -52,6 +52,9 @@ export const assessments = pgTable("assessments", {
   userId: varchar("user_id").notNull().references(() => users.id),
   organizationId: integer("organization_id").references(() => organizations.id),
   
+  // Service Type
+  serviceType: varchar("service_type", { enum: ["site-assessment", "fleet-tracking", "fleet-camera"] }).default("site-assessment"),
+  
   // Sales Executive Info
   salesExecutiveName: text("sales_executive_name").notNull(),
   salesExecutiveEmail: varchar("sales_executive_email").notNull(),

@@ -7,8 +7,9 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, CheckCircle, Clock, Plus, Download, LogOut, User } from "lucide-react";
+import { FileText, CheckCircle, Clock, Plus, Download, LogOut, User, ChevronDown } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import nxtKonektLogo from "@assets/NxtKonekt Logo_1749973360626.png";
 
 export default function Dashboard() {
@@ -47,7 +48,7 @@ export default function Dashboard() {
     window.location.href = "/api/logout";
   };
 
-  const handleNewAssessment = async () => {
+  const handleNewAssessment = async (serviceType: string) => {
     try {
       const response = await apiRequest("POST", "/api/assessments", {
         salesExecutiveName: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : '',
@@ -58,11 +59,20 @@ export default function Dashboard() {
         customerEmail: '',
         customerPhone: '',
         siteAddress: '',
+        serviceType: serviceType,
         // Don't include organizationId at all initially
       });
       
       const assessment = await response.json();
-      navigate(`/assessment/${assessment.id}`);
+      
+      // Route to appropriate form based on service type
+      if (serviceType === 'site-assessment') {
+        navigate(`/assessment/${assessment.id}`);
+      } else if (serviceType === 'fleet-tracking') {
+        navigate(`/fleet-tracking/${assessment.id}`);
+      } else if (serviceType === 'fleet-camera') {
+        navigate(`/fleet-camera/${assessment.id}`);
+      }
     } catch (error) {
       if (isUnauthorizedError(error as Error)) {
         toast({
@@ -191,13 +201,21 @@ export default function Dashboard() {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <Button 
-            onClick={handleNewAssessment}
-            className="flex-1 sm:flex-none bg-nxt-blue text-white px-6 py-4 rounded-xl font-medium hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="mr-2" size={20} />
-            New Site Assessment
-          </Button>
+          <div className="flex-1 sm:flex-none">
+            <Select onValueChange={(value) => handleNewAssessment(value)}>
+              <SelectTrigger className="w-full bg-nxt-blue text-white px-6 py-4 rounded-xl font-medium hover:bg-blue-700 transition-colors border-none">
+                <div className="flex items-center">
+                  <Plus className="mr-2" size={20} />
+                  <SelectValue placeholder="Create New Assessment" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="site-assessment">Site Assessment (Fixed Wireless)</SelectItem>
+                <SelectItem value="fleet-tracking">Fleet & Asset Tracking Device</SelectItem>
+                <SelectItem value="fleet-camera">Fleet Camera Installation</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           
           <Button 
             variant="outline"
