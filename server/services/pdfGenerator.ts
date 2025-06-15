@@ -9,6 +9,17 @@ export interface QuoteData {
   organizationName: string;
 }
 
+function getServiceTitle(serviceType?: string): string {
+  switch (serviceType) {
+    case 'fleet-tracking':
+      return 'Fleet & Asset Tracking Device';
+    case 'fleet-camera':
+      return 'Fleet Camera Installation';
+    default:
+      return 'Fixed Wireless Access';
+  }
+}
+
 export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
   const { assessment, quote, organizationName } = quoteData;
   
@@ -39,10 +50,11 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
       }
       
       // Company name and title (positioned to right of logo)
+      const serviceTitle = getServiceTitle(assessment.serviceType);
       doc.fontSize(20)
          .text('NXTKonekt', 120, 50)
          .fontSize(16)
-         .text('Fixed Wireless Access Installation Quote', 120, 75);
+         .text(`${serviceTitle} Installation Quote`, 120, 75);
 
       // Quote details (moved down to accommodate logo)
       doc.fontSize(12)

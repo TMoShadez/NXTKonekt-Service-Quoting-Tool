@@ -426,68 +426,20 @@ export default function FleetCameraForm() {
           </Card>
         );
 
-      case 4:
+      case 5:
         return (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <CheckCircle className="h-6 w-6 text-nxt-green" />
-                Assessment Summary
+                Quote Generation
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="bg-nxt-gray-50 p-6 rounded-lg">
-                <h3 className="font-semibold nxt-gray-800 mb-4">Fleet Camera Installation Assessment</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium">Vehicles:</span> {formData.deviceCount || 'Not specified'} vehicles
-                  </div>
-                  <div>
-                    <span className="font-medium">Vehicle Types:</span> {formData.buildingType || 'Not specified'}
-                  </div>
-                  <div>
-                    <span className="font-medium">Primary Purpose:</span> {formData.industry || 'Not specified'}
-                  </div>
-                  <div>
-                    <span className="font-medium">Environment:</span> {formData.siteAddress || 'Not specified'}
-                  </div>
-                </div>
-                
-                <div className="mt-4">
-                  <span className="font-medium">Camera Configuration:</span>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {formData.powerAvailable && <Badge variant="secondary">Forward Camera</Badge>}
-                    {formData.ethernetRequired && <Badge variant="secondary">Driver Camera</Badge>}
-                    {formData.ceilingMount && <Badge variant="secondary">Side Cameras</Badge>}
-                    {formData.outdoorCoverage && <Badge variant="secondary">Rear Camera</Badge>}
-                  </div>
-                </div>
-
-                {formData.preferredInstallationDate && (
-                  <div className="mt-4">
-                    <span className="font-medium">Installation Date:</span> {new Date(formData.preferredInstallationDate).toLocaleDateString()}
-                  </div>
-                )}
-
-                {formData.specialRequirements && (
-                  <div className="mt-4">
-                    <span className="font-medium">Special Requirements:</span>
-                    <p className="text-sm nxt-gray-600 mt-1">{formData.specialRequirements}</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="text-center">
-                <p className="nxt-gray-600 mb-4">
-                  Your fleet camera installation assessment is complete. Our team will review your requirements and provide a detailed quote within 24 hours.
-                </p>
-                <Button
-                  onClick={handleFinish}
-                  className="bg-nxt-green text-white px-8 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
-                >
-                  Complete Assessment
-                </Button>
-              </div>
+            <CardContent>
+              <StepQuoteGeneration 
+                assessmentId={parseInt(id!)}
+                data={formData}
+              />
             </CardContent>
           </Card>
         );
@@ -516,7 +468,7 @@ export default function FleetCameraForm() {
             
             <div className="text-center">
               <h1 className="text-xl font-semibold nxt-gray-800">Fleet Camera Installation</h1>
-              <p className="text-sm nxt-gray-500">Step {currentStep} of 4</p>
+              <p className="text-sm nxt-gray-500">Step {currentStep} of {totalSteps}</p>
             </div>
             
             <div className="w-24"></div>
