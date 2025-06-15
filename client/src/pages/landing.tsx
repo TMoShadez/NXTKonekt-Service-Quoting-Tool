@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wifi } from "lucide-react";
+import nxtKonektLogo from "@assets/NxtKonekt Astro 5_1749972215768.png";
 
 export default function Landing() {
   const handleLogin = () => {
@@ -12,10 +12,14 @@ export default function Landing() {
       <Card className="w-full max-w-md">
         <CardContent className="pt-6">
           <div className="text-center">
-            <div className="mx-auto h-16 w-16 bg-nxt-blue rounded-xl flex items-center justify-center mb-6">
-              <Wifi className="text-white text-2xl" size={32} />
+            <div className="mx-auto h-20 w-20 mb-6 rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center">
+              <img 
+                src={nxtKonektLogo} 
+                alt="NXTKonekt Logo" 
+                className="h-16 w-16 object-contain"
+              />
             </div>
-            <h2 className="text-3xl font-bold nxt-gray-800 mb-2">NXT Konekt</h2>
+            <h2 className="text-3xl font-bold nxt-gray-800 mb-2">NXTKonekt</h2>
             <p className="nxt-gray-500 text-lg mb-8">Site Assessment Tool</p>
             
             <Button 

@@ -28,7 +28,7 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
 
       // Header
       doc.fontSize(20)
-         .text('NXT Konekt', 50, 50)
+         .text('NXTKonekt', 50, 50)
          .fontSize(16)
          .text('Fixed Wireless Access Installation Quote', 50, 80);
 

@@ -1,8 +1,8 @@
-# NXT Konekt Site Assessment Tool
+# NXTKonekt Site Assessment Tool
 
 ## Overview
 
-NXT Konekt is a comprehensive full-stack web application designed for managing Fixed Wireless Access (FWA) installation assessments and quote generation. The system enables sales executives to conduct detailed site assessments, upload supporting documents and photos, and automatically generate professional quotes with pricing calculations.
+NXTKonekt is a comprehensive full-stack web application designed for managing Fixed Wireless Access (FWA) installation assessments and quote generation. The system enables sales executives to conduct detailed site assessments, upload supporting documents and photos, and automatically generate professional quotes with pricing calculations.
 
 ## System Architecture
 
@@ -20,7 +20,7 @@ The application follows a modern full-stack architecture with clear separation b
 - **Framework**: React 18 with TypeScript
 - **Build Tool**: Vite for development and production builds
 - **UI Library**: shadcn/ui components built on Radix UI primitives
-- **Styling**: Tailwind CSS with custom NXT Konekt brand colors
+- **Styling**: Tailwind CSS with custom NXTKonekt brand colors
 - **State Management**: TanStack Query for server state management
 - **Routing**: Wouter for lightweight client-side routing
 - **Forms**: React Hook Form with Zod validation
@@ -110,6 +110,7 @@ Changelog:
 - June 15, 2025. Fixed database foreign key constraints for organization handling
 - June 15, 2025. Resolved date validation errors in customer information step
 - June 15, 2025. Added 48-hour SLA disclaimer for installation date selection
+- June 15, 2025. Updated branding to "NXTKonekt" (one word) and added astronaut logo to landing page
 
 ## User Preferences
 

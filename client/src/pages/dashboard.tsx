@@ -110,7 +110,7 @@ export default function Dashboard() {
               <div className="h-8 w-8 bg-nxt-blue rounded-lg flex items-center justify-center">
                 <Wifi className="text-white" size={16} />
               </div>
-              <span className="ml-3 text-xl font-semibold nxt-gray-800">NXT Konekt</span>
+              <span className="ml-3 text-xl font-semibold nxt-gray-800">NXTKonekt</span>
             </div>
             
             <div className="flex items-center space-x-4">
