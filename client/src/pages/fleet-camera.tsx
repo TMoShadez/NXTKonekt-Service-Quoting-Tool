@@ -15,6 +15,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ArrowRight, CheckCircle, Camera } from "lucide-react";
 import type { Assessment } from "@shared/schema";
+import { StepCustomerInfo } from "@/components/assessment/step-customer-info";
+import { StepQuoteGeneration } from "@/components/assessment/step-quote-generation";
 
 export default function FleetCameraForm() {
   const { id } = useParams();
@@ -22,6 +24,7 @@ export default function FleetCameraForm() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 5;
   const [formData, setFormData] = useState<Partial<Assessment>>({});
 
   // Redirect if not authenticated
@@ -86,7 +89,7 @@ export default function FleetCameraForm() {
   };
 
   const handleNext = () => {
-    if (currentStep < 4) {
+    if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -116,11 +119,22 @@ export default function FleetCameraForm() {
     );
   }
 
-  const progress = (currentStep / 4) * 100;
+  const progress = (currentStep / totalSteps) * 100;
 
   const renderStep = () => {
     switch (currentStep) {
       case 1:
+        return (
+          <StepCustomerInfo 
+            data={formData}
+            onChange={(data) => {
+              const updatedData = { ...formData, ...data };
+              setFormData(updatedData);
+              updateMutation.mutate(updatedData);
+            }}
+          />
+        );
+      case 2:
         return (
           <Card>
             <CardHeader>
@@ -216,7 +230,7 @@ export default function FleetCameraForm() {
           </Card>
         );
 
-      case 2:
+      case 3:
         return (
           <Card>
             <CardHeader>
@@ -320,7 +334,7 @@ export default function FleetCameraForm() {
           </Card>
         );
 
-      case 3:
+      case 4:
         return (
           <Card>
             <CardHeader>
