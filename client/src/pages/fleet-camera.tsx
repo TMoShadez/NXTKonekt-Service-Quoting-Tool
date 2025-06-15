@@ -152,7 +152,7 @@ export default function FleetCameraForm() {
                   <Input
                     type="number"
                     value={formData.deviceCount || ''}
-                    onChange={(e) => handleInputChange('deviceCount', parseInt(e.target.value) || 0)}
+                    onChange={(e) => handleInputChange('deviceCount', e.target.value ? parseInt(e.target.value) : null)}
                     placeholder="Vehicles requiring cameras"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                   />
@@ -400,7 +400,7 @@ export default function FleetCameraForm() {
                   <Input
                     type="date"
                     value={formData.preferredInstallationDate ? new Date(formData.preferredInstallationDate).toISOString().split('T')[0] : ''}
-                    onChange={(e) => handleInputChange('preferredInstallationDate', new Date(e.target.value))}
+                    onChange={(e) => handleInputChange('preferredInstallationDate', e.target.value ? new Date(e.target.value) : null)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                     min={new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString().split('T')[0]}
                   />
