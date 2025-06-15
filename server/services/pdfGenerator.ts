@@ -26,42 +26,54 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
       const doc = new PDFDocument({ margin: 50 });
       doc.pipe(fs.createWriteStream(filePath));
 
-      // Header
+      // Header with logo
+      const logoPath = path.join(process.cwd(), 'attached_assets', 'NxtKonekt Astro 5_1749972215768.png');
+      
+      // Check if logo exists and add it
+      if (fs.existsSync(logoPath)) {
+        try {
+          doc.image(logoPath, 50, 40, { width: 60, height: 60 });
+        } catch (logoError) {
+          console.warn('Could not load logo for PDF:', logoError);
+        }
+      }
+      
+      // Company name and title (positioned to right of logo)
       doc.fontSize(20)
-         .text('NXTKonekt', 50, 50)
+         .text('NXTKonekt', 120, 50)
          .fontSize(16)
-         .text('Fixed Wireless Access Installation Quote', 50, 80);
+         .text('Fixed Wireless Access Installation Quote', 120, 75);
 
-      // Quote details
+      // Quote details (moved down to accommodate logo)
       doc.fontSize(12)
-         .text(`Quote Number: ${quote.quoteNumber}`, 50, 120)
-         .text(`Date: ${new Date().toLocaleDateString()}`, 50, 140)
-         .text(`Sales Organization: ${organizationName}`, 50, 160);
+         .text(`Quote Number: ${quote.quoteNumber}`, 50, 130)
+         .text(`Date: ${new Date().toLocaleDateString()}`, 50, 150)
+         .text(`Sales Organization: ${organizationName}`, 50, 170);
 
       // Customer information
       doc.fontSize(14)
-         .text('Customer Information', 50, 200)
+         .text('Customer Information', 50, 210)
          .fontSize(12)
-         .text(`Company: ${assessment.customerCompanyName}`, 50, 220)
-         .text(`Contact: ${assessment.customerContactName}`, 50, 240)
-         .text(`Email: ${assessment.customerEmail}`, 50, 260)
-         .text(`Phone: ${assessment.customerPhone}`, 50, 280)
-         .text(`Site Address: ${assessment.siteAddress}`, 50, 300);
+         .text(`Company: ${assessment.customerCompanyName}`, 50, 230)
+         .text(`Contact: ${assessment.customerContactName}`, 50, 250)
+         .text(`Email: ${assessment.customerEmail}`, 50, 270)
+         .text(`Phone: ${assessment.customerPhone}`, 50, 290)
+         .text(`Site Address: ${assessment.siteAddress}`, 50, 310);
 
       // Site assessment summary
       doc.fontSize(14)
-         .text('Site Assessment Summary', 50, 340)
+         .text('Site Assessment Summary', 50, 350)
          .fontSize(12)
-         .text(`Building Type: ${assessment.buildingType || 'Not specified'}`, 50, 360)
-         .text(`Coverage Area: ${assessment.coverageArea || 'Not specified'} sq ft`, 50, 380)
-         .text(`Number of Floors: ${assessment.floors || 'Not specified'}`, 50, 400)
-         .text(`Expected Device Count: ${assessment.deviceCount || 'Not specified'}`, 50, 420);
+         .text(`Building Type: ${assessment.buildingType || 'Not specified'}`, 50, 370)
+         .text(`Coverage Area: ${assessment.coverageArea || 'Not specified'} sq ft`, 50, 390)
+         .text(`Number of Floors: ${assessment.floors || 'Not specified'}`, 50, 410)
+         .text(`Expected Device Count: ${assessment.deviceCount || 'Not specified'}`, 50, 430);
 
       // Pricing breakdown
       doc.fontSize(14)
-         .text('Pricing Breakdown', 50, 460);
+         .text('Pricing Breakdown', 50, 470);
 
-      const lineY = 480;
+      const lineY = 490;
       doc.fontSize(12)
          .text('Service Item', 50, lineY)
          .text('Cost', 400, lineY);
