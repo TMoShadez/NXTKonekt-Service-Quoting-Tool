@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ArrowRight, CheckCircle, Truck } from "lucide-react";
 import type { Assessment } from "@shared/schema";
+import { StepCustomerInfo } from "@/components/assessment/step-customer-info";
 
 export default function FleetTrackingForm() {
   const { id } = useParams();
@@ -22,6 +23,7 @@ export default function FleetTrackingForm() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 5;
   const [formData, setFormData] = useState<Partial<Assessment>>({});
 
   // Redirect if not authenticated
@@ -86,7 +88,7 @@ export default function FleetTrackingForm() {
   };
 
   const handleNext = () => {
-    if (currentStep < 4) {
+    if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -116,11 +118,22 @@ export default function FleetTrackingForm() {
     );
   }
 
-  const progress = (currentStep / 4) * 100;
+  const progress = (currentStep / totalSteps) * 100;
 
   const renderStep = () => {
     switch (currentStep) {
       case 1:
+        return (
+          <StepCustomerInfo 
+            data={formData}
+            onChange={(data) => {
+              const updatedData = { ...formData, ...data };
+              setFormData(updatedData);
+              updateMutation.mutate(updatedData);
+            }}
+          />
+        );
+      case 2:
         return (
           <Card>
             <CardHeader>
@@ -214,7 +227,7 @@ export default function FleetTrackingForm() {
           </Card>
         );
 
-      case 2:
+      case 3:
         return (
           <Card>
             <CardHeader>
