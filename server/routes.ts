@@ -54,8 +54,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/assessments', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      
+      // Clean the request body to handle organizationId properly
+      const cleanedBody = { ...req.body };
+      if (cleanedBody.organizationId === 0 || cleanedBody.organizationId === null || cleanedBody.organizationId === undefined) {
+        delete cleanedBody.organizationId;
+      }
+      
       const assessmentData = insertAssessmentSchema.parse({ 
-        ...req.body, 
+        ...cleanedBody, 
         userId,
         status: 'draft'
       });
@@ -79,7 +86,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Assessment not found" });
       }
 
-      const assessmentData = insertAssessmentSchema.partial().parse(req.body);
+      // Clean the assessment data to handle organizationId properly
+      const cleanedData = { ...req.body };
+      if (cleanedData.organizationId === 0 || cleanedData.organizationId === null) {
+        delete cleanedData.organizationId;
+      }
+      
+      const assessmentData = insertAssessmentSchema.partial().parse(cleanedData);
       const updatedAssessment = await storage.updateAssessment(assessmentId, assessmentData);
       res.json(updatedAssessment);
     } catch (error) {

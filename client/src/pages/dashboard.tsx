@@ -57,6 +57,7 @@ export default function Dashboard() {
         customerEmail: '',
         customerPhone: '',
         siteAddress: '',
+        // Don't include organizationId at all initially
       });
       
       const assessment = await response.json();
