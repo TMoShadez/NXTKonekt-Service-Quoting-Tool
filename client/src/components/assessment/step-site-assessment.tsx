@@ -25,6 +25,99 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
       </CardHeader>
       <CardContent>
         <div className="space-y-8">
+          {/* Infrastructure Requirements */}
+          <div>
+            <h3 className="text-lg font-semibold nxt-gray-800 mb-4">Infrastructure Requirements</h3>
+            <div className="space-y-6">
+              {/* Network Signal Assessment */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Network Signal
+                  </Label>
+                  <Select 
+                    value={data.networkSignal || ''} 
+                    onValueChange={(value) => handleChange('networkSignal', value)}
+                  >
+                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                      <SelectValue placeholder="Select network type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="4g">4G</SelectItem>
+                      <SelectItem value="5g">5G</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Signal Strength
+                  </Label>
+                  <Select 
+                    value={data.signalStrength || ''} 
+                    onValueChange={(value) => handleChange('signalStrength', value)}
+                  >
+                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                      <SelectValue placeholder="Select signal strength" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5-bars">5 bars</SelectItem>
+                      <SelectItem value="4-bars">4 bars</SelectItem>
+                      <SelectItem value="3-bars">3 bars</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Infrastructure Checkboxes */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <Checkbox
+                    id="power-available"
+                    checked={data.powerAvailable || false}
+                    onCheckedChange={(checked) => handleChange('powerAvailable', !!checked)}
+                  />
+                  <Label htmlFor="power-available" className="text-sm nxt-gray-800">
+                    Power outlets available at installation locations
+                  </Label>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <Checkbox
+                    id="ethernet-required"
+                    checked={data.ethernetRequired || false}
+                    onCheckedChange={(checked) => handleChange('ethernetRequired', !!checked)}
+                  />
+                  <Label htmlFor="ethernet-required" className="text-sm nxt-gray-800">
+                    Ethernet backhaul required
+                  </Label>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <Checkbox
+                    id="ceiling-mount"
+                    checked={data.ceilingMount || false}
+                    onCheckedChange={(checked) => handleChange('ceilingMount', !!checked)}
+                  />
+                  <Label htmlFor="ceiling-mount" className="text-sm nxt-gray-800">
+                    Ceiling mounting required
+                  </Label>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <Checkbox
+                    id="outdoor-coverage"
+                    checked={data.outdoorCoverage || false}
+                    onCheckedChange={(checked) => handleChange('outdoorCoverage', !!checked)}
+                  />
+                  <Label htmlFor="outdoor-coverage" className="text-sm nxt-gray-800">
+                    Outdoor coverage needed
+                  </Label>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Site Characteristics */}
           <div>
             <h3 className="text-lg font-semibold nxt-gray-800 mb-4">Site Characteristics</h3>
@@ -87,56 +180,6 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
                   onChange={(e) => handleChange('deviceCount', parseInt(e.target.value) || 0)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                 />
-              </div>
-            </div>
-          </div>
-
-          {/* Infrastructure Requirements */}
-          <div>
-            <h3 className="text-lg font-semibold nxt-gray-800 mb-4">Infrastructure Requirements</h3>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <Checkbox
-                  id="power-available"
-                  checked={data.powerAvailable || false}
-                  onCheckedChange={(checked) => handleChange('powerAvailable', !!checked)}
-                />
-                <Label htmlFor="power-available" className="text-sm nxt-gray-800">
-                  Power outlets available at installation locations
-                </Label>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <Checkbox
-                  id="ethernet-required"
-                  checked={data.ethernetRequired || false}
-                  onCheckedChange={(checked) => handleChange('ethernetRequired', !!checked)}
-                />
-                <Label htmlFor="ethernet-required" className="text-sm nxt-gray-800">
-                  Ethernet backhaul required
-                </Label>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <Checkbox
-                  id="ceiling-mount"
-                  checked={data.ceilingMount || false}
-                  onCheckedChange={(checked) => handleChange('ceilingMount', !!checked)}
-                />
-                <Label htmlFor="ceiling-mount" className="text-sm nxt-gray-800">
-                  Ceiling mounting required
-                </Label>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <Checkbox
-                  id="outdoor-coverage"
-                  checked={data.outdoorCoverage || false}
-                  onCheckedChange={(checked) => handleChange('outdoorCoverage', !!checked)}
-                />
-                <Label htmlFor="outdoor-coverage" className="text-sm nxt-gray-800">
-                  Outdoor coverage needed
-                </Label>
               </div>
             </div>
           </div>

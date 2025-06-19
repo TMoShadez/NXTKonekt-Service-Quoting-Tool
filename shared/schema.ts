@@ -78,6 +78,8 @@ export const assessments = pgTable("assessments", {
   ethernetRequired: boolean("ethernet_required").default(false),
   ceilingMount: boolean("ceiling_mount").default(false),
   outdoorCoverage: boolean("outdoor_coverage").default(false),
+  networkSignal: varchar("network_signal"),
+  signalStrength: varchar("signal_strength"),
   interferenceSources: text("interference_sources"),
   specialRequirements: text("special_requirements"),
   

@@ -115,6 +115,9 @@ Changelog:
 - June 15, 2025. Updated dashboard to use NXTKonekt horizontal logo and pricing to $190/hr with included services
 - June 15, 2025. Completed multi-service assessment system with customer information collection and PDF quote generation for Fleet Tracking and Fleet Camera services
 - June 15, 2025. Updated pricing engine with service-specific calculations: Fleet Tracker OBD installation includes up to 3 vehicles, Fleet Camera pricing per vehicle at $190/hr
+- June 19, 2025. Fixed character input issues in Fleet Tracking and Fleet Camera forms by correcting number and date input parsing
+- June 19, 2025. Reordered Fixed Wireless assessment form sections: Infrastructure Requirements first, Site Characteristics second, Environmental Factors last
+- June 19, 2025. Added network signal assessment fields to Infrastructure Requirements: Network Signal dropdown (4G/5G) and Signal Strength dropdown (5/4/3 bars)
 
 ## User Preferences
 
