@@ -69,6 +69,80 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
                 </div>
               </div>
 
+              {/* Low Signal Strength Notice and Additional Questions */}
+              {data.signalStrength === '3-bars' && (
+                <div className="space-y-4">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p className="text-sm text-yellow-800">
+                      <strong>Due to Low Signal Strength:</strong> It is recommended to run an internal or external antenna. Please find an internal location with at least 4 signal bars. Determine if the client would like to run the required cables to complete the installation.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                      Would the customer like to run a cable for an Antenna?
+                    </Label>
+                    <Select 
+                      value={data.lowSignalAntennaCable || ''} 
+                      onValueChange={(value) => handleChange('lowSignalAntennaCable', value)}
+                    >
+                      <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                        <SelectValue placeholder="Select antenna cable option" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="yes">Yes</SelectItem>
+                        <SelectItem value="no">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {data.lowSignalAntennaCable === 'yes' && (
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                          Internal or External Antenna Requested?
+                        </Label>
+                        <Select 
+                          value={data.antennaType || ''} 
+                          onValueChange={(value) => handleChange('antennaType', value)}
+                        >
+                          <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                            <SelectValue placeholder="Select antenna type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="internal">Internal</SelectItem>
+                            <SelectItem value="external">External</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {data.antennaType === 'external' && (
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                          <p className="text-sm text-orange-800">
+                            <strong>External Antenna Notice:</strong> If external antenna will be needed, please inform the client that the owner of the building will need to provide approval for external penetration prior to technician completing the installation.
+                          </p>
+                        </div>
+                      )}
+
+                      {(data.antennaType === 'internal' || data.antennaType === 'external') && (
+                        <div>
+                          <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                            What is the recommended Antenna Installation Location?
+                          </Label>
+                          <Textarea
+                            value={data.antennaInstallationLocation || ''}
+                            onChange={(e) => handleChange('antennaInstallationLocation', e.target.value)}
+                            placeholder="Describe the recommended antenna installation location..."
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
+                            rows={3}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Connection and Installation Assessment */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -108,6 +182,48 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
                   </Select>
                 </div>
               </div>
+
+              {/* Router Mounting Question for Server Room */}
+              {data.routerLocation === 'server-room' && (
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Does the Wireless Router need to be mounted?
+                  </Label>
+                  <Select 
+                    value={data.routerMounting || ''} 
+                    onValueChange={(value) => handleChange('routerMounting', value)}
+                  >
+                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                      <SelectValue placeholder="Select mounting requirement" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes</SelectItem>
+                      <SelectItem value="no">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Firewall Question for Failover Connections */}
+              {data.connectionUsage === 'failover' && (
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Is there an existing firewall or router in place that supports dual WAN connections?
+                  </Label>
+                  <Select 
+                    value={data.dualWanSupport || ''} 
+                    onValueChange={(value) => handleChange('dualWanSupport', value)}
+                  >
+                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                      <SelectValue placeholder="Select dual WAN support" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes</SelectItem>
+                      <SelectItem value="no">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
