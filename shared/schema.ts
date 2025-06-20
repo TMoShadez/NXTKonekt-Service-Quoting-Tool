@@ -93,6 +93,7 @@ export const assessments = pgTable("assessments", {
   ceilingType: varchar("ceiling_type"),
   routerMake: varchar("router_make"),
   routerModel: varchar("router_model", { length: 20 }),
+  cableFootage: varchar("cable_footage"),
   interferenceSources: text("interference_sources"),
   specialRequirements: text("special_requirements"),
   

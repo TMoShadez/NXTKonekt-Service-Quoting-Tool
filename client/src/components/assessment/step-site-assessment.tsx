@@ -165,18 +165,36 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
                       )}
 
                       {(data.antennaType === 'internal' || data.antennaType === 'external') && (
-                        <div>
-                          <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                            What is the recommended Antenna Installation Location?
-                          </Label>
-                          <Textarea
-                            value={data.antennaInstallationLocation || ''}
-                            onChange={(e) => handleChange('antennaInstallationLocation', e.target.value)}
-                            placeholder="Describe the recommended antenna installation location..."
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
-                            rows={3}
-                          />
-                        </div>
+                        <>
+                          <div>
+                            <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                              What is the recommended Antenna Installation Location?
+                            </Label>
+                            <Textarea
+                              value={data.antennaInstallationLocation || ''}
+                              onChange={(e) => handleChange('antennaInstallationLocation', e.target.value)}
+                              placeholder="Describe the recommended antenna installation location..."
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
+                              rows={3}
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                              Estimated footage of cable needed to connect antenna?
+                            </Label>
+                            <Input
+                              type="text"
+                              placeholder="Enter cable length in feet"
+                              value={data.cableFootage || ''}
+                              onChange={(e) => handleChange('cableFootage', e.target.value)}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
+                            />
+                            <p className="text-xs text-gray-600 mt-1">
+                              Min 10 ft or up to 250 feet maximum
+                            </p>
+                          </div>
+                        </>
                       )}
                     </div>
                   )}
@@ -259,52 +277,7 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
                 </div>
               )}
 
-              {/* Infrastructure Checkboxes */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="power-available"
-                    checked={data.powerAvailable || false}
-                    onCheckedChange={(checked) => handleChange('powerAvailable', !!checked)}
-                  />
-                  <Label htmlFor="power-available" className="text-sm nxt-gray-800">
-                    Power outlets available at installation locations
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="ethernet-required"
-                    checked={data.ethernetRequired || false}
-                    onCheckedChange={(checked) => handleChange('ethernetRequired', !!checked)}
-                  />
-                  <Label htmlFor="ethernet-required" className="text-sm nxt-gray-800">
-                    Ethernet backhaul required
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="ceiling-mount"
-                    checked={data.ceilingMount || false}
-                    onCheckedChange={(checked) => handleChange('ceilingMount', !!checked)}
-                  />
-                  <Label htmlFor="ceiling-mount" className="text-sm nxt-gray-800">
-                    Ceiling mounting required
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="outdoor-coverage"
-                    checked={data.outdoorCoverage || false}
-                    onCheckedChange={(checked) => handleChange('outdoorCoverage', !!checked)}
-                  />
-                  <Label htmlFor="outdoor-coverage" className="text-sm nxt-gray-800">
-                    Outdoor coverage needed
-                  </Label>
-                </div>
-              </div>
+
             </div>
           </div>
 
