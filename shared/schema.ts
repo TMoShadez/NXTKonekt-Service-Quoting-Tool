@@ -91,6 +91,8 @@ export const assessments = pgTable("assessments", {
   dualWanSupport: varchar("dual_wan_support"),
   ceilingHeight: varchar("ceiling_height"),
   ceilingType: varchar("ceiling_type"),
+  routerMake: varchar("router_make"),
+  routerModel: varchar("router_model", { length: 20 }),
   interferenceSources: text("interference_sources"),
   specialRequirements: text("special_requirements"),
   

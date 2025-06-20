@@ -121,6 +121,7 @@ Changelog:
 - June 19, 2025. Enhanced Infrastructure Requirements with additional assessment questions: connection usage (Primary/Failover), router location (In Rack/Server Room/Other), antenna cable requirement, device connection assistance with conditional messaging for device limits
 - June 19, 2025. Implemented advanced conditional logic for Fixed Wireless assessments: 3-bars signal strength triggers antenna recommendations and additional questions, server room selection shows router mounting options, failover connections display dual WAN support questions
 - June 19, 2025. Reorganized Infrastructure Requirements question order: connection usage and router location moved to top, removed duplicate antenna cable question, added conditional ceiling assessment (height/type) to Site Characteristics when internal antenna selected
+- June 19, 2025. Added router specification questions to Site Characteristics: router make dropdown with 11 manufacturer options and router model text field with 20-character limit as final section questions
 
 ## User Preferences
 

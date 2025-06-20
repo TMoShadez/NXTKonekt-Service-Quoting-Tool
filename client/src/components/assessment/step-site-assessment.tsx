@@ -407,6 +407,48 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                 />
               </div>
+
+              <div>
+                <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                  Make of Router for Installation?
+                </Label>
+                <Select 
+                  value={data.routerMake || ''} 
+                  onValueChange={(value) => handleChange('routerMake', value)}
+                >
+                  <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                    <SelectValue placeholder="Select router make" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inseego">Inseego</SelectItem>
+                    <SelectItem value="cradlepoint">Cradlepoint</SelectItem>
+                    <SelectItem value="inhand">InHand</SelectItem>
+                    <SelectItem value="teltonica">Teltonica</SelectItem>
+                    <SelectItem value="peplink">Peplink</SelectItem>
+                    <SelectItem value="digi">Digi</SelectItem>
+                    <SelectItem value="bec-technologies">BEC Technologies</SelectItem>
+                    <SelectItem value="semtech-sierra">Semtech/ Sierra Wireless</SelectItem>
+                    <SelectItem value="netgear">Netgear</SelectItem>
+                    <SelectItem value="starlink">Starlink</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                  Model of Router?
+                </Label>
+                <Input
+                  type="text"
+                  placeholder="Enter router model"
+                  value={data.routerModel || ''}
+                  onChange={(e) => handleChange('routerModel', e.target.value.slice(0, 20))}
+                  maxLength={20}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
+                />
+                <p className="text-xs text-gray-500 mt-1">Maximum 20 characters</p>
+              </div>
             </div>
           </div>
 
