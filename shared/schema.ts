@@ -89,6 +89,8 @@ export const assessments = pgTable("assessments", {
   antennaInstallationLocation: text("antenna_installation_location"),
   routerMounting: varchar("router_mounting"),
   dualWanSupport: varchar("dual_wan_support"),
+  ceilingHeight: varchar("ceiling_height"),
+  ceilingType: varchar("ceiling_type"),
   interferenceSources: text("interference_sources"),
   specialRequirements: text("special_requirements"),
   

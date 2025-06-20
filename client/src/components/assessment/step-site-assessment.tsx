@@ -29,6 +29,46 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
           <div>
             <h3 className="text-lg font-semibold nxt-gray-800 mb-4">Infrastructure Requirements</h3>
             <div className="space-y-6">
+              {/* Primary Connection and Installation Questions */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    How will this Internet Connection be used?
+                  </Label>
+                  <Select 
+                    value={data.connectionUsage || ''} 
+                    onValueChange={(value) => handleChange('connectionUsage', value)}
+                  >
+                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                      <SelectValue placeholder="Select connection usage" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="primary">Primary</SelectItem>
+                      <SelectItem value="failover">Failover</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Where does the client want router installed?
+                  </Label>
+                  <Select 
+                    value={data.routerLocation || ''} 
+                    onValueChange={(value) => handleChange('routerLocation', value)}
+                  >
+                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                      <SelectValue placeholder="Select installation location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="in-rack">In Rack</SelectItem>
+                      <SelectItem value="server-room">Server Room</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               {/* Network Signal Assessment */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -143,45 +183,7 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
                 </div>
               )}
 
-              {/* Connection and Installation Assessment */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                    How will this Internet Connection be used?
-                  </Label>
-                  <Select 
-                    value={data.connectionUsage || ''} 
-                    onValueChange={(value) => handleChange('connectionUsage', value)}
-                  >
-                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
-                      <SelectValue placeholder="Select connection usage" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="primary">Primary</SelectItem>
-                      <SelectItem value="failover">Failover</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                    Where does the client want router installed?
-                  </Label>
-                  <Select 
-                    value={data.routerLocation || ''} 
-                    onValueChange={(value) => handleChange('routerLocation', value)}
-                  >
-                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
-                      <SelectValue placeholder="Select installation location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="in-rack">In Rack</SelectItem>
-                      <SelectItem value="server-room">Server Room</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              {/* Device Connection Assessment */}
 
               {/* Router Mounting Question for Server Room */}
               {data.routerLocation === 'server-room' && (
@@ -225,42 +227,22 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                    Would the customer like to run a cable for an Antenna?
-                  </Label>
-                  <Select 
-                    value={data.antennaCable || ''} 
-                    onValueChange={(value) => handleChange('antennaCable', value)}
-                  >
-                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
-                      <SelectValue placeholder="Select antenna cable option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="yes">Yes</SelectItem>
-                      <SelectItem value="no">No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                    Does the customer want assistance in connecting a networked device?
-                  </Label>
-                  <Select 
-                    value={data.deviceConnectionAssistance || ''} 
-                    onValueChange={(value) => handleChange('deviceConnectionAssistance', value)}
-                  >
-                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
-                      <SelectValue placeholder="Select device assistance option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="yes">Yes</SelectItem>
-                      <SelectItem value="no">No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                  Does the customer want assistance in connecting a networked device?
+                </Label>
+                <Select 
+                  value={data.deviceConnectionAssistance || ''} 
+                  onValueChange={(value) => handleChange('deviceConnectionAssistance', value)}
+                >
+                  <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                    <SelectValue placeholder="Select device assistance option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="yes">Yes</SelectItem>
+                    <SelectItem value="no">No</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Device Connection Notice */}
@@ -376,6 +358,42 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                 />
               </div>
+
+              {/* Ceiling Assessment for Internal Antenna */}
+              {data.antennaType === 'internal' && (
+                <>
+                  <div>
+                    <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                      How high are the ceilings?
+                    </Label>
+                    <Input
+                      type="text"
+                      placeholder="Enter ceiling height (e.g., 10 feet)"
+                      value={data.ceilingHeight || ''}
+                      onChange={(e) => handleChange('ceilingHeight', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                      What type of ceiling?
+                    </Label>
+                    <Select 
+                      value={data.ceilingType || ''} 
+                      onValueChange={(value) => handleChange('ceilingType', value)}
+                    >
+                      <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                        <SelectValue placeholder="Select ceiling type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="drop-tile">Drop Tile</SelectItem>
+                        <SelectItem value="solid">Solid</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
               
               <div>
                 <Label className="text-sm font-medium nxt-gray-800 mb-2">
