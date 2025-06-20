@@ -80,6 +80,10 @@ export const assessments = pgTable("assessments", {
   outdoorCoverage: boolean("outdoor_coverage").default(false),
   networkSignal: varchar("network_signal"),
   signalStrength: varchar("signal_strength"),
+  connectionUsage: varchar("connection_usage"),
+  routerLocation: varchar("router_location"),
+  antennaCable: varchar("antenna_cable"),
+  deviceConnectionAssistance: varchar("device_connection_assistance"),
   interferenceSources: text("interference_sources"),
   specialRequirements: text("special_requirements"),
   

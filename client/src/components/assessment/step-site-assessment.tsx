@@ -69,6 +69,98 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
                 </div>
               </div>
 
+              {/* Connection and Installation Assessment */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    How will this Internet Connection be used?
+                  </Label>
+                  <Select 
+                    value={data.connectionUsage || ''} 
+                    onValueChange={(value) => handleChange('connectionUsage', value)}
+                  >
+                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                      <SelectValue placeholder="Select connection usage" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="primary">Primary</SelectItem>
+                      <SelectItem value="failover">Failover</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Where does the client want router installed?
+                  </Label>
+                  <Select 
+                    value={data.routerLocation || ''} 
+                    onValueChange={(value) => handleChange('routerLocation', value)}
+                  >
+                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                      <SelectValue placeholder="Select installation location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="in-rack">In Rack</SelectItem>
+                      <SelectItem value="server-room">Server Room</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Would the customer like to run a cable for an Antenna?
+                  </Label>
+                  <Select 
+                    value={data.antennaCable || ''} 
+                    onValueChange={(value) => handleChange('antennaCable', value)}
+                  >
+                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                      <SelectValue placeholder="Select antenna cable option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes</SelectItem>
+                      <SelectItem value="no">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Does the customer want assistance in connecting a networked device?
+                  </Label>
+                  <Select 
+                    value={data.deviceConnectionAssistance || ''} 
+                    onValueChange={(value) => handleChange('deviceConnectionAssistance', value)}
+                  >
+                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                      <SelectValue placeholder="Select device assistance option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes</SelectItem>
+                      <SelectItem value="no">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Device Connection Notice */}
+              {data.deviceConnectionAssistance === 'yes' && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>Installation includes:</strong>{' '}
+                    {data.connectionUsage === 'primary' 
+                      ? 'Up to 5 devices if Primary ISP selected' 
+                      : data.connectionUsage === 'failover'
+                      ? '1 device if Failover selected'
+                      : 'Device connection assistance (number of devices depends on connection type)'}
+                  </p>
+                </div>
+              )}
+
               {/* Infrastructure Checkboxes */}
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">

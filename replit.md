@@ -118,6 +118,7 @@ Changelog:
 - June 19, 2025. Fixed character input issues in Fleet Tracking and Fleet Camera forms by correcting number and date input parsing
 - June 19, 2025. Reordered Fixed Wireless assessment form sections: Infrastructure Requirements first, Site Characteristics second, Environmental Factors last
 - June 19, 2025. Added network signal assessment fields to Infrastructure Requirements: Network Signal dropdown (4G/5G) and Signal Strength dropdown (5/4/3 bars)
+- June 19, 2025. Enhanced Infrastructure Requirements with additional assessment questions: connection usage (Primary/Failover), router location (In Rack/Server Room/Other), antenna cable requirement, device connection assistance with conditional messaging for device limits
 
 ## User Preferences
 
