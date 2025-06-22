@@ -5,7 +5,13 @@ export interface PricingBreakdown {
   installationCost: number;
   configurationCost: number;
   trainingCost: number;
+  hardwareCost: number;
   totalCost: number;
+  // Hours breakdown for display
+  surveyHours: number;
+  installationHours: number;
+  configurationHours: number;
+  hourlyRate: number;
 }
 
 // Base hourly rate (including taxes)
@@ -81,7 +87,12 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
     installationCost,
     configurationCost,
     trainingCost,
+    hardwareCost: cableCost,
     totalCost,
+    surveyHours,
+    installationHours,
+    configurationHours,
+    hourlyRate: HOURLY_RATE,
   };
 }
 
