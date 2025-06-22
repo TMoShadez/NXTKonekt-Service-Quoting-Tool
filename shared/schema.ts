@@ -116,7 +116,14 @@ export const quotes = pgTable("quotes", {
   installationCost: decimal("installation_cost", { precision: 10, scale: 2 }),
   configurationCost: decimal("configuration_cost", { precision: 10, scale: 2 }),
   trainingCost: decimal("training_cost", { precision: 10, scale: 2 }),
+  hardwareCost: decimal("hardware_cost", { precision: 10, scale: 2 }),
   totalCost: decimal("total_cost", { precision: 10, scale: 2 }).notNull(),
+  
+  // Hours breakdown for display
+  surveyHours: decimal("survey_hours", { precision: 5, scale: 2 }),
+  installationHours: decimal("installation_hours", { precision: 5, scale: 2 }),
+  configurationHours: decimal("configuration_hours", { precision: 5, scale: 2 }),
+  hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
   
   status: varchar("status").default("pending"), // pending, approved, rejected
   pdfUrl: text("pdf_url"),

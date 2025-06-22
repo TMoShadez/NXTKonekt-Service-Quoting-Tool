@@ -88,7 +88,9 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
       const lineY = 490;
       doc.fontSize(12)
          .text('Service Item', 50, lineY)
-         .text('Cost', 400, lineY);
+         .text('Hours', 300, lineY)
+         .text('Rate', 350, lineY)
+         .text('Cost', 450, lineY);
 
       // Draw line
       doc.moveTo(50, lineY + 15)
@@ -97,20 +99,48 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
 
       let currentY = lineY + 25;
       
-      doc.text('Site Survey & Planning', 50, currentY)
-         .text(`$${quote.surveyCost}`, 400, currentY);
+      // Survey line (only show if > 0 hours)
+      if (quote.surveyHours > 0) {
+        doc.text('Site Survey & Planning', 50, currentY)
+           .text(`${quote.surveyHours}`, 300, currentY)
+           .text(`$${quote.hourlyRate}`, 350, currentY)
+           .text(`$${quote.surveyCost}`, 450, currentY);
+        currentY += 20;
+      }
+      
+      // Installation line
+      doc.text('Installation & Setup', 50, currentY)
+         .text(`${quote.installationHours}`, 300, currentY)
+         .text(`$${quote.hourlyRate}`, 350, currentY)
+         .text(`$${quote.installationCost}`, 450, currentY);
       
       currentY += 20;
-      doc.text('Router Installation', 50, currentY)
-         .text(`$${quote.installationCost}`, 400, currentY);
       
-      currentY += 20;
-      doc.text('Configuration & Testing', 50, currentY)
-         .text('Included', 400, currentY);
+      // Configuration line (only show if > 0 hours and cost > 0)
+      if (quote.configurationHours > 0 && quote.configurationCost > 0) {
+        doc.text('Configuration & Testing', 50, currentY)
+           .text(`${quote.configurationHours}`, 300, currentY)
+           .text(`$${quote.hourlyRate}`, 350, currentY)
+           .text(`$${quote.configurationCost}`, 450, currentY);
+        currentY += 20;
+      } else if (quote.configurationHours > 0) {
+        doc.text('Configuration & Testing', 50, currentY)
+           .text('Included', 450, currentY);
+        currentY += 20;
+      }
       
-      currentY += 20;
+      // Hardware line (cable costs)
+      if (quote.hardwareCost > 0) {
+        doc.text('Hardware', 50, currentY)
+           .text('', 300, currentY)
+           .text('', 350, currentY)
+           .text(`$${quote.hardwareCost}`, 450, currentY);
+        currentY += 20;
+      }
+      
+      // Training line
       doc.text('Documentation & Training', 50, currentY)
-         .text('Included', 400, currentY);
+         .text('Included', 450, currentY);
 
       // Total line
       currentY += 30;

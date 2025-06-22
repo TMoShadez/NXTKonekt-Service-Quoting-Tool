@@ -34,9 +34,8 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
 
   const coverageArea = assessment.coverageArea || 1000;
   const deviceCount = assessment.deviceCount || 1;
-  const connectionUsage = assessment.connectionUsage || 'primary';
 
-  // Coverage area adjustments
+  // Coverage area complexity adjustments
   if (coverageArea > 5000) {
     surveyHours += 2;
     installationHours += 2;
@@ -45,24 +44,23 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
     installationHours += 1;
   }
 
-  // Device count adjustments (1 device included, no adjustment based on primary/failover)
-  if (deviceCount > 10) {
-    configurationHours += 2;
-  } else if (deviceCount >= 6 && deviceCount <= 9) {
-    configurationHours += 1;
+  // Device count logic: 1 device included, 2-5 devices with failover +1 config hour, 
+  // 6-9 devices +1 config hour, >10 devices +2 config hours
+  if (deviceCount === 1) {
+    // Base configuration - 1 hour
   } else if (deviceCount >= 2 && deviceCount <= 5) {
-    // For failover connections in 2-5 device range, add 1 configure hour
-    if (connectionUsage === 'failover') {
+    // Check if failover connection
+    if (assessment.connectionUsage === 'failover') {
       configurationHours += 1;
     }
+  } else if (deviceCount >= 6 && deviceCount <= 9) {
+    configurationHours += 1;
+  } else if (deviceCount >= 10) {
+    configurationHours += 2;
   }
 
-  // Special requirements adjustments (legacy support)
-  if (assessment.ceilingMount) {
-    installationHours += 1;
-  }
-
-  if (assessment.outdoorCoverage) {
+  // Signal strength adjustments (when 3 bars, additional complexity)
+  if (assessment.signalStrength === '3') {
     surveyHours += 1;
     installationHours += 1;
   }
@@ -139,7 +137,12 @@ function calculateFleetTrackingPricing(assessment: Assessment): PricingBreakdown
     installationCost,
     configurationCost,
     trainingCost,
+    hardwareCost: 0,
     totalCost,
+    surveyHours,
+    installationHours,
+    configurationHours: 0,
+    hourlyRate: HOURLY_RATE,
   };
 }
 
@@ -180,6 +183,11 @@ function calculateFleetCameraPricing(assessment: Assessment): PricingBreakdown {
     installationCost,
     configurationCost,
     trainingCost,
+    hardwareCost: 0,
     totalCost,
+    surveyHours,
+    installationHours,
+    configurationHours: 0,
+    hourlyRate: HOURLY_RATE,
   };
 }
