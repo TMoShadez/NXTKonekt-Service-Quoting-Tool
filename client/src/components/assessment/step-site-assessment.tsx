@@ -383,7 +383,7 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
 
               <div>
                 <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                  Make of Router for Installation?
+                  Make of Router for Installation
                 </Label>
                 <Select 
                   value={data.routerMake || ''} 
@@ -393,7 +393,6 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
                     <SelectValue placeholder="Select router make" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="inseego">Inseego</SelectItem>
                     <SelectItem value="cradlepoint">Cradlepoint</SelectItem>
                     <SelectItem value="inhand">InHand</SelectItem>
                     <SelectItem value="teltonica">Teltonica</SelectItem>
