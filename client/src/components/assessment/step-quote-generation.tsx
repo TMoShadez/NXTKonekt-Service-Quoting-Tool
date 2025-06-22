@@ -126,51 +126,89 @@ export function StepQuoteGeneration({ assessmentId, data }: StepQuoteGenerationP
             <h3 className="text-lg font-semibold nxt-gray-800 mb-4">Pricing Breakdown</h3>
             <div className="border border-gray-200 rounded-lg overflow-hidden">
               <div className="bg-nxt-gray-50 px-6 py-3 border-b border-gray-200">
-                <div className="grid grid-cols-3 gap-4 text-sm font-medium nxt-gray-800">
+                <div className="grid grid-cols-4 gap-4 text-sm font-medium nxt-gray-800">
                   <span>Service Item</span>
-                  <span>Rate/Hours</span>
-                  <span>Total</span>
+                  <span>Hours</span>
+                  <span>Rate</span>
+                  <span>Cost</span>
                 </div>
               </div>
               
               <div className="divide-y divide-gray-200">
+                {/* Survey line (only show if > 0 hours) */}
+                {parseFloat(quote.surveyHours || '0') > 0 && (
+                  <div className="px-6 py-4">
+                    <div className="grid grid-cols-4 gap-4 text-sm">
+                      <span className="nxt-gray-800">Site Survey & Planning</span>
+                      <span className="nxt-gray-500">{parseFloat(quote.surveyHours || '0')}</span>
+                      <span className="nxt-gray-500">${parseFloat(quote.hourlyRate || '190')}</span>
+                      <span className="font-medium">${parseFloat(quote.surveyCost || '0').toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Installation line */}
                 <div className="px-6 py-4">
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <span className="nxt-gray-800">Site Survey & Planning</span>
-                    <span className="nxt-gray-500">$125/hr</span>
-                    <span className="font-medium">${parseFloat(quote.surveyCost).toFixed(2)}</span>
+                  <div className="grid grid-cols-4 gap-4 text-sm">
+                    <span className="nxt-gray-800">Installation & Setup</span>
+                    <span className="nxt-gray-500">{parseFloat(quote.installationHours || '0')}</span>
+                    <span className="nxt-gray-500">${parseFloat(quote.hourlyRate || '190')}</span>
+                    <span className="font-medium">${parseFloat(quote.installationCost || '0').toFixed(2)}</span>
                   </div>
                 </div>
                 
-                <div className="px-6 py-4">
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <span className="nxt-gray-800">Router Installation</span>
-                    <span className="nxt-gray-500">$95/hr</span>
-                    <span className="font-medium">${parseFloat(quote.installationCost).toFixed(2)}</span>
+                {/* Configuration line (only show if > 0 hours and cost > 0) */}
+                {parseFloat(quote.configurationHours || '0') > 0 && parseFloat(quote.configurationCost || '0') > 0 && (
+                  <div className="px-6 py-4">
+                    <div className="grid grid-cols-4 gap-4 text-sm">
+                      <span className="nxt-gray-800">Configuration & Testing</span>
+                      <span className="nxt-gray-500">{parseFloat(quote.configurationHours || '0')}</span>
+                      <span className="nxt-gray-500">${parseFloat(quote.hourlyRate || '190')}</span>
+                      <span className="font-medium">${parseFloat(quote.configurationCost || '0').toFixed(2)}</span>
+                    </div>
                   </div>
-                </div>
+                )}
                 
-                <div className="px-6 py-4">
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <span className="nxt-gray-800">Configuration & Testing</span>
-                    <span className="nxt-gray-500">$110/hr</span>
-                    <span className="font-medium">${parseFloat(quote.configurationCost).toFixed(2)}</span>
+                {/* Configuration included line */}
+                {parseFloat(quote.configurationHours || '0') > 0 && parseFloat(quote.configurationCost || '0') === 0 && (
+                  <div className="px-6 py-4">
+                    <div className="grid grid-cols-4 gap-4 text-sm">
+                      <span className="nxt-gray-800">Configuration & Testing</span>
+                      <span className="nxt-gray-500">-</span>
+                      <span className="nxt-gray-500">-</span>
+                      <span className="font-medium">Included</span>
+                    </div>
                   </div>
-                </div>
+                )}
                 
+                {/* Hardware line (cable costs) */}
+                {parseFloat(quote.hardwareCost || '0') > 0 && (
+                  <div className="px-6 py-4">
+                    <div className="grid grid-cols-4 gap-4 text-sm">
+                      <span className="nxt-gray-800">Hardware</span>
+                      <span className="nxt-gray-500">-</span>
+                      <span className="nxt-gray-500">-</span>
+                      <span className="font-medium">${parseFloat(quote.hardwareCost || '0').toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Training line */}
                 <div className="px-6 py-4">
-                  <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div className="grid grid-cols-4 gap-4 text-sm">
                     <span className="nxt-gray-800">Documentation & Training</span>
-                    <span className="nxt-gray-500">$85/hr</span>
-                    <span className="font-medium">${parseFloat(quote.trainingCost).toFixed(2)}</span>
+                    <span className="nxt-gray-500">-</span>
+                    <span className="nxt-gray-500">-</span>
+                    <span className="font-medium">Included</span>
                   </div>
                 </div>
                 
                 <div className="px-6 py-4 bg-nxt-gray-50">
-                  <div className="grid grid-cols-3 gap-4 text-lg font-semibold">
+                  <div className="grid grid-cols-4 gap-4 text-lg font-semibold">
                     <span className="nxt-gray-800">Total Project Cost</span>
                     <span></span>
-                    <span className="text-nxt-blue">${parseFloat(quote.totalCost).toFixed(2)}</span>
+                    <span></span>
+                    <span className="text-nxt-blue">${parseFloat(quote.totalCost || '0').toFixed(2)}</span>
                   </div>
                 </div>
               </div>

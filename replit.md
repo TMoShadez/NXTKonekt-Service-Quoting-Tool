@@ -124,6 +124,8 @@ Changelog:
 - June 19, 2025. Added router specification questions to Site Characteristics: router make dropdown with 11 manufacturer options and router model text field with 20-character limit as final section questions
 - June 19, 2025. Enhanced antenna assessment with cable footage question (10-250 ft range) and streamlined Infrastructure Requirements by removing power, ethernet, ceiling mount, and outdoor coverage checkboxes
 - June 22, 2025. Updated pricing engine with new rate structure: Fixed Wireless base 0/2/1 hours (survey/install/config), device count logic for 1 included + failover adjustments, cable pricing at $7/ft, configuration now billable at $190/hr
+- June 22, 2025. Implemented configuration pricing logic: Failover with 1 device = $0, Failover with >1 devices = billable hours. Primary with <5 devices = $0, Primary with >=5 devices = billable hours
+- June 22, 2025. Updated quote summary page to match PDF format with hours, rates, and hardware line items displayed in 4-column table layout
 
 ## User Preferences
 

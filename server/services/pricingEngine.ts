@@ -44,19 +44,40 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
     installationHours += 1;
   }
 
-  // Device count logic: 1 device included, 2-5 devices with failover +1 config hour, 
-  // 6-9 devices +1 config hour, >10 devices +2 config hours
-  if (deviceCount === 1) {
-    // Base configuration - 1 hour
-  } else if (deviceCount >= 2 && deviceCount <= 5) {
-    // Check if failover connection
-    if (assessment.connectionUsage === 'failover') {
-      configurationHours += 1;
+  // Configuration pricing logic based on connection usage and device count
+  if (assessment.connectionUsage === 'failover') {
+    if (deviceCount === 1) {
+      configurationHours = 0; // $0 charge for failover with 1 device
+    } else if (deviceCount > 1) {
+      // Apply configuration pricing for failover with >1 devices
+      if (deviceCount >= 2 && deviceCount <= 5) {
+        configurationHours += 1;
+      } else if (deviceCount >= 6 && deviceCount <= 9) {
+        configurationHours += 1;
+      } else if (deviceCount >= 10) {
+        configurationHours += 2;
+      }
     }
-  } else if (deviceCount >= 6 && deviceCount <= 9) {
-    configurationHours += 1;
-  } else if (deviceCount >= 10) {
-    configurationHours += 2;
+  } else if (assessment.connectionUsage === 'primary') {
+    if (deviceCount < 5) {
+      configurationHours = 0; // $0 charge for primary with <5 devices
+    } else if (deviceCount >= 5) {
+      // Apply configuration pricing for primary with >=5 devices
+      if (deviceCount >= 5 && deviceCount <= 9) {
+        configurationHours += 1;
+      } else if (deviceCount >= 10) {
+        configurationHours += 2;
+      }
+    }
+  } else {
+    // Default logic for other connection types
+    if (deviceCount >= 2 && deviceCount <= 5) {
+      configurationHours += 1;
+    } else if (deviceCount >= 6 && deviceCount <= 9) {
+      configurationHours += 1;
+    } else if (deviceCount >= 10) {
+      configurationHours += 2;
+    }
   }
 
   // Signal strength adjustments (when 3 bars, additional complexity)
