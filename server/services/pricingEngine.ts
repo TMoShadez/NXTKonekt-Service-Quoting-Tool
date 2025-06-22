@@ -34,6 +34,7 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
 
   const coverageArea = assessment.coverageArea || 1000;
   const deviceCount = assessment.deviceCount || 1;
+  const routerCount = assessment.routerCount || 1;
 
   // Coverage area complexity adjustments
   if (coverageArea > 5000) {
@@ -84,6 +85,11 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
   if (assessment.signalStrength === '3') {
     surveyHours += 1;
     installationHours += 1;
+  }
+
+  // Router count multiplier for installation hours (when >1 router)
+  if (routerCount > 1) {
+    installationHours = installationHours * routerCount;
   }
 
   // Calculate costs

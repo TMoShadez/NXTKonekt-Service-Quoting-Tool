@@ -422,6 +422,23 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
                 />
                 <p className="text-xs text-gray-500 mt-1">Maximum 20 characters</p>
               </div>
+
+              <div>
+                <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                  Number of Routers to be installed? <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  type="number"
+                  placeholder="Enter number of routers"
+                  value={data.routerCount || ''}
+                  onChange={(e) => {
+                    const value = e.target.value ? parseInt(e.target.value) : null;
+                    handleChange('routerCount', value);
+                  }}
+                  min="1"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
+                />
+              </div>
             </div>
           </div>
 
