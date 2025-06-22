@@ -99,42 +99,52 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
 
       let currentY = lineY + 25;
       
+      // Parse numeric values from quote (handle string/decimal conversion)
+      const surveyHours = parseFloat(quote.surveyHours?.toString() || '0');
+      const installationHours = parseFloat(quote.installationHours?.toString() || '0');
+      const configurationHours = parseFloat(quote.configurationHours?.toString() || '0');
+      const hourlyRate = parseFloat(quote.hourlyRate?.toString() || '190');
+      const hardwareCost = parseFloat(quote.hardwareCost?.toString() || '0');
+      const surveyCost = parseFloat(quote.surveyCost?.toString() || '0');
+      const installationCost = parseFloat(quote.installationCost?.toString() || '0');
+      const configurationCost = parseFloat(quote.configurationCost?.toString() || '0');
+      
       // Survey line (only show if > 0 hours)
-      if (quote.surveyHours > 0) {
+      if (surveyHours > 0) {
         doc.text('Site Survey & Planning', 50, currentY)
-           .text(`${quote.surveyHours}`, 300, currentY)
-           .text(`$${quote.hourlyRate}`, 350, currentY)
-           .text(`$${quote.surveyCost}`, 450, currentY);
+           .text(`${surveyHours}`, 300, currentY)
+           .text(`$${hourlyRate}`, 350, currentY)
+           .text(`$${surveyCost.toFixed(2)}`, 450, currentY);
         currentY += 20;
       }
       
       // Installation line
       doc.text('Installation & Setup', 50, currentY)
-         .text(`${quote.installationHours}`, 300, currentY)
-         .text(`$${quote.hourlyRate}`, 350, currentY)
-         .text(`$${quote.installationCost}`, 450, currentY);
+         .text(`${installationHours}`, 300, currentY)
+         .text(`$${hourlyRate}`, 350, currentY)
+         .text(`$${installationCost.toFixed(2)}`, 450, currentY);
       
       currentY += 20;
       
       // Configuration line (only show if > 0 hours and cost > 0)
-      if (quote.configurationHours > 0 && quote.configurationCost > 0) {
+      if (configurationHours > 0 && configurationCost > 0) {
         doc.text('Configuration & Testing', 50, currentY)
-           .text(`${quote.configurationHours}`, 300, currentY)
-           .text(`$${quote.hourlyRate}`, 350, currentY)
-           .text(`$${quote.configurationCost}`, 450, currentY);
+           .text(`${configurationHours}`, 300, currentY)
+           .text(`$${hourlyRate}`, 350, currentY)
+           .text(`$${configurationCost.toFixed(2)}`, 450, currentY);
         currentY += 20;
-      } else if (quote.configurationHours > 0) {
+      } else if (configurationHours > 0) {
         doc.text('Configuration & Testing', 50, currentY)
            .text('Included', 450, currentY);
         currentY += 20;
       }
       
       // Hardware line (cable costs)
-      if (quote.hardwareCost > 0) {
+      if (hardwareCost > 0) {
         doc.text('Hardware', 50, currentY)
            .text('', 300, currentY)
            .text('', 350, currentY)
-           .text(`$${quote.hardwareCost}`, 450, currentY);
+           .text(`$${hardwareCost.toFixed(2)}`, 450, currentY);
         currentY += 20;
       }
       
@@ -149,9 +159,10 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
          .stroke();
 
       currentY += 10;
+      const totalCost = parseFloat(quote.totalCost?.toString() || '0');
       doc.fontSize(14)
          .text('Total Project Cost', 50, currentY)
-         .text(`$${quote.totalCost}`, 400, currentY);
+         .text(`$${totalCost.toFixed(2)}`, 450, currentY);
 
       // Additional notes
       if (assessment.additionalNotes) {
