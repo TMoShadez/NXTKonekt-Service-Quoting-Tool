@@ -393,6 +393,7 @@ export function StepSiteAssessment({ data, onChange }: StepSiteAssessmentProps) 
                     <SelectValue placeholder="Select router make" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="inseego">Inseego</SelectItem>
                     <SelectItem value="cradlepoint">Cradlepoint</SelectItem>
                     <SelectItem value="inhand">InHand</SelectItem>
                     <SelectItem value="teltonica">Teltonica</SelectItem>
