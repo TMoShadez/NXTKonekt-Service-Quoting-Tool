@@ -12,12 +12,8 @@ export interface PricingBreakdown {
 const HOURLY_RATE = 190;
 
 export function calculatePricing(assessment: Assessment): PricingBreakdown {
-  const serviceType = assessment.serviceType || 'fixed-wireless';
-  let surveyHours = 4; // Base survey hours
-  let installationHours = 8; // Base installation hours
-  let configurationHours = 4; // Base configuration hours
-  let trainingHours = 2; // Base training hours
-
+  const serviceType = assessment.serviceType || 'site-assessment';
+  
   // Service-specific pricing calculations
   if (serviceType === 'fleet-tracking') {
     return calculateFleetTrackingPricing(assessment);
@@ -25,73 +21,60 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
     return calculateFleetCameraPricing(assessment);
   }
 
-  // Fixed Wireless Access pricing (existing logic)
+  // Fixed Wireless Access pricing (updated logic)
+  let surveyHours = 0; // New base: 0 hours
+  let installationHours = 2; // New base: 2 hours
+  let configurationHours = 1; // New base: 1 hour
+
   const coverageArea = assessment.coverageArea || 1000;
-  const deviceCount = assessment.deviceCount || 20;
-  const floors = assessment.floors || 1;
+  const deviceCount = assessment.deviceCount || 1;
+  const connectionUsage = assessment.connectionUsage || 'primary';
 
   // Coverage area adjustments
   if (coverageArea > 5000) {
     surveyHours += 2;
-    installationHours += 6;
-    configurationHours += 2;
+    installationHours += 2;
   } else if (coverageArea > 2500) {
     surveyHours += 1;
-    installationHours += 3;
-    configurationHours += 1;
+    installationHours += 1;
   }
 
-  // Device count adjustments
-  if (deviceCount > 100) {
-    installationHours += 4;
-    configurationHours += 3;
-    trainingHours += 2;
-  } else if (deviceCount > 50) {
-    installationHours += 2;
+  // Device count adjustments (1 device included, no adjustment based on primary/failover)
+  if (deviceCount > 10) {
     configurationHours += 2;
-    trainingHours += 1;
+  } else if (deviceCount >= 6 && deviceCount <= 9) {
+    configurationHours += 1;
+  } else if (deviceCount >= 2 && deviceCount <= 5) {
+    // For failover connections in 2-5 device range, add 1 configure hour
+    if (connectionUsage === 'failover') {
+      configurationHours += 1;
+    }
   }
 
-  // Multi-floor adjustments
-  if (floors > 3) {
-    surveyHours += 2;
-    installationHours += 4;
-  } else if (floors > 1) {
-    surveyHours += 1;
-    installationHours += 2;
-  }
-
-  // Special requirements adjustments
+  // Special requirements adjustments (legacy support)
   if (assessment.ceilingMount) {
-    installationHours += 2;
+    installationHours += 1;
   }
 
   if (assessment.outdoorCoverage) {
     surveyHours += 1;
-    installationHours += 3;
+    installationHours += 1;
   }
 
-  if (assessment.ethernetRequired) {
-    installationHours += 2;
-    configurationHours += 1;
-  }
-
-  // Complex building type adjustments
-  if (assessment.buildingType === 'warehouse') {
-    surveyHours += 1;
-    installationHours += 2;
-  } else if (assessment.buildingType === 'office-complex') {
-    surveyHours += 2;
-    configurationHours += 2;
-    trainingHours += 1;
-  }
-
-  // Calculate costs - Configuration & Testing and Documentation & Training are included
+  // Calculate costs
   const surveyCost = Math.round(surveyHours * HOURLY_RATE * 100) / 100;
   const installationCost = Math.round(installationHours * HOURLY_RATE * 100) / 100;
-  const configurationCost = 0; // Included in service
-  const trainingCost = 0; // Included in service
-  const totalCost = Math.round((surveyCost + installationCost) * 100) / 100;
+  const configurationCost = Math.round(configurationHours * HOURLY_RATE * 100) / 100;
+  const trainingCost = 0; // Training included
+  
+  // Ethernet cable pricing - $7 per foot
+  let cableCost = 0;
+  if (assessment.cableFootage) {
+    const footage = parseFloat(assessment.cableFootage) || 0;
+    cableCost = footage * 7;
+  }
+  
+  const totalCost = Math.round((surveyCost + installationCost + configurationCost + cableCost) * 100) / 100;
 
   return {
     surveyCost,
@@ -103,12 +86,12 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
 }
 
 function calculateFleetTrackingPricing(assessment: Assessment): PricingBreakdown {
-  let surveyHours = 2; // Base survey hours for fleet assessment
-  let installationHours = 4; // Base installation hours
+  let surveyHours = 0; // New base: 0 hours
+  let installationHours = 2; // New base: 2 hours
   
   const vehicleCount = assessment.deviceCount || 1;
   
-  // Fleet Tracker OBD installation includes up to 3 vehicles in hourly rate
+  // Fleet Tracker OBD installation includes up to 3 vehicles in base rate
   const billableVehicles = Math.max(0, vehicleCount - 3);
   
   // Base installation covers up to 3 vehicles
@@ -118,7 +101,7 @@ function calculateFleetTrackingPricing(assessment: Assessment): PricingBreakdown
   
   // Complexity adjustments based on vehicle types
   if (assessment.buildingType === 'heavy-duty' || assessment.buildingType === 'specialized') {
-    installationHours += 2;
+    installationHours += 1; // Reduced from 2 to 1
   } else if (assessment.buildingType === 'mixed-fleet') {
     installationHours += 1;
   }
@@ -150,13 +133,13 @@ function calculateFleetTrackingPricing(assessment: Assessment): PricingBreakdown
 }
 
 function calculateFleetCameraPricing(assessment: Assessment): PricingBreakdown {
-  let surveyHours = 3; // Base survey hours for camera assessment
-  let installationHours = 6; // Base installation hours
+  let surveyHours = 0; // New base: 0 hours
+  let installationHours = 2; // New base: 2 hours
   
   const vehicleCount = assessment.deviceCount || 1;
   
-  // Camera installation is per vehicle
-  installationHours = 2 + (vehicleCount * 1.5); // 2 hours base + 1.5 hours per vehicle
+  // Camera installation is per vehicle - 2 base hours + 1 hour per vehicle
+  installationHours = 2 + (vehicleCount * 1); // Updated: 1 hour per vehicle instead of 1.5
   
   // Camera type complexity adjustments
   let cameraCount = 0;

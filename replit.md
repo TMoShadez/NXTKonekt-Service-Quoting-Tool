@@ -123,6 +123,7 @@ Changelog:
 - June 19, 2025. Reorganized Infrastructure Requirements question order: connection usage and router location moved to top, removed duplicate antenna cable question, added conditional ceiling assessment (height/type) to Site Characteristics when internal antenna selected
 - June 19, 2025. Added router specification questions to Site Characteristics: router make dropdown with 11 manufacturer options and router model text field with 20-character limit as final section questions
 - June 19, 2025. Enhanced antenna assessment with cable footage question (10-250 ft range) and streamlined Infrastructure Requirements by removing power, ethernet, ceiling mount, and outdoor coverage checkboxes
+- June 22, 2025. Updated pricing engine with new rate structure: Fixed Wireless base 0/2/1 hours (survey/install/config), device count logic for 1 included + failover adjustments, cable pricing at $7/ft, configuration now billable at $190/hr
 
 ## User Preferences
 

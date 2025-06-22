@@ -1,0 +1,73 @@
+Base Rates
+Hourly Rate: $190 (includes taxes)
+Service Types & Pricing Models
+1. Fixed Wireless Access (Site Assessment)
+Base Hours:
+Survey: 0 hours
+Installation: 2 hours
+Configuration: 1 hour (included in service - $0)
+Training: 0 hours (included in service - $0)
+Coverage Area Adjustments:
+>5,000 sq ft: +2 survey hours, +2 installation hours, +0 configuration hours
+2,500-5,000 sq ft: +1 survey hour, +1 installation hours, +0 configuration hour
+<2,500 sq ft: No adjustment
+Device Count Adjustments:
+>10 devices: +0 installation hours, +2 configuration hours, +0 training hours
+6-9 devices: +0 installation hours, +1 configuration hours, +0 training hour
+2-5 devices: No adjustment
+Multi-Floor Adjustments:
+>3 floors: No adjustment
+2-3 floors: No adjustment
+Single floor: No adjustment
+Building Type Adjustments:
+Warehouse: No adjustment
+Office Complex: No adjustment 
+Other types: No adjustment
+Special Requirements (Legacy - removed from current form):
+Ceiling Mount: +1 installation hour
+Outdoor Coverage: +1 survey hour, +1 installation hour
+Ethernet Required: price based on $7 per foot of cable x qty entered in "Estimated footage of cable needed to connect antenna?"
+
+2. Fleet Tracking
+Base Hours:
+Survey: 0 hours
+Installation: 2 hours
+Vehicle Count Logic:
+Special Rule: Up to 3 vehicles included in base rate
+Additional Vehicles: +0.5 hours per vehicle beyond 3
+Vehicle Type Adjustments:
+Heavy-duty/Specialized: +1 installation hours
+Mixed Fleet: +1 installation hour
+Standard fleet: No adjustment
+Feature Complexity: (uses legacy checkbox mappings)
+Each additional feature beyond 2: +1 installation hour
+Features counted: Real-time GPS, Geofencing, Driver behavior, Maintenance scheduling
+3. Fleet Camera
+Base Hours:
+Survey: 0 hours
+Installation: 2 base hours + (1 hour × vehicle count)
+Per-Vehicle Calculation:
+Each vehicle: +1 hour installation time
+Camera Complexity: (uses legacy checkbox mappings)
+Multiple camera types (>2): +0.5 hours per vehicle
+Camera types: Forward, Driver, Side, Rear cameras
+Installation Complexity:
+Custom/Retrofit installations: +0.5 hours per vehicle
+Cost Calculation Formula
+For All Services:
+Survey Cost = Survey Hours × $190
+Installation Cost = Installation Hours × $190
+Configuration Cost = $190
+Training Cost = $0 (included)
+Total Cost = Survey Cost + Installation Cost
+Current Rate Structure
+What's Included at $190/hr:
+Site survey and assessment
+Equipment installation
+System configuration and testing
+Documentation and training
+Post-installation support
+Billing Structure:
+All costs rounded to nearest cent
+Training services included in base rate
+This pricing model provides transparent, service-specific calculations that account for complexity factors while maintaining the $190/hour rate with included configuration and training services.
