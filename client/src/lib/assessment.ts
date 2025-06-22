@@ -24,7 +24,7 @@ export const ASSESSMENT_STEPS: AssessmentStep[] = [
     id: 3,
     title: "Site Assessment",
     description: "Assess technical requirements and site characteristics",
-    fields: ['buildingType', 'coverageArea', 'floors', 'deviceCount', 'powerAvailable', 'ethernetRequired', 'ceilingMount', 'outdoorCoverage', 'interferenceSources', 'specialRequirements'],
+    fields: ['buildingType', 'coverageArea', 'floors', 'deviceCount', 'routerCount', 'powerAvailable', 'ethernetRequired', 'ceilingMount', 'outdoorCoverage', 'interferenceSources', 'specialRequirements'],
   },
   {
     id: 4,
