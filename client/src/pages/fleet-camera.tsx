@@ -130,7 +130,9 @@ export default function FleetCameraForm() {
             onChange={(data) => {
               const updatedData = { ...formData, ...data };
               setFormData(updatedData);
-              updateMutation.mutate(updatedData);
+              if (assessment?.id) {
+                updateMutation.mutate(updatedData);
+              }
             }}
           />
         );

@@ -132,7 +132,11 @@ export default function FleetTrackingForm() {
           <StepCustomerInfo 
             data={formData}
             onChange={(data) => {
-              setFormData(prev => ({ ...prev, ...data }));
+              const updatedData = { ...formData, ...data };
+              setFormData(updatedData);
+              if (assessment?.id) {
+                updateMutation.mutate(updatedData);
+              }
             }}
           />
         );
