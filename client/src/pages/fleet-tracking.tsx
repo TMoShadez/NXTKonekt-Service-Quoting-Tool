@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useFormInput } from "@/hooks/useFormInput";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -82,18 +83,53 @@ export default function FleetTrackingForm() {
     }
   }, [assessment]);
 
-  const handleInputChange = useCallback((field: keyof Assessment, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  }, []);
-
   const saveData = useCallback((data: Partial<Assessment>) => {
     if (assessment?.id && !updateMutation.isPending) {
       updateMutation.mutate(data);
     }
   }, [assessment?.id, updateMutation]);
 
-  const handleInputBlur = useCallback(() => {
-    saveData(formData);
+  const deviceCountInput = useFormInput(
+    formData.deviceCount || '',
+    (value) => {
+      const numValue = value ? parseInt(value.toString()) : null;
+      const updatedData = { ...formData, deviceCount: numValue };
+      setFormData(updatedData);
+      saveData(updatedData);
+    },
+    500
+  );
+
+  const siteAddressInput = useFormInput(
+    formData.siteAddress || '',
+    (value) => {
+      const updatedData = { ...formData, siteAddress: value };
+      setFormData(updatedData);
+      saveData(updatedData);
+    },
+    500
+  );
+
+  const specialRequirementsInput = useFormInput(
+    formData.specialRequirements || '',
+    (value) => {
+      const updatedData = { ...formData, specialRequirements: value };
+      setFormData(updatedData);
+      saveData(updatedData);
+    },
+    1000
+  );
+
+  const handleSelectChange = useCallback((field: keyof Assessment, value: any) => {
+    const updatedData = { ...formData, [field]: value };
+    setFormData(updatedData);
+    saveData(updatedData);
+  }, [formData, saveData]);
+
+  const handleCheckboxChange = useCallback((field: keyof Assessment, value: boolean) => {
+    const updatedData = { ...formData, [field]: value };
+    setFormData(updatedData);
+    saveData(updatedData);
   }, [formData, saveData]);
 
   const handleNext = () => {
@@ -159,12 +195,9 @@ export default function FleetTrackingForm() {
                   </Label>
                   <Input
                     type="number"
-                    value={formData.deviceCount?.toString() || ''}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      handleInputChange('deviceCount', value ? parseInt(value) : null);
-                    }}
-                    onBlur={handleInputBlur}
+                    value={deviceCountInput.value?.toString() || ''}
+                    onChange={(e) => deviceCountInput.onChange(e.target.value)}
+                    onBlur={deviceCountInput.onBlur}
                     placeholder="Number of vehicles"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                   />
@@ -176,10 +209,7 @@ export default function FleetTrackingForm() {
                   </Label>
                   <Select
                     value={formData.buildingType || ''}
-                    onValueChange={(value) => {
-                      handleInputChange('buildingType', value);
-                      saveData({ ...formData, buildingType: value });
-                    }}
+                    onValueChange={(value) => handleSelectChange('buildingType', value)}
                   >
                     <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
                       <SelectValue placeholder="Select vehicle types" />
@@ -200,10 +230,7 @@ export default function FleetTrackingForm() {
                   </Label>
                   <Select
                     value={formData.industry || ''}
-                    onValueChange={(value) => {
-                      handleInputChange('industry', value);
-                      saveData({ ...formData, industry: value });
-                    }}
+                    onValueChange={(value) => handleSelectChange('industry', value)}
                   >
                     <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
                       <SelectValue placeholder="Select operating schedule" />
@@ -222,9 +249,9 @@ export default function FleetTrackingForm() {
                     Coverage Area
                   </Label>
                   <Input
-                    value={formData.siteAddress || ''}
-                    onChange={(e) => handleInputChange('siteAddress', e.target.value)}
-                    onBlur={handleInputBlur}
+                    value={siteAddressInput.value}
+                    onChange={(e) => siteAddressInput.onChange(e.target.value)}
+                    onBlur={siteAddressInput.onBlur}
                     placeholder="Geographic coverage area"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                   />
@@ -236,9 +263,9 @@ export default function FleetTrackingForm() {
                   Special Requirements
                 </Label>
                 <Textarea
-                  value={formData.specialRequirements || ''}
-                  onChange={(e) => handleInputChange('specialRequirements', e.target.value)}
-                  onBlur={handleInputBlur}
+                  value={specialRequirementsInput.value}
+                  onChange={(e) => specialRequirementsInput.onChange(e.target.value)}
+                  onBlur={specialRequirementsInput.onBlur}
                   placeholder="Any specific tracking requirements or compliance needs..."
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                   rows={4}
@@ -261,10 +288,7 @@ export default function FleetTrackingForm() {
                     <Checkbox
                       id="real-time"
                       checked={formData.powerAvailable || false}
-                      onCheckedChange={(checked) => {
-                        handleInputChange('powerAvailable', checked);
-                        handleInputBlur();
-                      }}
+                      onCheckedChange={(checked) => handleCheckboxChange('powerAvailable', checked)}
                     />
                     <Label htmlFor="real-time">Real-time GPS tracking</Label>
                   </div>
@@ -273,10 +297,7 @@ export default function FleetTrackingForm() {
                     <Checkbox
                       id="geofencing"
                       checked={formData.ethernetRequired || false}
-                      onCheckedChange={(checked) => {
-                        handleInputChange('ethernetRequired', checked);
-                        handleInputBlur();
-                      }}
+                      onCheckedChange={(checked) => handleCheckboxChange('ethernetRequired', checked)}
                     />
                     <Label htmlFor="geofencing">Geofencing alerts</Label>
                   </div>
@@ -285,7 +306,7 @@ export default function FleetTrackingForm() {
                     <Checkbox
                       id="driver-behavior"
                       checked={formData.ceilingMount || false}
-                      onCheckedChange={(checked) => handleInputChange('ceilingMount', checked)}
+                      onCheckedChange={(checked) => handleCheckboxChange('ceilingMount', checked)}
                     />
                     <Label htmlFor="driver-behavior">Driver behavior monitoring</Label>
                   </div>
@@ -294,7 +315,7 @@ export default function FleetTrackingForm() {
                     <Checkbox
                       id="maintenance"
                       checked={formData.outdoorCoverage || false}
-                      onCheckedChange={(checked) => handleInputChange('outdoorCoverage', checked)}
+                      onCheckedChange={(checked) => handleCheckboxChange('outdoorCoverage', checked)}
                     />
                     <Label htmlFor="maintenance">Maintenance scheduling</Label>
                   </div>
