@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useFormInput } from "@/hooks/useFormInput";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ArrowRight, CheckCircle, Camera } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Camera, Plus, Minus } from "lucide-react";
 import type { Assessment } from "@shared/schema";
 import { StepCustomerInfo } from "@/components/assessment/step-customer-info";
 import { StepQuoteGeneration } from "@/components/assessment/step-quote-generation";
@@ -26,6 +27,7 @@ export default function FleetCameraForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 5;
   const [formData, setFormData] = useState<Partial<Assessment>>({});
+  const [vehicleDetails, setVehicleDetails] = useState<Array<{year: string, make: string, model: string}>>([]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -79,12 +81,13 @@ export default function FleetCameraForm() {
   useEffect(() => {
     if (assessment) {
       setFormData(assessment);
+      // Initialize vehicle details if device count exists
+      if (assessment.deviceCount && assessment.deviceCount > 0) {
+        const initialDetails = Array(assessment.deviceCount).fill(null).map(() => ({ year: '', make: '', model: '' }));
+        setVehicleDetails(initialDetails);
+      }
     }
   }, [assessment]);
-
-  const handleInputChange = useCallback((field: keyof Assessment, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  }, []);
 
   const saveData = useCallback((data: Partial<Assessment>) => {
     if (assessment?.id && !updateMutation.isPending) {
@@ -92,9 +95,71 @@ export default function FleetCameraForm() {
     }
   }, [assessment?.id, updateMutation]);
 
-  const handleInputBlur = useCallback(() => {
-    saveData(formData);
+  const deviceCountInput = useFormInput(
+    formData.deviceCount || '',
+    (value) => {
+      const numValue = value ? parseInt(value.toString()) : null;
+      const updatedData = { ...formData, deviceCount: numValue };
+      setFormData(updatedData);
+      saveData(updatedData);
+      
+      // Update vehicle details array based on device count
+      if (numValue && numValue > 0) {
+        setVehicleDetails(prev => {
+          const newDetails = [...prev];
+          while (newDetails.length < numValue) {
+            newDetails.push({ year: '', make: '', model: '' });
+          }
+          return newDetails.slice(0, numValue);
+        });
+      } else {
+        setVehicleDetails([]);
+      }
+    },
+    500
+  );
+
+  const siteAddressInput = useFormInput(
+    formData.siteAddress || '',
+    (value) => {
+      const updatedData = { ...formData, siteAddress: value };
+      setFormData(updatedData);
+      saveData(updatedData);
+    },
+    500
+  );
+
+  const specialRequirementsInput = useFormInput(
+    formData.specialRequirements || '',
+    (value) => {
+      const updatedData = { ...formData, specialRequirements: value };
+      setFormData(updatedData);
+      saveData(updatedData);
+    },
+    1000
+  );
+
+  const handleSelectChange = useCallback((field: keyof Assessment, value: any) => {
+    const updatedData = { ...formData, [field]: value };
+    setFormData(updatedData);
+    saveData(updatedData);
   }, [formData, saveData]);
+
+  const handleCheckboxChange = useCallback((field: keyof Assessment, value: boolean) => {
+    const updatedData = { ...formData, [field]: value };
+    setFormData(updatedData);
+    saveData(updatedData);
+  }, [formData, saveData]);
+
+  const updateVehicleDetail = useCallback((index: number, field: 'year' | 'make' | 'model', value: string) => {
+    setVehicleDetails(prev => {
+      const updated = [...prev];
+      if (updated[index]) {
+        updated[index] = { ...updated[index], [field]: value };
+      }
+      return updated;
+    });
+  }, []);
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
@@ -159,12 +224,9 @@ export default function FleetCameraForm() {
                   </Label>
                   <Input
                     type="number"
-                    value={formData.deviceCount?.toString() || ''}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      handleInputChange('deviceCount', value ? parseInt(value) : null);
-                    }}
-                    onBlur={handleInputBlur}
+                    value={deviceCountInput.value?.toString() || ''}
+                    onChange={(e) => deviceCountInput.onChange(e.target.value)}
+                    onBlur={deviceCountInput.onBlur}
                     placeholder="Vehicles requiring cameras"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                   />
@@ -176,10 +238,7 @@ export default function FleetCameraForm() {
                   </Label>
                   <Select
                     value={formData.buildingType || ''}
-                    onValueChange={(value) => {
-                      handleInputChange('buildingType', value);
-                      saveData({ ...formData, buildingType: value });
-                    }}
+                    onValueChange={(value) => handleSelectChange('buildingType', value)}
                   >
                     <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
                       <SelectValue placeholder="Select vehicle types" />
@@ -201,10 +260,7 @@ export default function FleetCameraForm() {
                   </Label>
                   <Select
                     value={formData.industry || ''}
-                    onValueChange={(value) => {
-                      handleInputChange('industry', value);
-                      saveData({ ...formData, industry: value });
-                    }}
+                    onValueChange={(value) => handleSelectChange('industry', value)}
                   >
                     <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
                       <SelectValue placeholder="Primary use case" />
@@ -224,23 +280,84 @@ export default function FleetCameraForm() {
                     Operating Environment
                   </Label>
                   <Input
-                    value={formData.siteAddress || ''}
-                    onChange={(e) => handleInputChange('siteAddress', e.target.value)}
-                    onBlur={handleInputBlur}
+                    value={siteAddressInput.value}
+                    onChange={(e) => siteAddressInput.onChange(e.target.value)}
+                    onBlur={siteAddressInput.onBlur}
                     placeholder="e.g., Urban delivery, Highway transport, Construction sites"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                   />
                 </div>
+
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Carrier Sim to be Installed
+                  </Label>
+                  <Select
+                    value={formData.connectionUsage || ''}
+                    onValueChange={(value) => handleSelectChange('connectionUsage', value)}
+                  >
+                    <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
+                      <SelectValue placeholder="Select carrier" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="t-mobile">T-Mobile</SelectItem>
+                      <SelectItem value="verizon">Verizon Wireless</SelectItem>
+                      <SelectItem value="att">AT&T</SelectItem>
+                      <SelectItem value="wholesale">Wholesale Sim</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+
+              {/* Vehicle Details Section */}
+              {vehicleDetails.length > 0 && (
+                <div className="space-y-4">
+                  <h4 className="font-medium nxt-gray-800">Vehicle Information</h4>
+                  {vehicleDetails.map((vehicle, index) => (
+                    <div key={index} className="border rounded-lg p-4 space-y-4">
+                      <h5 className="font-medium text-sm nxt-gray-700">Vehicle #{index + 1}</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <Label className="text-sm font-medium nxt-gray-800 mb-1">Year</Label>
+                          <Input
+                            value={vehicle.year}
+                            onChange={(e) => updateVehicleDetail(index, 'year', e.target.value)}
+                            placeholder="e.g., 2023"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium nxt-gray-800 mb-1">Make</Label>
+                          <Input
+                            value={vehicle.make}
+                            onChange={(e) => updateVehicleDetail(index, 'make', e.target.value)}
+                            placeholder="e.g., Ford"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium nxt-gray-800 mb-1">Model</Label>
+                          <Input
+                            value={vehicle.model}
+                            onChange={(e) => updateVehicleDetail(index, 'model', e.target.value)}
+                            placeholder="e.g., Transit"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div>
                 <Label className="text-sm font-medium nxt-gray-800 mb-2">
                   Special Requirements
                 </Label>
                 <Textarea
-                  value={formData.specialRequirements || ''}
-                  onChange={(e) => handleInputChange('specialRequirements', e.target.value)}
-                  onBlur={handleInputBlur}
+                  value={specialRequirementsInput.value}
+                  onChange={(e) => specialRequirementsInput.onChange(e.target.value)}
+                  onBlur={specialRequirementsInput.onBlur}
                   placeholder="Any specific camera requirements, vehicle restrictions, or compliance needs..."
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                   rows={4}
@@ -265,10 +382,7 @@ export default function FleetCameraForm() {
                     <Checkbox
                       id="forward-facing"
                       checked={formData.powerAvailable || false}
-                      onCheckedChange={(checked) => {
-                        handleInputChange('powerAvailable', checked);
-                        handleInputBlur();
-                      }}
+                      onCheckedChange={(checked) => handleCheckboxChange('powerAvailable', checked)}
                     />
                     <Label htmlFor="forward-facing">Forward-facing road camera</Label>
                   </div>
@@ -277,10 +391,7 @@ export default function FleetCameraForm() {
                     <Checkbox
                       id="driver-facing"
                       checked={formData.ethernetRequired || false}
-                      onCheckedChange={(checked) => {
-                        handleInputChange('ethernetRequired', checked);
-                        handleInputBlur();
-                      }}
+                      onCheckedChange={(checked) => handleCheckboxChange('ethernetRequired', checked)}
                     />
                     <Label htmlFor="driver-facing">Driver-facing interior camera</Label>
                   </div>
@@ -289,10 +400,7 @@ export default function FleetCameraForm() {
                     <Checkbox
                       id="side-cameras"
                       checked={formData.ceilingMount || false}
-                      onCheckedChange={(checked) => {
-                        handleInputChange('ceilingMount', checked);
-                        handleInputBlur();
-                      }}
+                      onCheckedChange={(checked) => handleCheckboxChange('ceilingMount', checked)}
                     />
                     <Label htmlFor="side-cameras">Side-view cameras</Label>
                   </div>
@@ -301,10 +409,7 @@ export default function FleetCameraForm() {
                     <Checkbox
                       id="rear-camera"
                       checked={formData.outdoorCoverage || false}
-                      onCheckedChange={(checked) => {
-                        handleInputChange('outdoorCoverage', checked);
-                        handleInputBlur();
-                      }}
+                      onCheckedChange={(checked) => handleCheckboxChange('outdoorCoverage', checked)}
                     />
                     <Label htmlFor="rear-camera">Rear-view backup camera</Label>
                   </div>
