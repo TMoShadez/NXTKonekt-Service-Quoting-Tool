@@ -83,9 +83,13 @@ export default function FleetTrackingForm() {
   }, [assessment]);
 
   const handleInputChange = (field: keyof Assessment, value: any) => {
-    const updatedData = { ...formData, [field]: value };
-    setFormData(updatedData);
-    updateMutation.mutate(updatedData);
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleInputBlur = () => {
+    if (assessment?.id) {
+      updateMutation.mutate(formData);
+    }
   };
 
   const handleNext = () => {
@@ -128,9 +132,7 @@ export default function FleetTrackingForm() {
           <StepCustomerInfo 
             data={formData}
             onChange={(data) => {
-              const updatedData = { ...formData, ...data };
-              setFormData(updatedData);
-              updateMutation.mutate(updatedData);
+              setFormData(prev => ({ ...prev, ...data }));
             }}
           />
         );
@@ -152,7 +154,12 @@ export default function FleetTrackingForm() {
                   <Input
                     type="number"
                     value={formData.deviceCount || ''}
-                    onChange={(e) => handleInputChange('deviceCount', e.target.value ? parseInt(e.target.value) : null)}
+                    onChange={(e) => handleInputChange('deviceCount', e.target.value)}
+                    onBlur={(e) => {
+                      const numValue = e.target.value ? parseInt(e.target.value) : null;
+                      handleInputChange('deviceCount', numValue);
+                      handleInputBlur();
+                    }}
                     placeholder="Number of vehicles"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                   />
@@ -206,6 +213,7 @@ export default function FleetTrackingForm() {
                   <Input
                     value={formData.siteAddress || ''}
                     onChange={(e) => handleInputChange('siteAddress', e.target.value)}
+                    onBlur={handleInputBlur}
                     placeholder="Geographic coverage area"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                   />
@@ -219,6 +227,7 @@ export default function FleetTrackingForm() {
                 <Textarea
                   value={formData.specialRequirements || ''}
                   onChange={(e) => handleInputChange('specialRequirements', e.target.value)}
+                  onBlur={handleInputBlur}
                   placeholder="Any specific tracking requirements or compliance needs..."
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                   rows={4}

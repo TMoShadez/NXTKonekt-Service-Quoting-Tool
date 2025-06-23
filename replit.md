@@ -127,6 +127,7 @@ Changelog:
 - June 22, 2025. Implemented configuration pricing logic: Failover with 1 device = $0, Failover with >1 devices = billable hours. Primary with <5 devices = $0, Primary with >=5 devices = billable hours
 - June 22, 2025. Updated quote summary page to match PDF format with hours, rates, and hardware line items displayed in 4-column table layout
 - June 22, 2025. Added "Number of Routers to be installed" required field to Site Characteristics section with router count multiplier logic for installation hours when >1 router specified
+- June 22, 2025. Fixed Fleet Tracking and Fleet Camera form input issues by implementing debounced state updates that save on blur instead of every keystroke, preventing cursor jumping and character deletion
 
 ## User Preferences
 
