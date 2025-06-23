@@ -300,7 +300,10 @@ export default function FleetCameraForm() {
                     <Checkbox
                       id="rear-camera"
                       checked={formData.outdoorCoverage || false}
-                      onCheckedChange={(checked) => handleInputChange('outdoorCoverage', checked)}
+                      onCheckedChange={(checked) => {
+                        handleInputChange('outdoorCoverage', checked);
+                        handleInputBlur();
+                      }}
                     />
                     <Label htmlFor="rear-camera">Rear-view backup camera</Label>
                   </div>
