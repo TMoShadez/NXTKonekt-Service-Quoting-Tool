@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -82,15 +82,19 @@ export default function FleetTrackingForm() {
     }
   }, [assessment]);
 
-  const handleInputChange = (field: keyof Assessment, value: any) => {
+  const handleInputChange = useCallback((field: keyof Assessment, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
-  const handleInputBlur = () => {
+  const saveData = useCallback((data: Partial<Assessment>) => {
     if (assessment?.id && !updateMutation.isPending) {
-      updateMutation.mutate(formData);
+      updateMutation.mutate(data);
     }
-  };
+  }, [assessment?.id, updateMutation]);
+
+  const handleInputBlur = useCallback(() => {
+    saveData(formData);
+  }, [formData, saveData]);
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
@@ -134,9 +138,7 @@ export default function FleetTrackingForm() {
             onChange={(data) => {
               const updatedData = { ...formData, ...data };
               setFormData(updatedData);
-              if (assessment?.id) {
-                updateMutation.mutate(updatedData);
-              }
+              saveData(updatedData);
             }}
           />
         );
@@ -157,13 +159,12 @@ export default function FleetTrackingForm() {
                   </Label>
                   <Input
                     type="number"
-                    value={formData.deviceCount || ''}
-                    onChange={(e) => handleInputChange('deviceCount', e.target.value)}
-                    onBlur={(e) => {
-                      const numValue = e.target.value ? parseInt(e.target.value) : null;
-                      handleInputChange('deviceCount', numValue);
-                      handleInputBlur();
+                    value={formData.deviceCount?.toString() || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      handleInputChange('deviceCount', value ? parseInt(value) : null);
                     }}
+                    onBlur={handleInputBlur}
                     placeholder="Number of vehicles"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                   />
@@ -177,7 +178,7 @@ export default function FleetTrackingForm() {
                     value={formData.buildingType || ''}
                     onValueChange={(value) => {
                       handleInputChange('buildingType', value);
-                      handleInputBlur();
+                      saveData({ ...formData, buildingType: value });
                     }}
                   >
                     <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
@@ -201,7 +202,7 @@ export default function FleetTrackingForm() {
                     value={formData.industry || ''}
                     onValueChange={(value) => {
                       handleInputChange('industry', value);
-                      handleInputBlur();
+                      saveData({ ...formData, industry: value });
                     }}
                   >
                     <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
