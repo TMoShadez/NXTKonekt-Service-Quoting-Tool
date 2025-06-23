@@ -83,9 +83,13 @@ export default function FleetCameraForm() {
   }, [assessment]);
 
   const handleInputChange = (field: keyof Assessment, value: any) => {
-    const updatedData = { ...formData, [field]: value };
-    setFormData(updatedData);
-    updateMutation.mutate(updatedData);
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleInputBlur = () => {
+    if (assessment?.id && !updateMutation.isPending) {
+      updateMutation.mutate(formData);
+    }
   };
 
   const handleNext = () => {
@@ -154,7 +158,12 @@ export default function FleetCameraForm() {
                   <Input
                     type="number"
                     value={formData.deviceCount || ''}
-                    onChange={(e) => handleInputChange('deviceCount', e.target.value ? parseInt(e.target.value) : null)}
+                    onChange={(e) => handleInputChange('deviceCount', e.target.value)}
+                    onBlur={(e) => {
+                      const numValue = e.target.value ? parseInt(e.target.value) : null;
+                      handleInputChange('deviceCount', numValue);
+                      handleInputBlur();
+                    }}
                     placeholder="Vehicles requiring cameras"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                   />
@@ -216,6 +225,7 @@ export default function FleetCameraForm() {
                   <Input
                     value={formData.siteAddress || ''}
                     onChange={(e) => handleInputChange('siteAddress', e.target.value)}
+                    onBlur={handleInputBlur}
                     placeholder="e.g., Urban delivery, Highway transport, Construction sites"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                   />
@@ -229,6 +239,7 @@ export default function FleetCameraForm() {
                 <Textarea
                   value={formData.specialRequirements || ''}
                   onChange={(e) => handleInputChange('specialRequirements', e.target.value)}
+                  onBlur={handleInputBlur}
                   placeholder="Any specific camera requirements, vehicle restrictions, or compliance needs..."
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
                   rows={4}
@@ -253,7 +264,10 @@ export default function FleetCameraForm() {
                     <Checkbox
                       id="forward-facing"
                       checked={formData.powerAvailable || false}
-                      onCheckedChange={(checked) => handleInputChange('powerAvailable', checked)}
+                      onCheckedChange={(checked) => {
+                        handleInputChange('powerAvailable', checked);
+                        handleInputBlur();
+                      }}
                     />
                     <Label htmlFor="forward-facing">Forward-facing road camera</Label>
                   </div>
@@ -262,7 +276,10 @@ export default function FleetCameraForm() {
                     <Checkbox
                       id="driver-facing"
                       checked={formData.ethernetRequired || false}
-                      onCheckedChange={(checked) => handleInputChange('ethernetRequired', checked)}
+                      onCheckedChange={(checked) => {
+                        handleInputChange('ethernetRequired', checked);
+                        handleInputBlur();
+                      }}
                     />
                     <Label htmlFor="driver-facing">Driver-facing interior camera</Label>
                   </div>
@@ -271,7 +288,10 @@ export default function FleetCameraForm() {
                     <Checkbox
                       id="side-cameras"
                       checked={formData.ceilingMount || false}
-                      onCheckedChange={(checked) => handleInputChange('ceilingMount', checked)}
+                      onCheckedChange={(checked) => {
+                        handleInputChange('ceilingMount', checked);
+                        handleInputBlur();
+                      }}
                     />
                     <Label htmlFor="side-cameras">Side-view cameras</Label>
                   </div>

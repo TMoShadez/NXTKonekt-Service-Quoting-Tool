@@ -87,7 +87,7 @@ export default function FleetTrackingForm() {
   };
 
   const handleInputBlur = () => {
-    if (assessment?.id) {
+    if (assessment?.id && !updateMutation.isPending) {
       updateMutation.mutate(formData);
     }
   };
@@ -260,7 +260,10 @@ export default function FleetTrackingForm() {
                     <Checkbox
                       id="real-time"
                       checked={formData.powerAvailable || false}
-                      onCheckedChange={(checked) => handleInputChange('powerAvailable', checked)}
+                      onCheckedChange={(checked) => {
+                        handleInputChange('powerAvailable', checked);
+                        handleInputBlur();
+                      }}
                     />
                     <Label htmlFor="real-time">Real-time GPS tracking</Label>
                   </div>
@@ -269,7 +272,10 @@ export default function FleetTrackingForm() {
                     <Checkbox
                       id="geofencing"
                       checked={formData.ethernetRequired || false}
-                      onCheckedChange={(checked) => handleInputChange('ethernetRequired', checked)}
+                      onCheckedChange={(checked) => {
+                        handleInputChange('ethernetRequired', checked);
+                        handleInputBlur();
+                      }}
                     />
                     <Label htmlFor="geofencing">Geofencing alerts</Label>
                   </div>
