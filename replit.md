@@ -128,6 +128,7 @@ Changelog:
 - June 22, 2025. Updated quote summary page to match PDF format with hours, rates, and hardware line items displayed in 4-column table layout
 - June 22, 2025. Added "Number of Routers to be installed" required field to Site Characteristics section with router count multiplier logic for installation hours when >1 router specified
 - June 22, 2025. Fixed Fleet Tracking and Fleet Camera form input issues by implementing debounced state updates that save on blur instead of every keystroke, preventing cursor jumping and character deletion
+- June 23, 2025. Implemented data isolation between service types to prevent cross-contamination: Fleet Tracking and Fleet Camera forms now maintain independent datasets, customer information properly transfers to PDFs, and quotes are service-specific without Fixed Wireless data bleeding through
 
 ## User Preferences
 

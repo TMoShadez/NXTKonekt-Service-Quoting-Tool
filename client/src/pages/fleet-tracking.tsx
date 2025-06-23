@@ -175,7 +175,10 @@ export default function FleetTrackingForm() {
                   </Label>
                   <Select
                     value={formData.buildingType || ''}
-                    onValueChange={(value) => handleInputChange('buildingType', value)}
+                    onValueChange={(value) => {
+                      handleInputChange('buildingType', value);
+                      handleInputBlur();
+                    }}
                   >
                     <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
                       <SelectValue placeholder="Select vehicle types" />
@@ -196,7 +199,10 @@ export default function FleetTrackingForm() {
                   </Label>
                   <Select
                     value={formData.industry || ''}
-                    onValueChange={(value) => handleInputChange('industry', value)}
+                    onValueChange={(value) => {
+                      handleInputChange('industry', value);
+                      handleInputBlur();
+                    }}
                   >
                     <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue">
                       <SelectValue placeholder="Select operating schedule" />

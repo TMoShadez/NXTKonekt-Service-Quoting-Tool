@@ -62,24 +62,50 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
          .text(`Date: ${new Date().toLocaleDateString()}`, 50, 150)
          .text(`Sales Organization: ${organizationName}`, 50, 170);
 
-      // Customer information
+      // Customer information - using actual assessment data
       doc.fontSize(14)
          .text('Customer Information', 50, 210)
          .fontSize(12)
-         .text(`Company: ${assessment.customerCompanyName}`, 50, 230)
-         .text(`Contact: ${assessment.customerContactName}`, 50, 250)
-         .text(`Email: ${assessment.customerEmail}`, 50, 270)
-         .text(`Phone: ${assessment.customerPhone}`, 50, 290)
-         .text(`Site Address: ${assessment.siteAddress}`, 50, 310);
+         .text(`Company: ${assessment.customerCompanyName || 'Not provided'}`, 50, 230)
+         .text(`Contact: ${assessment.customerContactName || 'Not provided'}`, 50, 250)
+         .text(`Email: ${assessment.customerEmail || 'Not provided'}`, 50, 270)
+         .text(`Phone: ${assessment.customerPhone || 'Not provided'}`, 50, 290)
+         .text(`Site Address: ${assessment.siteAddress || 'Not provided'}`, 50, 310);
 
-      // Site assessment summary
+      // Service-specific assessment summary
+      const serviceType = assessment.serviceType || 'site-assessment';
+      let summaryTitle = 'Site Assessment Summary';
+      let summaryContent = '';
+      
+      if (serviceType === 'fleet-tracking') {
+        summaryTitle = 'Fleet Tracking Requirements';
+        summaryContent = `Vehicle Count: ${assessment.deviceCount || 'Not specified'}\n` +
+                        `Vehicle Types: ${assessment.buildingType || 'Not specified'}\n` +
+                        `Operating Hours: ${assessment.industry || 'Not specified'}\n` +
+                        `Coverage Area: ${assessment.siteAddress || 'Not specified'}`;
+      } else if (serviceType === 'fleet-camera') {
+        summaryTitle = 'Fleet Camera Requirements';
+        summaryContent = `Vehicle Count: ${assessment.deviceCount || 'Not specified'}\n` +
+                        `Vehicle Types: ${assessment.buildingType || 'Not specified'}\n` +
+                        `Camera Purpose: ${assessment.industry || 'Not specified'}`;
+      } else {
+        summaryTitle = 'Site Assessment Summary';
+        summaryContent = `Building Type: ${assessment.buildingType || 'Not specified'}\n` +
+                        `Coverage Area: ${assessment.coverageArea || 'Not specified'} sq ft\n` +
+                        `Number of Floors: ${assessment.floors || 'Not specified'}\n` +
+                        `Expected Device Count: ${assessment.deviceCount || 'Not specified'}`;
+      }
+      
       doc.fontSize(14)
-         .text('Site Assessment Summary', 50, 350)
-         .fontSize(12)
-         .text(`Building Type: ${assessment.buildingType || 'Not specified'}`, 50, 370)
-         .text(`Coverage Area: ${assessment.coverageArea || 'Not specified'} sq ft`, 50, 390)
-         .text(`Number of Floors: ${assessment.floors || 'Not specified'}`, 50, 410)
-         .text(`Expected Device Count: ${assessment.deviceCount || 'Not specified'}`, 50, 430);
+         .text(summaryTitle, 50, 350)
+         .fontSize(12);
+      
+      const lines = summaryContent.split('\n');
+      let yPos = 370;
+      lines.forEach(line => {
+        doc.text(line, 50, yPos);
+        yPos += 20;
+      });
 
       // Pricing breakdown
       doc.fontSize(14)
