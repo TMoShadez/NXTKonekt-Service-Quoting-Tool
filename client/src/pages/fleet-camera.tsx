@@ -28,6 +28,7 @@ export default function FleetCameraForm() {
   const totalSteps = 5;
   const [formData, setFormData] = useState<Partial<Assessment>>({});
   const [vehicleDetails, setVehicleDetails] = useState<Array<{year: string, make: string, model: string}>>([]);
+  const [protectiveHarness, setProtectiveHarness] = useState<string>('');
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -85,6 +86,12 @@ export default function FleetCameraForm() {
       if (assessment.deviceCount && assessment.deviceCount > 0) {
         const initialDetails = Array(assessment.deviceCount).fill(null).map(() => ({ year: '', make: '', model: '' }));
         setVehicleDetails(initialDetails);
+      }
+      // Initialize protective harness state
+      if (assessment.ceilingHeight === 'protective_harness_yes') {
+        setProtectiveHarness('yes');
+      } else if (assessment.ceilingHeight === 'protective_harness_no') {
+        setProtectiveHarness('no');
       }
     }
   }, [assessment]);
@@ -460,8 +467,12 @@ export default function FleetCameraForm() {
                       Protective Wiring Harness requested by customer for installation?
                     </Label>
                     <Select
-                      value={formData.antennaRequired ? 'yes' : 'no'}
-                      onValueChange={(value) => handleSelectChange('antennaRequired', value === 'yes')}
+                      value={protectiveHarness}
+                      onValueChange={(value) => {
+                        setProtectiveHarness(value);
+                        // Store the value in a field that's available
+                        handleSelectChange('ceilingHeight', value === 'yes' ? 'protective_harness_yes' : 'protective_harness_no');
+                      }}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select option" />
