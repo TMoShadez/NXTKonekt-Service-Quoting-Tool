@@ -418,50 +418,57 @@ export default function FleetCameraForm() {
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                      Video Quality
+                      Tracking Partner
                     </Label>
-                    <Select>
+                    <Select
+                      value={formData.routerMake || ''}
+                      onValueChange={(value) => handleSelectChange('routerMake', value)}
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select video resolution" />
+                        <SelectValue placeholder="Select tracking partner" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="720p">720p HD</SelectItem>
-                        <SelectItem value="1080p">1080p Full HD</SelectItem>
-                        <SelectItem value="4k">4K Ultra HD</SelectItem>
+                        <SelectItem value="zenduit">Zenduit</SelectItem>
+                        <SelectItem value="spireon">Spireon</SelectItem>
+                        <SelectItem value="geotab">Geotab</SelectItem>
+                        <SelectItem value="trackcam">TrackCam</SelectItem>
+                        <SelectItem value="fleethoster">Fleethoster</SelectItem>
+                        <SelectItem value="airiq">AirIQ</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
                     <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                      Storage Requirement
+                      Model
                     </Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select storage option" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="local-only">Local storage only</SelectItem>
-                        <SelectItem value="cloud-backup">Cloud backup</SelectItem>
-                        <SelectItem value="real-time-streaming">Real-time streaming</SelectItem>
-                        <SelectItem value="hybrid">Hybrid local + cloud</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      value={formData.routerModel || ''}
+                      onChange={(e) => {
+                        const updatedData = { ...formData, routerModel: e.target.value };
+                        setFormData(updatedData);
+                      }}
+                      onBlur={() => saveData(formData)}
+                      placeholder="Enter model number/name"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
+                    />
                   </div>
 
                   <div>
                     <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                      Recording Mode
+                      Protective Wiring Harness requested by customer for installation?
                     </Label>
-                    <Select>
+                    <Select
+                      value={formData.antennaRequired ? 'yes' : 'no'}
+                      onValueChange={(value) => handleSelectChange('antennaRequired', value === 'yes')}
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select recording mode" />
+                        <SelectValue placeholder="Select option" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="continuous">Continuous recording</SelectItem>
-                        <SelectItem value="event-triggered">Event-triggered only</SelectItem>
-                        <SelectItem value="motion-detection">Motion detection</SelectItem>
-                        <SelectItem value="scheduled">Scheduled recording</SelectItem>
+                        <SelectItem value="yes">Yes</SelectItem>
+                        <SelectItem value="no">No</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
