@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ArrowRight, CheckCircle, Truck } from "lucide-react";
-import type { Assessment } from "@shared/schema";
 import { StepCustomerInfo } from "@/components/assessment/step-customer-info";
 import { StepQuoteGeneration } from "@/components/assessment/step-quote-generation";
 
@@ -26,11 +25,13 @@ export default function FleetTrackingForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 5;
 
-  // Local form state - simplified to prevent input issues
-  const [deviceCount, setDeviceCount] = useState('');
-  const [siteAddress, setSiteAddress] = useState('');
-  const [specialRequirements, setSpecialRequirements] = useState('');
-  const [formData, setFormData] = useState<Partial<Assessment>>({});
+  // Completely isolated local state - no useEffect conflicts
+  const [localDeviceCount, setLocalDeviceCount] = useState('');
+  const [localSiteAddress, setLocalSiteAddress] = useState('');
+  const [localSpecialRequirements, setLocalSpecialRequirements] = useState('');
+  const [formData, setFormData] = useState<any>({});
+  const [isInitialized, setIsInitialized] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -54,12 +55,12 @@ export default function FleetTrackingForm() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: Partial<Assessment>) => {
+    mutationFn: async (data: any) => {
       const response = await apiRequest("PUT", `/api/assessments/${id}`, data);
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/assessments/${id}`] });
+      // No query invalidation to prevent form resets
     },
     onError: (error) => {
       if (isUnauthorizedError(error as Error)) {
@@ -81,53 +82,73 @@ export default function FleetTrackingForm() {
     },
   });
 
-  // Load initial data
+  // Initialize form data ONLY ONCE
   useEffect(() => {
-    if (assessment) {
+    if (assessment && !isInitialized) {
       setFormData(assessment);
-      setDeviceCount(assessment.deviceCount?.toString() || '');
-      setSiteAddress(assessment.siteAddress || '');
-      setSpecialRequirements(assessment.specialRequirements || '');
+      setLocalDeviceCount(assessment.deviceCount?.toString() || '');
+      setLocalSiteAddress(assessment.siteAddress || '');
+      setLocalSpecialRequirements(assessment.specialRequirements || '');
+      setIsInitialized(true);
     }
-  }, [assessment]);
+  }, [assessment, isInitialized]);
 
-  const saveData = useCallback((data: Partial<Assessment>) => {
-    if (assessment && !updateMutation.isPending) {
-      updateMutation.mutate(data);
+  // Debounced save function
+  const debouncedSave = useCallback((data: any) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
+    
+    saveTimeoutRef.current = setTimeout(() => {
+      if (assessment && !updateMutation.isPending) {
+        updateMutation.mutate(data);
+      }
+    }, 1000);
   }, [assessment, updateMutation]);
 
-  // Simple input handlers with onBlur save
+  // Simple input handlers that save on blur
+  const handleDeviceCountChange = useCallback((value: string) => {
+    setLocalDeviceCount(value);
+  }, []);
+
   const handleDeviceCountBlur = useCallback(() => {
-    const numValue = deviceCount ? parseInt(deviceCount) : null;
+    const numValue = localDeviceCount ? parseInt(localDeviceCount) : null;
     const updatedData = { ...formData, deviceCount: numValue };
     setFormData(updatedData);
-    saveData(updatedData);
-  }, [deviceCount, formData, saveData]);
+    debouncedSave(updatedData);
+  }, [localDeviceCount, formData, debouncedSave]);
+
+  const handleSiteAddressChange = useCallback((value: string) => {
+    setLocalSiteAddress(value);
+  }, []);
 
   const handleSiteAddressBlur = useCallback(() => {
-    const updatedData = { ...formData, siteAddress: siteAddress };
+    const updatedData = { ...formData, siteAddress: localSiteAddress };
     setFormData(updatedData);
-    saveData(updatedData);
-  }, [siteAddress, formData, saveData]);
+    debouncedSave(updatedData);
+  }, [localSiteAddress, formData, debouncedSave]);
+
+  const handleSpecialRequirementsChange = useCallback((value: string) => {
+    setLocalSpecialRequirements(value);
+  }, []);
 
   const handleSpecialRequirementsBlur = useCallback(() => {
-    const updatedData = { ...formData, specialRequirements: specialRequirements };
+    const updatedData = { ...formData, specialRequirements: localSpecialRequirements };
     setFormData(updatedData);
-    saveData(updatedData);
-  }, [specialRequirements, formData, saveData]);
+    debouncedSave(updatedData);
+  }, [localSpecialRequirements, formData, debouncedSave]);
 
-  const handleSelectChange = useCallback((field: keyof Assessment, value: any) => {
+  const handleSelectChange = useCallback((field: string, value: any) => {
     const updatedData = { ...formData, [field]: value };
     setFormData(updatedData);
-    saveData(updatedData);
-  }, [formData, saveData]);
+    debouncedSave(updatedData);
+  }, [formData, debouncedSave]);
 
-  const handleCheckboxChange = useCallback((field: keyof Assessment, value: boolean) => {
+  const handleCheckboxChange = useCallback((field: string, value: boolean) => {
     const updatedData = { ...formData, [field]: value };
     setFormData(updatedData);
-    saveData(updatedData);
-  }, [formData, saveData]);
+    debouncedSave(updatedData);
+  }, [formData, debouncedSave]);
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
@@ -171,7 +192,7 @@ export default function FleetTrackingForm() {
             onChange={(data) => {
               const updatedData = { ...formData, ...data };
               setFormData(updatedData);
-              saveData(updatedData);
+              debouncedSave(updatedData);
             }}
           />
         );
@@ -192,8 +213,8 @@ export default function FleetTrackingForm() {
                   </Label>
                   <Input
                     type="number"
-                    value={deviceCount}
-                    onChange={(e) => setDeviceCount(e.target.value)}
+                    value={localDeviceCount}
+                    onChange={(e) => handleDeviceCountChange(e.target.value)}
                     onBlur={handleDeviceCountBlur}
                     placeholder="Number of vehicles"
                     className="w-full"
@@ -223,8 +244,8 @@ export default function FleetTrackingForm() {
                   Primary Service Location
                 </Label>
                 <Input
-                  value={siteAddress}
-                  onChange={(e) => setSiteAddress(e.target.value)}
+                  value={localSiteAddress}
+                  onChange={(e) => handleSiteAddressChange(e.target.value)}
                   onBlur={handleSiteAddressBlur}
                   placeholder="Enter primary service address"
                   className="w-full"
@@ -346,8 +367,8 @@ export default function FleetTrackingForm() {
                   Special Requirements or Notes
                 </Label>
                 <Textarea
-                  value={specialRequirements}
-                  onChange={(e) => setSpecialRequirements(e.target.value)}
+                  value={localSpecialRequirements}
+                  onChange={(e) => handleSpecialRequirementsChange(e.target.value)}
                   onBlur={handleSpecialRequirementsBlur}
                   placeholder="Any special installation requirements, vehicle access restrictions, or additional notes..."
                   className="min-h-[120px]"
