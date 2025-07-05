@@ -134,6 +134,7 @@ Changelog:
 - July 5, 2025. Simplified pricing logic across all service types: reduced to +1 additional hour of labor for all quotes regardless of device count or complexity, updated cable pricing from $7/ft to $14.50/ft for Fixed Wireless installations
 - July 5, 2025. Implemented router-based pricing for Fixed Wireless: installation hours now calculated as (router count × 2 hours) + 1 labor hold hour, added dedicated "Labor hold for possible overage, returned if unused in final billing" line item with proper database schema and display integration
 - July 5, 2025. Updated pricing to 1 base hour for all services: Fixed Wireless (router count × 1 hour), Fleet Tracking (1 hour), Fleet Camera (1 hour), all with +1 labor hold hour, ensured Labor Hold service item displays in both web interface and PDF quotes
+- July 5, 2025. Completely redesigned PDF quote generator for compact 1-2 page layout: reduced margins, smaller fonts, compressed sections, added debug logging for Labor Hold line, renamed to "Labor Hold - Overage Reserve" for clarity
 
 ## User Preferences
 
