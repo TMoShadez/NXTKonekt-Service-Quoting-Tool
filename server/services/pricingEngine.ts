@@ -36,7 +36,7 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
   const routerCount = assessment.routerCount || 1;
   
   // Installation hours based on number of routers to be installed
-  let installationHours = routerCount * 2; // 2 hours per router
+  let installationHours = routerCount * 1; // 1 hour per router
   
   // Add exactly 1 additional labor hold hour
   const laborHoldHours = 1;
@@ -75,7 +75,7 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
 
 function calculateFleetTrackingPricing(assessment: Assessment): PricingBreakdown {
   let surveyHours = 0;
-  let installationHours = 2;
+  let installationHours = 1;
   
   // Add exactly 1 additional labor hold hour
   const laborHoldHours = 1;
@@ -105,7 +105,7 @@ function calculateFleetTrackingPricing(assessment: Assessment): PricingBreakdown
 
 function calculateFleetCameraPricing(assessment: Assessment): PricingBreakdown {
   let surveyHours = 0;
-  let installationHours = 2;
+  let installationHours = 1;
   
   // Add exactly 1 additional labor hold hour
   const laborHoldHours = 1;

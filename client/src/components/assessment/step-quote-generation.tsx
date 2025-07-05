@@ -181,8 +181,8 @@ export function StepQuoteGeneration({ assessmentId, data }: StepQuoteGenerationP
                   </div>
                 )}
                 
-                {/* Labor Hold line */}
-                {parseFloat(quote.laborHoldHours || '0') > 0 && (
+                {/* Labor Hold line (always show for all quotes) */}
+                {(parseFloat(quote.laborHoldHours || '0') > 0 || parseFloat(quote.laborHoldCost || '0') > 0) && (
                   <div className="px-6 py-4">
                     <div className="grid grid-cols-4 gap-4 text-sm">
                       <span className="nxt-gray-800">Labor hold for possible overage, returned if unused in final billing</span>

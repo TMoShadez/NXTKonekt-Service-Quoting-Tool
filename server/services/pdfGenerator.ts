@@ -167,8 +167,8 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         currentY += 20;
       }
       
-      // Labor Hold line
-      if (laborHoldHours > 0) {
+      // Labor Hold line (always show for all quotes)
+      if (laborHoldHours > 0 || laborHoldCost > 0) {
         doc.text('Labor hold for possible overage, returned if unused in final billing', 50, currentY)
            .text(`${laborHoldHours}`, 300, currentY)
            .text(`$${hourlyRate}`, 350, currentY)
