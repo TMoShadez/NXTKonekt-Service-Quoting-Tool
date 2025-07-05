@@ -135,6 +135,7 @@ Changelog:
 - July 5, 2025. Implemented router-based pricing for Fixed Wireless: installation hours now calculated as (router count × 2 hours) + 1 labor hold hour, added dedicated "Labor hold for possible overage, returned if unused in final billing" line item with proper database schema and display integration
 - July 5, 2025. Updated pricing to 1 base hour for all services: Fixed Wireless (router count × 1 hour), Fleet Tracking (1 hour), Fleet Camera (1 hour), all with +1 labor hold hour, ensured Labor Hold service item displays in both web interface and PDF quotes
 - July 5, 2025. Completely redesigned PDF quote generator for compact 1-2 page layout: reduced margins, smaller fonts, compressed sections, added debug logging for Labor Hold line, renamed to "Labor Hold - Overage Reserve" for clarity
+- July 5, 2025. Fixed critical Fleet form input issues: completely rewrote Fleet Tracking and Fleet Camera forms with simplified state management using onBlur saves instead of real-time updates, eliminated useFormInput hook conflicts, resolved TypeScript errors, and implemented local state management to prevent digit deletion and cursor jumping during data entry
 
 ## User Preferences
 

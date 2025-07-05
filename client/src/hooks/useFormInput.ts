@@ -8,14 +8,27 @@ export function useFormInput<T>(
   const [value, setValue] = useState<T>(initialValue);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedRef = useRef<T>(initialValue);
+  const isTypingRef = useRef<boolean>(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleChange = useCallback((newValue: T) => {
     setValue(newValue);
+    isTypingRef.current = true;
     
     // Clear existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
+    
+    // Clear typing timeout and set new one
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    // Mark as not typing after a short delay
+    typingTimeoutRef.current = setTimeout(() => {
+      isTypingRef.current = false;
+    }, 100);
     
     // Set new timeout for saving
     timeoutRef.current = setTimeout(() => {
@@ -27,9 +40,15 @@ export function useFormInput<T>(
   }, [onSave, saveDelay]);
 
   const handleBlur = useCallback(() => {
+    isTypingRef.current = false;
+    
     // Clear timeout and save immediately on blur
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+    }
+    
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
     }
     
     if (value !== lastSavedRef.current) {
@@ -38,17 +57,22 @@ export function useFormInput<T>(
     }
   }, [value, onSave]);
 
-  // Update value when initialValue changes
+  // Update value when initialValue changes, but only if not actively typing
   useEffect(() => {
-    setValue(initialValue);
-    lastSavedRef.current = initialValue;
+    if (!isTypingRef.current && initialValue !== lastSavedRef.current) {
+      setValue(initialValue);
+      lastSavedRef.current = initialValue;
+    }
   }, [initialValue]);
 
-  // Cleanup timeout on unmount
+  // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
+      }
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
       }
     };
   }, []);
