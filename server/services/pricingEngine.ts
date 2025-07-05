@@ -78,7 +78,16 @@ function calculateFleetTrackingPricing(assessment: Assessment): PricingBreakdown
   
   // Use deviceCount (number of vehicles for installation) to determine base hours
   const deviceCount = assessment.deviceCount || 1;
-  let installationHours = deviceCount; // 1 hour per vehicle for installation
+  let installationHours = 1; // Default to 1 hour
+  
+  // Check if OBD Port Installation is selected for special pricing
+  if (assessment.ceilingType === 'obd-port') {
+    // For OBD Port Installation: 1 base hour covers up to 3 vehicles
+    installationHours = Math.ceil(deviceCount / 3);
+  } else {
+    // For other installation types: 1 hour per vehicle
+    installationHours = deviceCount;
+  }
   
   // Add exactly 1 additional labor hold hour
   const laborHoldHours = 1;
