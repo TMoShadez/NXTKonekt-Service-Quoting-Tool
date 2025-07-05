@@ -75,7 +75,10 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
 
 function calculateFleetTrackingPricing(assessment: Assessment): PricingBreakdown {
   let surveyHours = 0;
-  let installationHours = 1;
+  
+  // Use deviceCount (number of vehicles for installation) to determine base hours
+  const deviceCount = assessment.deviceCount || 1;
+  let installationHours = deviceCount; // 1 hour per vehicle for installation
   
   // Add exactly 1 additional labor hold hour
   const laborHoldHours = 1;

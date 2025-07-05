@@ -80,10 +80,10 @@ export function StepCustomerInfo({ data, onChange }: StepCustomerInfoProps) {
           
           <div className="md:col-span-2">
             <Label className="text-sm font-medium nxt-gray-800 mb-2">
-              Site Address
+              Billing Address
             </Label>
             <Textarea
-              placeholder="Enter complete site address"
+              placeholder="Enter complete billing address"
               value={data.siteAddress || ''}
               onChange={(e) => handleChange('siteAddress', e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nxt-blue focus:border-nxt-blue"
@@ -108,6 +108,9 @@ export function StepCustomerInfo({ data, onChange }: StepCustomerInfoProps) {
                 <SelectItem value="education">Education</SelectItem>
                 <SelectItem value="manufacturing">Manufacturing</SelectItem>
                 <SelectItem value="hospitality">Hospitality</SelectItem>
+                <SelectItem value="transportation-logistics">Transportation / Logistics</SelectItem>
+                <SelectItem value="finance">Finance</SelectItem>
+                <SelectItem value="construction">Construction</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>

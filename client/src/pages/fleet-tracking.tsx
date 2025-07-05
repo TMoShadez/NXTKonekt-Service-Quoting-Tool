@@ -209,63 +209,88 @@ export default function FleetTrackingForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                    Fleet Size
+                    Number of Vehicles for Installation
                   </Label>
                   <Input
                     type="number"
                     value={localDeviceCount}
                     onChange={(e) => handleDeviceCountChange(e.target.value)}
                     onBlur={handleDeviceCountBlur}
-                    placeholder="Number of vehicles"
+                    placeholder="Number of vehicles for tracker installation"
                     className="w-full"
                   />
                 </div>
                 
                 <div>
                   <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                    Vehicle Types
+                    Total Number of Vehicles in Fleet
                   </Label>
-                  <Select value={formData.buildingType || ''} onValueChange={(value) => handleSelectChange('buildingType', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select vehicle types" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="light-duty">Light Duty Vehicles</SelectItem>
-                      <SelectItem value="heavy-duty">Heavy Duty Trucks</SelectItem>
-                      <SelectItem value="mixed-fleet">Mixed Fleet</SelectItem>
-                      <SelectItem value="specialized">Specialized Vehicles</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    type="number"
+                    value={formData.totalFleetSize?.toString() || ''}
+                    onChange={(e) => {
+                      const value = e.target.value ? parseInt(e.target.value) : null;
+                      handleSelectChange('totalFleetSize', value);
+                    }}
+                    placeholder="Total fleet size"
+                    className="w-full"
+                  />
                 </div>
               </div>
 
               <div>
                 <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                  Primary Service Location
+                  Installation Site Address
                 </Label>
                 <Input
                   value={localSiteAddress}
                   onChange={(e) => handleSiteAddressChange(e.target.value)}
                   onBlur={handleSiteAddressBlur}
-                  placeholder="Enter primary service address"
+                  placeholder="Enter installation site address"
                   className="w-full"
                 />
               </div>
 
-              <div>
-                <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                  Fleet Coverage Area (square miles)
-                </Label>
-                <Input
-                  type="number"
-                  value={formData.coverageArea?.toString() || ''}
-                  onChange={(e) => {
-                    const value = e.target.value ? parseInt(e.target.value) : null;
-                    handleSelectChange('coverageArea', value);
-                  }}
-                  placeholder="Coverage area in square miles"
-                  className="w-full"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Year of Vehicle
+                  </Label>
+                  <Input
+                    type="number"
+                    value={formData.vehicleYear?.toString() || ''}
+                    onChange={(e) => {
+                      const value = e.target.value ? parseInt(e.target.value) : null;
+                      handleSelectChange('vehicleYear', value);
+                    }}
+                    placeholder="Vehicle year"
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Make
+                  </Label>
+                  <Input
+                    value={formData.vehicleMake || ''}
+                    onChange={(e) => handleSelectChange('vehicleMake', e.target.value)}
+                    placeholder="Vehicle make"
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Model
+                  </Label>
+                  <Input
+                    value={formData.vehicleModel || ''}
+                    onChange={(e) => handleSelectChange('vehicleModel', e.target.value)}
+                    placeholder="Vehicle model"
+                    className="w-full"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -274,82 +299,78 @@ export default function FleetTrackingForm() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Tracking Features Required</CardTitle>
+              <CardTitle>Tracking Requirements</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="real-time"
-                      checked={formData.powerAvailable || false}
-                      onCheckedChange={(checked) => handleCheckboxChange('powerAvailable', !!checked)}
-                    />
-                    <Label htmlFor="real-time">Real-time GPS tracking</Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="geofencing"
-                      checked={formData.ethernetRequired || false}
-                      onCheckedChange={(checked) => handleCheckboxChange('ethernetRequired', !!checked)}
-                    />
-                    <Label htmlFor="geofencing">Geofencing alerts</Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="driver-behavior"
-                      checked={formData.ceilingMount || false}
-                      onCheckedChange={(checked) => handleCheckboxChange('ceilingMount', !!checked)}
-                    />
-                    <Label htmlFor="driver-behavior">Driver behavior monitoring</Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="maintenance"
-                      checked={formData.outdoorCoverage || false}
-                      onCheckedChange={(checked) => handleCheckboxChange('outdoorCoverage', !!checked)}
-                    />
-                    <Label htmlFor="maintenance">Maintenance scheduling</Label>
-                  </div>
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Tracker Type
+                  </Label>
+                  <Select value={formData.trackerType || ''} onValueChange={(value) => handleSelectChange('trackerType', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select tracker type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="vehicle-tracker">Vehicle Tracker</SelectItem>
+                      <SelectItem value="asset-tracker">Asset Tracker</SelectItem>
+                      <SelectItem value="slap-track">Slap & Track</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                      Installation Type
-                    </Label>
-                    <Select value={formData.ceilingType || ''} onValueChange={(value) => handleSelectChange('ceilingType', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select installation" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="obd-port">OBD Port Installation</SelectItem>
-                        <SelectItem value="hardwired">Hardwired Installation</SelectItem>
-                        <SelectItem value="magnetic">Magnetic Mount</SelectItem>
-                        <SelectItem value="asset-tracking">Asset Tracking Device</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Installation Type
+                  </Label>
+                  <Select value={formData.ceilingType || ''} onValueChange={(value) => handleSelectChange('ceilingType', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select installation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="obd-port">OBD Port Installation</SelectItem>
+                      <SelectItem value="hardwired">Hardwired Installation</SelectItem>
+                      <SelectItem value="magnetic">Magnetic Mount</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                  <div>
-                    <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                      Reporting Frequency
-                    </Label>
-                    <Select value={formData.signalStrength || ''} onValueChange={(value) => handleSelectChange('signalStrength', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select frequency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="real-time">Real-time (30 seconds)</SelectItem>
-                        <SelectItem value="frequent">Frequent (2 minutes)</SelectItem>
-                        <SelectItem value="standard">Standard (5 minutes)</SelectItem>
-                        <SelectItem value="extended">Extended (15 minutes)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    IoT Tracking Partner
+                  </Label>
+                  <Select value={formData.iotTrackingPartner || ''} onValueChange={(value) => handleSelectChange('iotTrackingPartner', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select tracking partner" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="geotab">GeoTab</SelectItem>
+                      <SelectItem value="zenduit">Zenduit</SelectItem>
+                      <SelectItem value="spireon">Spireon</SelectItem>
+                      <SelectItem value="airiq">AirIQ</SelectItem>
+                      <SelectItem value="verizon-connect">Verizon Connect</SelectItem>
+                      <SelectItem value="samsara">Samsara</SelectItem>
+                      <SelectItem value="fleetio">Fleetio</SelectItem>
+                      <SelectItem value="truckx">TruckX</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Carrier Sim
+                  </Label>
+                  <Select value={formData.carrierSim || ''} onValueChange={(value) => handleSelectChange('carrierSim', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select carrier" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="t-mobile">T-Mobile</SelectItem>
+                      <SelectItem value="verizon-wireless">Verizon Wireless</SelectItem>
+                      <SelectItem value="att">AT&T</SelectItem>
+                      <SelectItem value="wholesale-provider">Wholesale Provider</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardContent>

@@ -98,6 +98,15 @@ export const assessments = pgTable("assessments", {
   interferenceSources: text("interference_sources"),
   specialRequirements: text("special_requirements"),
   
+  // Fleet Tracking specific fields
+  totalFleetSize: integer("total_fleet_size"),
+  vehicleYear: integer("vehicle_year"),
+  vehicleMake: varchar("vehicle_make"),
+  vehicleModel: varchar("vehicle_model"),
+  trackerType: varchar("tracker_type"),
+  iotTrackingPartner: varchar("iot_tracking_partner"),
+  carrierSim: varchar("carrier_sim"),
+  
   // Quote Info
   totalCost: decimal("total_cost", { precision: 10, scale: 2 }),
   additionalNotes: text("additional_notes"),
