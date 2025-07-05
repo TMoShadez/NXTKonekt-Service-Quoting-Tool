@@ -11,6 +11,8 @@ export interface PricingBreakdown {
   surveyHours: number;
   installationHours: number;
   configurationHours: number;
+  laborHoldHours: number;
+  laborHoldCost: number;
   hourlyRate: number;
 }
 
@@ -27,18 +29,23 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
     return calculateFleetCameraPricing(assessment);
   }
 
-  // Fixed Wireless Access pricing - simplified logic with +1 hour labor
+  // Fixed Wireless Access pricing - based on router count with +1 labor hold hour
   let surveyHours = 0;
-  let installationHours = 2;
   let configurationHours = 1;
-
-  // Add one additional hour of labor regardless of device count or complexity
-  installationHours += 1;
+  
+  const routerCount = assessment.routerCount || 1;
+  
+  // Installation hours based on number of routers to be installed
+  let installationHours = routerCount * 2; // 2 hours per router
+  
+  // Add exactly 1 additional labor hold hour
+  const laborHoldHours = 1;
 
   // Calculate costs
   const surveyCost = Math.round(surveyHours * HOURLY_RATE * 100) / 100;
   const installationCost = Math.round(installationHours * HOURLY_RATE * 100) / 100;
   const configurationCost = Math.round(configurationHours * HOURLY_RATE * 100) / 100;
+  const laborHoldCost = Math.round(laborHoldHours * HOURLY_RATE * 100) / 100;
   const trainingCost = 0; // Training included
   
   // Ethernet cable pricing - $14.50 per foot
@@ -48,7 +55,7 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
     cableCost = footage * 14.50;
   }
   
-  const totalCost = Math.round((surveyCost + installationCost + configurationCost + cableCost) * 100) / 100;
+  const totalCost = Math.round((surveyCost + installationCost + configurationCost + laborHoldCost + cableCost) * 100) / 100;
 
   return {
     surveyCost,
@@ -60,6 +67,8 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
     surveyHours,
     installationHours,
     configurationHours,
+    laborHoldHours,
+    laborHoldCost,
     hourlyRate: HOURLY_RATE,
   };
 }
@@ -68,14 +77,15 @@ function calculateFleetTrackingPricing(assessment: Assessment): PricingBreakdown
   let surveyHours = 0;
   let installationHours = 2;
   
-  // Add one additional hour of labor regardless of device count or complexity
-  installationHours += 1;
+  // Add exactly 1 additional labor hold hour
+  const laborHoldHours = 1;
   
   const surveyCost = Math.round(surveyHours * HOURLY_RATE * 100) / 100;
   const installationCost = Math.round(installationHours * HOURLY_RATE * 100) / 100;
+  const laborHoldCost = Math.round(laborHoldHours * HOURLY_RATE * 100) / 100;
   const configurationCost = 0; // Included in service
   const trainingCost = 0; // Included in service
-  const totalCost = Math.round((surveyCost + installationCost) * 100) / 100;
+  const totalCost = Math.round((surveyCost + installationCost + laborHoldCost) * 100) / 100;
 
   return {
     surveyCost,
@@ -87,6 +97,8 @@ function calculateFleetTrackingPricing(assessment: Assessment): PricingBreakdown
     surveyHours,
     installationHours,
     configurationHours: 0,
+    laborHoldHours,
+    laborHoldCost,
     hourlyRate: HOURLY_RATE,
   };
 }
@@ -95,14 +107,15 @@ function calculateFleetCameraPricing(assessment: Assessment): PricingBreakdown {
   let surveyHours = 0;
   let installationHours = 2;
   
-  // Add one additional hour of labor regardless of device count or complexity
-  installationHours += 1;
+  // Add exactly 1 additional labor hold hour
+  const laborHoldHours = 1;
   
   const surveyCost = Math.round(surveyHours * HOURLY_RATE * 100) / 100;
   const installationCost = Math.round(installationHours * HOURLY_RATE * 100) / 100;
+  const laborHoldCost = Math.round(laborHoldHours * HOURLY_RATE * 100) / 100;
   const configurationCost = 0; // Included in service
   const trainingCost = 0; // Included in service
-  const totalCost = Math.round((surveyCost + installationCost) * 100) / 100;
+  const totalCost = Math.round((surveyCost + installationCost + laborHoldCost) * 100) / 100;
 
   return {
     surveyCost,
@@ -114,6 +127,8 @@ function calculateFleetCameraPricing(assessment: Assessment): PricingBreakdown {
     surveyHours,
     installationHours,
     configurationHours: 0,
+    laborHoldHours,
+    laborHoldCost,
     hourlyRate: HOURLY_RATE,
   };
 }

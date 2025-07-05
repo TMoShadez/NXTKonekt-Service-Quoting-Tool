@@ -238,6 +238,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           surveyHours: pricing.surveyHours.toString(),
           installationHours: pricing.installationHours.toString(),
           configurationHours: pricing.configurationHours.toString(),
+          laborHoldHours: pricing.laborHoldHours.toString(),
+          laborHoldCost: pricing.laborHoldCost.toString(),
           hourlyRate: pricing.hourlyRate.toString(),
           status: 'pending',
         });

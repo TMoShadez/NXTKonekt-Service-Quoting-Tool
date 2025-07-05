@@ -124,6 +124,8 @@ export const quotes = pgTable("quotes", {
   surveyHours: decimal("survey_hours", { precision: 5, scale: 2 }),
   installationHours: decimal("installation_hours", { precision: 5, scale: 2 }),
   configurationHours: decimal("configuration_hours", { precision: 5, scale: 2 }),
+  laborHoldHours: decimal("labor_hold_hours", { precision: 5, scale: 2 }),
+  laborHoldCost: decimal("labor_hold_cost", { precision: 10, scale: 2 }),
   hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
   
   status: varchar("status").default("pending"), // pending, approved, rejected

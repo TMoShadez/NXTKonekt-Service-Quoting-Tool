@@ -132,6 +132,7 @@ Changelog:
 - June 23, 2025. Completely resolved Fleet form input issues: implemented proper debounced state management with onBlur API saves, fixed cursor jumping in text fields, eliminated character deletion during typing, and ensured all form inputs (text, number, select, checkbox, textarea) work smoothly across both Fleet Tracking and Fleet Camera forms
 - June 23, 2025. Enhanced Fleet Camera form with advanced features: added useFormInput custom hook for robust input handling, implemented Carrier Sim dropdown (T-Mobile, Verizon, AT&T, Wholesale), added dynamic vehicle details collection (Year/Make/Model) that scales with vehicle count, replaced Video Quality with Tracking Partner dropdown (Zenduit, Spireon, Geotab, TrackCam, Fleethoster, AirIQ, Other), replaced Storage with Model text field, and replaced Recording Mode with Protective Wiring Harness Yes/No dropdown
 - July 5, 2025. Simplified pricing logic across all service types: reduced to +1 additional hour of labor for all quotes regardless of device count or complexity, updated cable pricing from $7/ft to $14.50/ft for Fixed Wireless installations
+- July 5, 2025. Implemented router-based pricing for Fixed Wireless: installation hours now calculated as (router count × 2 hours) + 1 labor hold hour, added dedicated "Labor hold for possible overage, returned if unused in final billing" line item with proper database schema and display integration
 
 ## User Preferences
 

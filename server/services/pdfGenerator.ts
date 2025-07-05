@@ -129,11 +129,13 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
       const surveyHours = parseFloat(quote.surveyHours?.toString() || '0');
       const installationHours = parseFloat(quote.installationHours?.toString() || '0');
       const configurationHours = parseFloat(quote.configurationHours?.toString() || '0');
+      const laborHoldHours = parseFloat(quote.laborHoldHours?.toString() || '0');
       const hourlyRate = parseFloat(quote.hourlyRate?.toString() || '190');
       const hardwareCost = parseFloat(quote.hardwareCost?.toString() || '0');
       const surveyCost = parseFloat(quote.surveyCost?.toString() || '0');
       const installationCost = parseFloat(quote.installationCost?.toString() || '0');
       const configurationCost = parseFloat(quote.configurationCost?.toString() || '0');
+      const laborHoldCost = parseFloat(quote.laborHoldCost?.toString() || '0');
       
       // Survey line (only show if > 0 hours)
       if (surveyHours > 0) {
@@ -162,6 +164,15 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
       } else if (configurationHours > 0) {
         doc.text('Configuration & Testing', 50, currentY)
            .text('Included', 450, currentY);
+        currentY += 20;
+      }
+      
+      // Labor Hold line
+      if (laborHoldHours > 0) {
+        doc.text('Labor hold for possible overage, returned if unused in final billing', 50, currentY)
+           .text(`${laborHoldHours}`, 300, currentY)
+           .text(`$${hourlyRate}`, 350, currentY)
+           .text(`$${laborHoldCost.toFixed(2)}`, 450, currentY);
         currentY += 20;
       }
       
