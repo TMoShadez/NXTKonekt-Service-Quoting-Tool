@@ -30,6 +30,7 @@ export default function FleetTrackingForm() {
   const [localSiteAddress, setLocalSiteAddress] = useState('');
   const [localSpecialRequirements, setLocalSpecialRequirements] = useState('');
   const [formData, setFormData] = useState<any>({});
+  const [vehicleDetails, setVehicleDetails] = useState<Array<{year: string, make: string, model: string}>>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -89,6 +90,17 @@ export default function FleetTrackingForm() {
       setLocalDeviceCount(assessment.deviceCount?.toString() || '');
       setLocalSiteAddress(assessment.siteAddress || '');
       setLocalSpecialRequirements(assessment.specialRequirements || '');
+      
+      // Initialize vehicle details based on device count
+      const deviceCount = assessment.deviceCount;
+      if (deviceCount && deviceCount > 0) {
+        const details = [];
+        for (let i = 0; i < deviceCount; i++) {
+          details.push({ year: '', make: '', model: '' });
+        }
+        setVehicleDetails(details);
+      }
+      
       setIsInitialized(true);
     }
   }, [assessment, isInitialized]);
@@ -116,7 +128,19 @@ export default function FleetTrackingForm() {
     const updatedData = { ...formData, deviceCount: numValue };
     setFormData(updatedData);
     debouncedSave(updatedData);
-  }, [localDeviceCount, formData, debouncedSave]);
+    
+    // Update vehicle details array based on device count
+    if (numValue && numValue > 0) {
+      const newDetails = [];
+      for (let i = 0; i < numValue; i++) {
+        // Preserve existing data if available, otherwise create empty
+        newDetails.push(vehicleDetails[i] || { year: '', make: '', model: '' });
+      }
+      setVehicleDetails(newDetails);
+    } else {
+      setVehicleDetails([]);
+    }
+  }, [localDeviceCount, formData, debouncedSave, vehicleDetails]);
 
   const handleSiteAddressChange = useCallback((value: string) => {
     setLocalSiteAddress(value);
@@ -149,6 +173,16 @@ export default function FleetTrackingForm() {
     setFormData(updatedData);
     debouncedSave(updatedData);
   }, [formData, debouncedSave]);
+
+  const updateVehicleDetail = useCallback((index: number, field: 'year' | 'make' | 'model', value: string) => {
+    setVehicleDetails(prev => {
+      const updated = [...prev];
+      if (updated[index]) {
+        updated[index] = { ...updated[index], [field]: value };
+      }
+      return updated;
+    });
+  }, []);
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
@@ -251,47 +285,63 @@ export default function FleetTrackingForm() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                    Year of Vehicle
-                  </Label>
-                  <Input
-                    type="number"
-                    value={formData.vehicleYear?.toString() || ''}
-                    onChange={(e) => {
-                      const value = e.target.value ? parseInt(e.target.value) : null;
-                      handleSelectChange('vehicleYear', value);
-                    }}
-                    placeholder="Vehicle year"
-                    className="w-full"
-                  />
+              {/* Dynamic Vehicle Details Section */}
+              {vehicleDetails.length > 0 && (
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-nxt-gray-800 border-b border-nxt-gray-200 pb-2">
+                    Vehicle Details ({vehicleDetails.length} vehicle{vehicleDetails.length !== 1 ? 's' : ''})
+                  </h4>
+                  {vehicleDetails.map((vehicle, index) => (
+                    <div key={index} className="border rounded-lg p-4 space-y-4 bg-nxt-gray-50">
+                      <h5 className="font-medium text-nxt-gray-800">Vehicle {index + 1}</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                            Year
+                          </Label>
+                          <Input
+                            type="number"
+                            value={vehicle.year}
+                            onChange={(e) => updateVehicleDetail(index, 'year', e.target.value)}
+                            placeholder="Vehicle year"
+                            className="w-full"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                            Make
+                          </Label>
+                          <Input
+                            value={vehicle.make}
+                            onChange={(e) => updateVehicleDetail(index, 'make', e.target.value)}
+                            placeholder="Vehicle make"
+                            className="w-full"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                            Model
+                          </Label>
+                          <Input
+                            value={vehicle.model}
+                            onChange={(e) => updateVehicleDetail(index, 'model', e.target.value)}
+                            placeholder="Vehicle model"
+                            className="w-full"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-
-                <div>
-                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                    Make
-                  </Label>
-                  <Input
-                    value={formData.vehicleMake || ''}
-                    onChange={(e) => handleSelectChange('vehicleMake', e.target.value)}
-                    placeholder="Vehicle make"
-                    className="w-full"
-                  />
+              )}
+              
+              {vehicleDetails.length === 0 && (
+                <div className="bg-nxt-gray-50 border border-nxt-gray-200 rounded-lg p-6 text-center">
+                  <p className="text-nxt-gray-600">
+                    Enter the number of vehicles for installation above to add vehicle details.
+                  </p>
                 </div>
-
-                <div>
-                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                    Model
-                  </Label>
-                  <Input
-                    value={formData.vehicleModel || ''}
-                    onChange={(e) => handleSelectChange('vehicleModel', e.target.value)}
-                    placeholder="Vehicle model"
-                    className="w-full"
-                  />
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         );
