@@ -329,6 +329,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Customer portal routes (public - no authentication required)
+  app.get('/api/customer/quote/:token', async (req, res) => {
+    try {
+      const token = req.params.token;
+      
+      // In a real implementation, you'd decode/verify the token
+      // For this mockup, we'll use the quote ID as the token
+      const quoteId = parseInt(token);
+      
+      const quotes = await storage.getQuotesByUserId('*'); // Get all quotes for demo
+      const quote = quotes.find(q => q.id === quoteId);
+      
+      if (!quote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+
+      // Get organization info
+      const organization = await storage.getOrganizationByUserId(quote.assessment.userId);
+      
+      const response = {
+        ...quote,
+        organization: organization || { name: "NXTKonekt" }
+      };
+      
+      res.json(response);
+    } catch (error) {
+      console.error("Error fetching customer quote:", error);
+      res.status(500).json({ message: "Failed to fetch quote" });
+    }
+  });
+
+  app.post('/api/customer/quote/:token/:action', async (req, res) => {
+    try {
+      const token = req.params.token;
+      const action = req.params.action;
+      const { feedback } = req.body;
+      
+      // Validate action
+      if (!['approve', 'reject'].includes(action)) {
+        return res.status(400).json({ message: "Invalid action" });
+      }
+      
+      // In a real implementation, you'd decode/verify the token
+      const quoteId = parseInt(token);
+      
+      const quotes = await storage.getQuotesByUserId('*'); // Get all quotes for demo
+      const quote = quotes.find(q => q.id === quoteId);
+      
+      if (!quote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+
+      // Update quote status
+      const updatedQuote = await storage.updateQuote(quote.id, {
+        status: action === 'approve' ? 'approved' : 'rejected',
+        // In a real implementation, you'd store customer feedback in a separate field
+      });
+
+      res.json({ 
+        success: true, 
+        message: `Quote ${action}d successfully`,
+        quote: updatedQuote 
+      });
+    } catch (error) {
+      console.error("Error updating quote status:", error);
+      res.status(500).json({ message: "Failed to update quote" });
+    }
+  });
+
   // File serving routes
   app.get('/api/files/pdf/:filename', (req, res) => {
     const filename = req.params.filename;

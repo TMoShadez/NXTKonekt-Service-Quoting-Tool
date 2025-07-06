@@ -7,7 +7,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, CheckCircle, Clock, Plus, Download, LogOut, User, ChevronDown, Trash2 } from "lucide-react";
+import { FileText, CheckCircle, Clock, Plus, Download, LogOut, User, ChevronDown, Trash2, Share, Copy } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import nxtKonektLogo from "@assets/NxtKonekt Logo_1749973360626.png";
@@ -79,6 +79,24 @@ export default function Dashboard() {
   const handleDeleteQuote = (quoteId: number, quoteNumber: string) => {
     if (confirm(`Are you sure you want to delete quote #${quoteNumber}? This action cannot be undone.`)) {
       deleteQuoteMutation.mutate(quoteId);
+    }
+  };
+
+  const handleShareCustomerPortal = async (quoteId: number, customerName: string) => {
+    const customerPortalUrl = `${window.location.origin}/customer/${quoteId}`;
+    
+    try {
+      await navigator.clipboard.writeText(customerPortalUrl);
+      toast({
+        title: "Customer Portal Link Copied",
+        description: `Share this link with ${customerName} to view and approve the quote`,
+      });
+    } catch (error) {
+      // Fallback for browsers that don't support clipboard API
+      toast({
+        title: "Customer Portal Link",
+        description: customerPortalUrl,
+      });
     }
   };
 
@@ -335,6 +353,14 @@ export default function Dashboard() {
                               Download
                             </Button>
                           )}
+                          <Button 
+                            variant="link" 
+                            className="text-nxt-blue hover:text-blue-700 p-0 mr-3"
+                            onClick={() => handleShareCustomerPortal(quote.id, quote.assessment.customerCompanyName)}
+                            title="Share customer portal link"
+                          >
+                            <Share className="h-4 w-4" />
+                          </Button>
                           <Button 
                             variant="link" 
                             className="text-red-500 hover:text-red-700 p-0"

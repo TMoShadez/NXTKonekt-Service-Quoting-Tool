@@ -10,12 +10,14 @@ import Dashboard from "@/pages/dashboard";
 import Assessment from "@/pages/assessment";
 import FleetTrackingForm from "@/pages/fleet-tracking";
 import FleetCameraForm from "@/pages/fleet-camera";
+import CustomerPortal from "@/pages/customer-portal";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <Switch>
+      <Route path="/customer/:token" component={CustomerPortal} />
       {isLoading || !isAuthenticated ? (
         <>
           <Route path="/" component={Landing} />
