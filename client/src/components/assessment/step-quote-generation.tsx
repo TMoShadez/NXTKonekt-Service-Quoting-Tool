@@ -829,6 +829,107 @@ export function StepQuoteGeneration({ assessmentId, data }: StepQuoteGenerationP
             </div>
           )}
 
+          {/* Fourth conditional Statement of Work for Fixed Wireless (Failover Only - No Antenna) */}
+          {data.serviceType === 'site-assessment' && 
+           data.connectionUsage === 'failover' && 
+           data.lowSignalAntennaCable !== 'yes' && (
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-nxt-gray-800 mb-4">Scope of Work: Failover Cellular Wireless Router Installation</h3>
+              
+              <div className="space-y-4 text-sm text-nxt-gray-700">
+                <p>
+                  This document outlines the scope of work for the installation of a cellular wireless router to serve as a failover internet service provider (ISP) at your designated location. This service ensures business continuity by providing an alternative internet connection in the event of an outage with your primary ISP. The installation includes a site survey, preparation and installation of the wireless router, and basic configuration to integrate it into your existing network for seamless failover operation.
+                </p>
+                
+                <p>
+                  Hardware for this project will be provided by your Wireless Vendor. All necessary materials will be provided by NXTKonekt/Tekumo.
+                </p>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Summary of Services</h4>
+                  <p className="mb-2">Our team will install a cellular wireless router, performing the following key steps:</p>
+                  <ul className="list-disc list-inside space-y-1 ml-4">
+                    <li><strong>Site Survey:</strong> A thorough assessment of your location to determine the optimal placement for the wireless router, ensuring the best possible cellular signal while considering proximity to your existing network infrastructure.</li>
+                    <li><strong>Router Preparation:</strong> Unboxing and verifying all components of the wireless router, and reviewing the manufacturer's documentation.</li>
+                    <li><strong>Mounting and Installation:</strong> Securely mounting the router (if applicable) and connecting all necessary components, including power.</li>
+                    <li><strong>Basic Router Configuration:</strong> Setting up the cellular connection, establishing Wi-Fi connectivity (if desired), and configuring the router for failover integration with your existing primary network.</li>
+                    <li><strong>Failover Testing:</strong> Verifying the failover functionality to ensure a smooth transition to the cellular connection during a primary ISP outage.</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Our Process</h4>
+                  <p className="mb-2">Here's a detailed breakdown of the steps our technician will take:</p>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Preparation and Planning</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Location Determination:</strong> Our technician will work with your site contact to identify the best position for the cellular wireless router. This will involve performing a signal survey using a cellular device to determine the optimal placement for signal strength, preferably within 5 feet of a power outlet and in proximity to your existing network equipment.</li>
+                        <li><strong>Network Integration Planning:</strong> Discussion with your site contact will occur to understand the existing network topology and plan the most effective method for integrating the failover router (e.g., direct connection to a firewall/router with failover capabilities).</li>
+                        <li><strong>Hardware Verification:</strong> All hardware, provided by the wireless vendor, will be checked to ensure all components are present and accounted for.</li>
+                        <li><strong>Documentation Review:</strong> The manufacturer's installation guide and user manual for the router will be thoroughly reviewed.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">SIM Card Installation</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Power Off:</strong> The router will be completely powered off before any SIM card insertion or removal.</li>
+                        <li><strong>SIM Card Slot Location:</strong> The technician will locate the SIM card slot, typically on the side or back of the router.</li>
+                        <li><strong>SIM Card Insertion:</strong> The SIM card will be carefully inserted, ensuring correct orientation. A SIM card insertion tool will be used if provided.</li>
+                        <li><strong>Secure Cover:</strong> The SIM card cover will be securely replaced.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Mounting (Optional)</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Wall Mounting:</strong> If wall-mounting is desired and feasible, the router will be secured to the wall using appropriate screws and hardware. Cables will be routed neatly.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Power Connection</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Connect Power Adapter:</strong> The power adapter will be plugged into the router's power input and then into a suitable power outlet.</li>
+                        <li><strong>Power ON the Router:</strong> The router will be powered on, and the indicator lights will be observed to confirm boot-up.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Network Connection</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Ethernet Connection:</strong> The router will be connected via Ethernet patch cable to your existing network equipment (e.g., firewall, primary router) as determined during the planning phase.</li>
+                        <li><strong>Wireless Connection (Wi-Fi - Optional):</strong> If Wi-Fi functionality is desired for the failover connection, the Wi-Fi network name (SSID) and password will be identified and configured.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Router Configuration</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Accessing Configuration Interface:</strong> A web browser on a connected device will be used to access the router's configuration interface via its IP address.</li>
+                        <li><strong>Login and Password Change:</strong> The default username and password will be entered. The technician will work with your site contact to immediately change the default password for security purposes.</li>
+                        <li><strong>Configure Cellular Connection:</strong> The cellular settings will be configured, including entering the APN (Access Point Name) provided by your cellular carrier.</li>
+                        <li><strong>Configure Network Settings:</strong> Essential network settings such as IP address, DHCP, and DNS will be configured to ensure proper integration with your existing network.</li>
+                        <li><strong>Configure Failover Settings:</strong> The router will be configured to work as a failover ISP. This may involve setting up appropriate routing, NAT rules, or working with your network administrator to configure failover on your existing firewall/router.</li>
+                        <li><strong>Test the Connection:</strong> An internet connection test will be performed using a speed test from the browser to confirm the cellular connection's speed and reliability.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Failover Testing</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Primary Connection Test:</strong> The technician will coordinate with your site contact to temporarily disable the primary internet connection (or simulate an outage) to verify that the failover cellular router seamlessly takes over the internet traffic.</li>
+                        <li><strong>Restoration Test:</strong> Once failover is confirmed, the primary internet connection will be re-enabled.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Additional Notes */}
           <div>
             <Label className="text-sm font-medium nxt-gray-800 mb-2">
