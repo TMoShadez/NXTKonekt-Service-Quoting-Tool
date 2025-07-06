@@ -577,6 +577,123 @@ export function StepQuoteGeneration({ assessmentId, data }: StepQuoteGenerationP
             </div>
           )}
 
+          {/* Statement of Work for Fixed Wireless (Primary Only - No Antenna) */}
+          {data.serviceType === 'site-assessment' && 
+           data.connectionUsage === 'primary' && 
+           data.lowSignalAntennaCable !== 'yes' && (
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-nxt-gray-800 mb-4">Scope of Work: Cellular Wireless Router Installation</h3>
+              
+              <div className="space-y-4 text-sm text-nxt-gray-700">
+                <p>
+                  This document outlines the scope of work for the installation of a cellular wireless router at your designated location. This service includes a comprehensive site survey, preparation and installation of the router, and basic configuration to ensure your devices are connected. Please note that this service does not include network cabling.
+                </p>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Summary of Services</h4>
+                  <p className="mb-2">Our team will install a cellular wireless router, performing the following key steps:</p>
+                  <ul className="list-disc list-inside space-y-1 ml-4">
+                    <li><strong>Site Survey:</strong> A thorough assessment of your location to determine the optimal placement for the wireless router, ensuring the best possible cellular signal.</li>
+                    <li><strong>Router Preparation:</strong> Unboxing and verifying all components of the wireless router, and reviewing the manufacturer's documentation.</li>
+                    <li><strong>Mounting and Installation:</strong> Securely mounting the router (if applicable) and connecting all necessary components, including antennas and power.</li>
+                    <li><strong>Basic Router Configuration:</strong> Setting up the cellular connection, establishing Wi-Fi connectivity, and performing initial testing.</li>
+                    <li><strong>Device Configuration Support:</strong> We will assist with connecting up to 5 of your devices (workstations, printers, terminals) to the new wireless network and provide guidance on connecting additional hardware.</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Our Process</h4>
+                  <p className="mb-2">Here's a detailed breakdown of the steps our technician will take:</p>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Preparation and Planning</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Location Determination:</strong> Our technician will work with your site contact to perform a walkthrough and signal survey using a mobile phone to identify the best position for the wireless router. The chosen location will be within 5 feet of a power outlet.</li>
+                        <li><strong>Hardware Verification:</strong> All hardware, provided by the wireless vendor, will be checked to ensure all components are present and accounted for.</li>
+                        <li><strong>Documentation Review:</strong> The manufacturer's installation guide and user manual for the router will be thoroughly reviewed.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">SIM Card Installation</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Power Off:</strong> The router will be completely powered off before any SIM card insertion or removal.</li>
+                        <li><strong>SIM Card Slot Location:</strong> The technician will locate the SIM card slot, typically on the side or back of the router.</li>
+                        <li><strong>SIM Card Insertion:</strong> The SIM card will be carefully inserted, ensuring correct orientation. A SIM card insertion tool will be used if provided.</li>
+                        <li><strong>Secure Cover:</strong> The SIM card cover will be securely replaced.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Mounting (Optional)</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Wall Mounting:</strong> If wall-mounting is desired and feasible, the router will be secured to the wall using appropriate screws and hardware. Cables will be routed neatly.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Antenna Connection</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Antenna Attachment:</strong> If the router has detachable antennas, they will be securely screwed onto their designated connectors, ensuring proper alignment.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Power Connection</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Power Adapter Connection:</strong> The power adapter will be plugged into the router's power input and then into a suitable power outlet.</li>
+                        <li><strong>Power On:</strong> The router will be powered on, and the indicator lights will be observed to confirm boot-up.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Network Connection</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Wireless Connection (Wi-Fi):</strong> Your device will be connected to the router's Wi-Fi network using the provided network name (SSID) and password.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Router Configuration</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Accessing Configuration Interface:</strong> A web browser on a connected device will be used to access the router's configuration interface via its IP address.</li>
+                        <li><strong>Login and Password Change:</strong> The default username and password will be entered. The technician will work with your site contact to immediately change the default password for security purposes.</li>
+                        <li><strong>Cellular Connection Configuration:</strong> The cellular settings will be configured, including entering the APN (Access Point Name) provided by your cellular carrier.</li>
+                        <li><strong>Network Settings (Optional):</strong> Other network settings like DHCP, DNS, and firewall may be configured based on your specific requirements and the router's documentation.</li>
+                        <li><strong>Connection Test:</strong> An internet connection test will be performed using a speed test from the browser.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Device Configuration (Up to 5 Devices)</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Device Connection Support:</strong> Our technician will provide hands-on assistance and training to connect up to 5 of your existing devices (e.g., workstations, printers, terminals) to the newly established wireless network.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Estimated Time On-Site</h4>
+                  <p>The estimated time on-site for this installation is 1 hour.</p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Additional Labor Hold</h4>
+                  <p className="mb-1"><strong>Price:</strong> $380.00</p>
+                  <p>
+                    While we aim for completion within a typical timeframe, the final charge will accurately 
+                    reflect the actual time our team spends on-site. This includes the minimum service fee plus 
+                    any additional time (billed at $190 per hour in 15-minute increments) needed for extra work 
+                    or unforeseen issues. A preliminary Credit Hold of $380.00 in total Hold Amount. This will 
+                    cover most external penetrations, or ceiling issues.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Additional Notes */}
           <div>
             <Label className="text-sm font-medium nxt-gray-800 mb-2">

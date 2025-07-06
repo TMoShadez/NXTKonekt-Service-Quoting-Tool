@@ -452,6 +452,153 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         doc.text('• Final Testing: Speed test confirmation of primary ISP functionality', 50, currentY, { width: 500 });
       }
 
+      // Statement of Work for Fixed Wireless (Primary Only - No Antenna) - optimized for readability
+      if (assessment.serviceType === 'site-assessment' && 
+          assessment.connectionUsage === 'primary' && 
+          assessment.lowSignalAntennaCable !== 'yes') {
+        // Always start on new page for SOW to keep it organized
+        doc.addPage();
+        currentY = 50;
+        
+        doc.fontSize(11)
+           .text('Scope of Work: Cellular Wireless Router Installation', 50, currentY);
+        
+        currentY += 25;
+        doc.fontSize(8)
+           .text('This document outlines the scope of work for the installation of a cellular wireless router at your designated location. This service includes a comprehensive site survey, preparation and installation of the router, and basic configuration to ensure your devices are connected. Please note that this service does not include network cabling.', 50, currentY, { width: 500, lineGap: 3 });
+        
+        currentY += 35;
+        doc.fontSize(9)
+           .text('Summary of Services', 50, currentY);
+        
+        currentY += 20;
+        doc.fontSize(8)
+           .text('Our team will install a cellular wireless router, performing the following key steps:', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.text('• Site Survey: Assessment of location for optimal router placement', 50, currentY, { width: 500 });
+        currentY += 16;
+        doc.text('• Router Preparation: Unboxing and component verification', 50, currentY, { width: 500 });
+        currentY += 16;
+        doc.text('• Mounting and Installation: Secure mounting with component connections', 50, currentY, { width: 500 });
+        currentY += 16;
+        doc.text('• Basic Router Configuration: Cellular connection and Wi-Fi setup', 50, currentY, { width: 500 });
+        currentY += 16;
+        doc.text('• Device Configuration Support: Connect up to 5 devices to wireless network', 50, currentY, { width: 500 });
+        
+        currentY += 25;
+        doc.fontSize(9)
+           .text('Our Process', 50, currentY);
+        
+        currentY += 20;
+        doc.fontSize(8)
+           .text('Detailed breakdown of installation steps:', 50, currentY, { width: 500 });
+        
+        currentY += 25;
+        doc.fontSize(8)
+           .text('1. Preparation and Planning', 50, currentY);
+        
+        currentY += 18;
+        doc.fontSize(7)
+           .text('• Location Determination: Site contact collaboration for optimal router placement within 5 feet of power outlet', 50, currentY, { width: 500 });
+        currentY += 14;
+        doc.text('• Hardware Verification: Component check and documentation review', 50, currentY, { width: 500 });
+        currentY += 14;
+        doc.text('• Documentation Review: Manufacturer installation guide review', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(8)
+           .text('2. SIM Card Installation', 50, currentY);
+        
+        currentY += 18;
+        doc.fontSize(7)
+           .text('• Power Off: Complete router shutdown before SIM insertion', 50, currentY, { width: 500 });
+        currentY += 14;
+        doc.text('• SIM Card Slot Location: Locate slot typically on side or back of router', 50, currentY, { width: 500 });
+        currentY += 14;
+        doc.text('• SIM Card Insertion: Careful insertion with correct orientation using provided tool', 50, currentY, { width: 500 });
+        currentY += 14;
+        doc.text('• Secure Cover: Replace SIM card cover securely', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(8)
+           .text('3. Mounting (Optional)', 50, currentY);
+        
+        currentY += 18;
+        doc.fontSize(7)
+           .text('• Wall Mounting: Secure wall mounting if desired with appropriate hardware and neat cable routing', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(8)
+           .text('4. Antenna Connection', 50, currentY);
+        
+        currentY += 18;
+        doc.fontSize(7)
+           .text('• Antenna Attachment: Secure attachment of detachable antennas with proper alignment', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(8)
+           .text('5. Power Connection', 50, currentY);
+        
+        currentY += 18;
+        doc.fontSize(7)
+           .text('• Power Adapter Connection: Connect adapter to router power input and suitable outlet', 50, currentY, { width: 500 });
+        currentY += 14;
+        doc.text('• Power On: Router startup and indicator light observation for boot confirmation', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(8)
+           .text('6. Network Connection', 50, currentY);
+        
+        currentY += 18;
+        doc.fontSize(7)
+           .text('• Wireless Connection (Wi-Fi): Device connection using provided SSID and password', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(8)
+           .text('7. Router Configuration', 50, currentY);
+        
+        currentY += 18;
+        doc.fontSize(7)
+           .text('• Configuration Interface Access: Web browser access via router IP address', 50, currentY, { width: 500 });
+        currentY += 14;
+        doc.text('• Login and Password Change: Default credentials entry and immediate password change for security', 50, currentY, { width: 500 });
+        currentY += 14;
+        doc.text('• Cellular Connection Configuration: APN configuration from cellular carrier', 50, currentY, { width: 500 });
+        currentY += 14;
+        doc.text('• Network Settings (Optional): DHCP, DNS, and firewall configuration as needed', 50, currentY, { width: 500 });
+        currentY += 14;
+        doc.text('• Connection Test: Internet speed test verification via browser', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(8)
+           .text('8. Device Configuration (Up to 5 Devices)', 50, currentY);
+        
+        currentY += 18;
+        doc.fontSize(7)
+           .text('• Device Connection Support: Hands-on assistance connecting up to 5 existing devices to wireless network', 50, currentY, { width: 500 });
+        
+        currentY += 25;
+        doc.fontSize(9)
+           .text('Estimated Time On-Site', 50, currentY);
+        
+        currentY += 18;
+        doc.fontSize(8)
+           .text('The estimated time on-site for this installation is 1 hour.', 50, currentY);
+        
+        currentY += 25;
+        doc.fontSize(9)
+           .text('Additional Labor Hold', 50, currentY);
+        
+        currentY += 18;
+        doc.fontSize(8)
+           .text('Price: $380.00', 50, currentY);
+        
+        currentY += 16;
+        doc.fontSize(7)
+           .text('While we aim for completion within a typical timeframe, the final charge will accurately reflect the actual time our team spends on-site. This includes the minimum service fee plus any additional time (billed at $190 per hour in 15-minute increments) needed for extra work or unforeseen issues. A preliminary Credit Hold of $380.00 in total Hold Amount. This will cover most external penetrations, or ceiling issues.', 50, currentY, { width: 500, lineGap: 3 });
+      }
+
       // Additional notes - if any
       if (assessment.additionalNotes) {
         currentY += 35;

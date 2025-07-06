@@ -1,0 +1,43 @@
+Scope of Work: Cellular Wireless Router Installation
+This document outlines the scope of work for the installation of a cellular wireless router at your designated location. This service includes a comprehensive site survey, preparation and installation of the router, and basic configuration to ensure your devices are connected. Please note that this service does not include network cabling.
+ 
+Summary of Services
+Our team will install a cellular wireless router, performing the following key steps:
+•	Site Survey: A thorough assessment of your location to determine the optimal placement for the wireless router, ensuring the best possible cellular signal.
+•	Router Preparation: Unboxing and verifying all components of the wireless router, and reviewing the manufacturer's documentation.
+•	Mounting and Installation: Securely mounting the router (if applicable) and connecting all necessary components, including antennas and power.
+•	Basic Router Configuration: Setting up the cellular connection, establishing Wi-Fi connectivity, and performing initial testing.
+•	Device Configuration Support: We will assist with connecting up to 5 of your devices (workstations, printers, terminals) to the new wireless network and provide guidance on connecting additional hardware.
+Our Process
+Here's a detailed breakdown of the steps our technician will take:
+•	Preparation and Planning
+•	Location Determination: Our technician will work with your site contact to perform a walkthrough and signal survey using a mobile phone to identify the best position for the wireless router. The chosen location will be within 5 feet of a power outlet.
+•	Hardware Verification: All hardware, provided by the wireless vendor, will be checked to ensure all components are present and accounted for.
+•	Documentation Review: The manufacturer's installation guide and user manual for the router will be thoroughly reviewed.
+•	SIM Card Installation
+•	Power Off: The router will be completely powered off before any SIM card insertion or removal.
+•	SIM Card Slot Location: The technician will locate the SIM card slot, typically on the side or back of the router.
+•	SIM Card Insertion: The SIM card will be carefully inserted, ensuring correct orientation. A SIM card insertion tool will be used if provided.
+•	Secure Cover: The SIM card cover will be securely replaced.
+•	Mounting (Optional)
+•	Wall Mounting: If wall-mounting is desired and feasible, the router will be secured to the wall using appropriate screws and hardware. Cables will be routed neatly.
+•	Antenna Connection
+•	Antenna Attachment: If the router has detachable antennas, they will be securely screwed onto their designated connectors, ensuring proper alignment.
+•	Power Connection
+•	Power Adapter Connection: The power adapter will be plugged into the router's power input and then into a suitable power outlet.
+•	Power On: The router will be powered on, and the indicator lights will be observed to confirm boot-up.
+•	Network Connection
+•	Wireless Connection (Wi-Fi): Your device will be connected to the router's Wi-Fi network using the provided network name (SSID) and password.
+•	Router Configuration
+•	Accessing Configuration Interface: A web browser on a connected device will be used to access the router's configuration interface via its IP address.
+•	Login and Password Change: The default username and password will be entered. The technician will work with your site contact to immediately change the default password for security purposes.
+•	Cellular Connection Configuration: The cellular settings will be configured, including entering the APN (Access Point Name) provided by your cellular carrier.
+•	Network Settings (Optional): Other network settings like DHCP, DNS, and firewall may be configured based on your specific requirements and the router's documentation.
+•	Connection Test: An internet connection test will be performed using a speed test from the browser.
+•	Device Configuration (Up to 5 Devices)
+•	Our technician will provide hands-on assistance and training to connect up to 5 of your existing devices (e.g., workstations, printers, terminals) to the newly established wireless network.
+Estimated Time On-Site
+The estimated time on-site for this installation is 1 hour.
+Additional Labor Hold
+Price: $380.00
+While we aim for completion within a typical timeframe, the final charge will accurately reflect the actual time our team spends on-site. This includes the minimum service fee plus any additional time (billed at $190 per hour in 15-minute increments) needed for extra work or unforeseen issues. A preliminary Credit Hold of $380.00 in total Hold Amount. This will cover most external penetrations, or ceiling issues.
