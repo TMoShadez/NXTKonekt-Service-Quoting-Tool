@@ -346,6 +346,111 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         doc.text('Work will be completed within a typical timeframe, the final charge will accurately reflect the actual time our team spends on-site. This includes the minimum service fee plus any additional time for completion. Any on-site challenges or unexpected extra work or unforeseen delay. A preliminary labor hold of $190.00 in total hold.', 50, currentY, { width: 500 });
       }
 
+      // Statement of Work for Fixed Wireless (Primary + Antenna) - optimized for readability
+      if (assessment.serviceType === 'site-assessment' && 
+          assessment.connectionUsage === 'Primary' && 
+          assessment.antennaCable === 'Yes') {
+        // Always start on new page for SOW to keep it organized
+        doc.addPage();
+        currentY = 50;
+        
+        doc.fontSize(11)
+           .text('Scope of Work: Primary Cellular Wireless Router Installation with Antenna Installation', 50, currentY);
+        
+        currentY += 20;
+        doc.fontSize(8)
+           .text('This document outlines the scope of work for the installation of a cellular wireless router to serve as your primary internet service provider (ISP) at the designated location. This comprehensive service includes a detailed site survey, preparation and installation of the wireless router, and, if necessary, the running of up to 200 feet of coaxial cable for the installation of an internal antenna to optimize signal strength.', 50, currentY, { width: 500 });
+        
+        currentY += 28;
+        doc.text('Hardware for this project will be provided by your Wireless Vendor. All necessary materials will be provided by NXTKonekt/Tekumo.', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(9)
+           .text('Summary of Services', 50, currentY);
+        
+        currentY += 16;
+        doc.fontSize(8)
+           .text('Our team will install a cellular wireless router, performing the following key steps:', 50, currentY, { width: 500 });
+        
+        currentY += 16;
+        doc.text('• Site Survey: A thorough assessment of your location to determine the optimal placement for the wireless router and, if required, the best position for an external or internal antenna to achieve maximum cellular signal.', 50, currentY, { width: 500 });
+        currentY += 18;
+        doc.text('• Router Preparation: Unboxing and verifying all components of the wireless router, and reviewing the manufacturer\'s documentation.', 50, currentY, { width: 500 });
+        currentY += 18;
+        doc.text('• Mounting and Installation: Securely mounting the router and/or antenna (if applicable) and connecting all necessary components, including power and coaxial cable.', 50, currentY, { width: 500 });
+        currentY += 18;
+        doc.text('• Coaxial Cable Installation (If Needed): Running and terminating up to 200 feet of coaxial cable to connect the router to a strategically placed internal antenna for enhanced signal reception.', 50, currentY, { width: 500 });
+        currentY += 18;
+        doc.text('• Basic Router Configuration: Setting up the cellular connection, establishing Wi-Fi connectivity, and performing initial testing to confirm primary internet functionality.', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(9)
+           .text('Our Process', 50, currentY);
+        
+        currentY += 16;
+        doc.fontSize(8)
+           .text('Here\'s a detailed breakdown of the steps our technician will take:', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(9)
+           .text('Preparation and Planning', 50, currentY);
+        
+        currentY += 14;
+        doc.fontSize(8)
+           .text('Location Determination: Our technician will collaborate with your site contact to identify the preferred location for the cellular wireless router. A comprehensive wireless survey using a cellular device will be conducted to determine the optimal position for the antenna, ensuring the best possible signal reception. If cable routing is necessary, the technician will review the above-ceiling space to determine the most efficient and least intrusive cable path.', 50, currentY, { width: 500 });
+        
+        currentY += 30;
+        doc.text('Route Planning (If Cable Run Needed): A detailed plan will be developed for the coaxial cable path, aiming to minimize bends and avoid potential interference sources such as power lines or fluorescent lights. Future needs and potential expansion will be considered, allowing for adequate cable slack (at least 5-10 feet).', 50, currentY, { width: 500 });
+        
+        currentY += 25;
+        doc.text('Hardware Verification: All hardware, provided by the wireless vendor, will be checked to ensure all components are present and accounted for. Documentation Review: The manufacturer\'s installation guide and user manual for the router will be thoroughly reviewed.', 50, currentY, { width: 500 });
+        
+        currentY += 25;
+        doc.fontSize(9)
+           .text('Coaxial Cable Installation (If Required)', 50, currentY);
+        
+        currentY += 14;
+        doc.fontSize(8)
+           .text('Drilling Holes: If necessary, holes will be carefully drilled through studs or walls, ensuring they are sufficiently sized for the cable to pass through comfortably. Structural members will be avoided. Using Fish Tape/Rods: For routing cable through walls or conduits, fish tape or rods will be utilized to guide the cable, with the cable securely attached.', 50, currentY, { width: 500 });
+        
+        currentY += 30;
+        doc.text('Pulling Cable: The cable will be pulled carefully and smoothly, avoiding excessive tension or abrupt movements. The cable\'s bend radius specifications will be adhered to. Avoiding Interference: Coaxial cables will be kept clear of power lines and other sources of electromagnetic interference. If crossing power lines is unavoidable, it will be done at a 90-degree angle.', 50, currentY, { width: 500 });
+        
+        currentY += 30;
+        doc.text('Securing Cables: Cable ties or clips will be used to secure the cable along its run, preventing sagging, tangling, or resting on ceiling surfaces. Cable ties will not be overtightened to prevent damage. Labeling Cables: Both ends of each installed cable will be clearly labeled with a unique identifier to facilitate future troubleshooting.', 50, currentY, { width: 500 });
+        
+        currentY += 25;
+        doc.fontSize(9)
+           .text('Coaxial Cable Termination (If Required)', 50, currentY);
+        
+        currentY += 14;
+        doc.fontSize(8)
+           .text('Stripping Cable Jacket: A coaxial cable stripper will be used to carefully remove the outer jacket of the cable, exposing the center conductor and shielding. Care will be taken to avoid nicking the center conductor. Preparing Connector: The connector manufacturer\'s instructions will be followed for preparing the connector, which may involve sliding a compression ring onto the cable.', 50, currentY, { width: 500 });
+        
+        currentY += 30;
+        doc.text('Inserting Cable into Connector: The prepared cable will be inserted into the F-type connector, ensuring the center conductor is properly seated. Crimping Connector: A compression tool will be used to crimp the connector, securely fastening the cable in place. Testing: A cable tester will be used to verify the connection, confirming a proper signal path.', 50, currentY, { width: 500 });
+        
+        currentY += 25;
+        doc.fontSize(9)
+           .text('Installation and Configuration', 50, currentY);
+        
+        currentY += 14;
+        doc.fontSize(8)
+           .text('Finishing Touches (If Cable Run Needed): Wall plates will be installed, and F-type jacks will be connected to the terminated cables. All cables will be neatly organized and secured with cable ties or clips.', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.text('SIM Card Installation: The router will be completely powered off before any SIM card insertion or removal. The technician will locate the SIM card slot, carefully insert the SIM card ensuring correct orientation, and securely replace the cover.', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.text('Mounting of Router and Antenna: If wall-mounting is desired and feasible, the router and/or antenna will be secured to the wall using appropriate screws and hardware with neat cable routing.', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.text('Power Connection: The power adapter will be plugged into the router\'s power input and then into a suitable power outlet. The router will be powered on and indicator lights observed to confirm boot-up.', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.text('Router Configuration: A web browser on a connected device will be used to access the router\'s configuration interface. The technician will work with your site contact to change the default password for security, configure cellular settings including APN provided by your cellular carrier, configure network settings as needed, and test the connection using a speed test to confirm primary ISP functionality.', 50, currentY, { width: 500 });
+      }
+
       // Additional notes - if any
       if (assessment.additionalNotes) {
         currentY += 35;

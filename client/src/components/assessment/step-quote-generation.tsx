@@ -462,6 +462,121 @@ export function StepQuoteGeneration({ assessmentId, data }: StepQuoteGenerationP
             </div>
           )}
 
+          {/* Statement of Work for Fixed Wireless (Primary + Antenna) */}
+          {data.serviceType === 'site-assessment' && 
+           data.connectionUsage === 'Primary' && 
+           data.antennaCable === 'Yes' && (
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-nxt-gray-800 mb-4">Scope of Work: Primary Cellular Wireless Router Installation with Antenna Installation</h3>
+              
+              <div className="space-y-4 text-sm text-nxt-gray-700">
+                <p>
+                  This document outlines the scope of work for the installation of a cellular wireless router to serve as your primary internet service provider (ISP) at the designated location. This comprehensive service includes a detailed site survey, preparation and installation of the wireless router, and, if necessary, the running of up to 200 feet of coaxial cable for the installation of an internal antenna to optimize signal strength.
+                </p>
+                
+                <p>
+                  Hardware for this project will be provided by your Wireless Vendor. All necessary materials will be provided by NXTKonekt/Tekumo.
+                </p>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Summary of Services</h4>
+                  <p className="mb-2">Our team will install a cellular wireless router, performing the following key steps:</p>
+                  <ul className="list-disc list-inside space-y-1 ml-4">
+                    <li><strong>Site Survey:</strong> A thorough assessment of your location to determine the optimal placement for the wireless router and, if required, the best position for an external or internal antenna to achieve maximum cellular signal.</li>
+                    <li><strong>Router Preparation:</strong> Unboxing and verifying all components of the wireless router, and reviewing the manufacturer's documentation.</li>
+                    <li><strong>Mounting and Installation:</strong> Securely mounting the router and/or antenna (if applicable) and connecting all necessary components, including power and coaxial cable.</li>
+                    <li><strong>Coaxial Cable Installation (If Needed):</strong> Running and terminating up to 200 feet of coaxial cable to connect the router to a strategically placed internal antenna for enhanced signal reception.</li>
+                    <li><strong>Basic Router Configuration:</strong> Setting up the cellular connection, establishing Wi-Fi connectivity, and performing initial testing to confirm primary internet functionality.</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Our Process</h4>
+                  <p className="mb-2">Here's a detailed breakdown of the steps our technician will take:</p>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Preparation and Planning</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Location Determination:</strong> Our technician will collaborate with your site contact to identify the preferred location for the cellular wireless router. A comprehensive wireless survey using a cellular device will be conducted to determine the optimal position for the antenna, ensuring the best possible signal reception. If cable routing is necessary, the technician will review the above-ceiling space to determine the most efficient and least intrusive cable path.</li>
+                        <li><strong>Route Planning (If Cable Run Needed):</strong> A detailed plan will be developed for the coaxial cable path, aiming to minimize bends and avoid potential interference sources such as power lines or fluorescent lights. Future needs and potential expansion will be considered, allowing for adequate cable slack (at least 5-10 feet).</li>
+                        <li><strong>Hardware Verification:</strong> All hardware, provided by the wireless vendor, will be checked to ensure all components are present and accounted for.</li>
+                        <li><strong>Documentation Review:</strong> The manufacturer's installation guide and user manual for the router will be thoroughly reviewed.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Coaxial Cable Installation (If Required)</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Drilling Holes:</strong> If necessary, holes will be carefully drilled through studs or walls, ensuring they are sufficiently sized for the cable to pass through comfortably. Structural members will be avoided.</li>
+                        <li><strong>Using Fish Tape/Rods:</strong> For routing cable through walls or conduits, fish tape or rods will be utilized to guide the cable, with the cable securely attached.</li>
+                        <li><strong>Pulling Cable:</strong> The cable will be pulled carefully and smoothly, avoiding excessive tension or abrupt movements. The cable's bend radius specifications will be adhered to.</li>
+                        <li><strong>Avoiding Interference:</strong> Coaxial cables will be kept clear of power lines and other sources of electromagnetic interference. If crossing power lines is unavoidable, it will be done at a 90-degree angle.</li>
+                        <li><strong>Securing Cables:</strong> Cable ties or clips will be used to secure the cable along its run, preventing sagging, tangling, or resting on ceiling surfaces. Cable ties will not be overtightened to prevent damage.</li>
+                        <li><strong>Labeling Cables:</strong> Both ends of each installed cable will be clearly labeled with a unique identifier to facilitate future troubleshooting.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Coaxial Cable Termination (If Required)</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Stripping Cable Jacket:</strong> A coaxial cable stripper will be used to carefully remove the outer jacket of the cable, exposing the center conductor and shielding. Care will be taken to avoid nicking the center conductor.</li>
+                        <li><strong>Preparing Connector:</strong> The connector manufacturer's instructions will be followed for preparing the connector, which may involve sliding a compression ring onto the cable.</li>
+                        <li><strong>Inserting Cable into Connector:</strong> The prepared cable will be inserted into the F-type connector, ensuring the center conductor is properly seated.</li>
+                        <li><strong>Crimping Connector:</strong> A compression tool will be used to crimp the connector, securely fastening the cable in place.</li>
+                        <li><strong>Testing:</strong> A cable tester will be used to verify the connection, confirming a proper signal path.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Finishing Touches (If Cable Run Needed)</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Wall Plates and F-Type Jacks:</strong> Wall plates will be installed, and F-type jacks will be connected to the terminated cables.</li>
+                        <li><strong>Cable Management:</strong> All cables will be neatly organized and secured with cable ties or clips.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">SIM Card Installation</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Power Off:</strong> The router will be completely powered off before any SIM card insertion or removal.</li>
+                        <li><strong>SIM Card Slot Location:</strong> The technician will locate the SIM card slot, typically on the side or back of the router.</li>
+                        <li><strong>SIM Card Insertion:</strong> The SIM card will be carefully inserted, ensuring correct orientation. A SIM card insertion tool will be used if provided.</li>
+                        <li><strong>Secure Cover:</strong> The SIM card cover will be securely replaced.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Mounting of Router and Antenna (Optional)</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Wall Mounting:</strong> If wall-mounting is desired and feasible, the router and/or antenna will be secured to the wall using appropriate screws and hardware. The location will be suitable, and cables will be routed neatly.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Power Connection</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Connect Power Adapter:</strong> The power adapter will be plugged into the router's power input and then into a suitable power outlet.</li>
+                        <li><strong>Power ON the Router:</strong> The router will be powered on, and the indicator lights will be observed to confirm boot-up.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Router Configuration</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Accessing Configuration Interface:</strong> A web browser on a connected device will be used to access the router's configuration interface via its IP address.</li>
+                        <li><strong>Login and Password Change:</strong> The default username and password will be entered. The technician will work with your site contact to immediately change the default password for security purposes.</li>
+                        <li><strong>Configure Cellular Connection:</strong> The cellular settings will be configured, including entering the APN (Access Point Name) provided by your cellular carrier.</li>
+                        <li><strong>Configure Network Settings (Optional):</strong> Other network settings like DHCP, DNS, and firewall may be configured based on your specific requirements and the router's documentation.</li>
+                        <li><strong>Test the Connection:</strong> An internet connection test will be performed using a speed test from the browser to confirm primary ISP functionality.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Additional Notes */}
           <div>
             <Label className="text-sm font-medium nxt-gray-800 mb-2">
