@@ -197,7 +197,7 @@ export function StepQuoteGeneration({ assessmentId, data }: StepQuoteGenerationP
                 {(parseFloat(quote.laborHoldHours || '0') > 0 || parseFloat(quote.laborHoldCost || '0') > 0) && (
                   <div className="px-6 py-4">
                     <div className="grid grid-cols-4 gap-4 text-sm">
-                      <span className="nxt-gray-800">Labor hold for possible overage, returned if unused in final billing</span>
+                      <span className="nxt-gray-800">Labor Hold, Final bill Return</span>
                       <span className="nxt-gray-500">{parseFloat(quote.laborHoldHours || '0')}</span>
                       <span className="nxt-gray-500">${parseFloat(quote.hourlyRate || '190')}</span>
                       <span className="font-medium">${parseFloat(quote.laborHoldCost || '0').toFixed(2)}</span>

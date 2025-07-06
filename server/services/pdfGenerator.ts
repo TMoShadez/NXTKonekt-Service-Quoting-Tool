@@ -117,6 +117,7 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
       const removalCost = parseFloat(quote.removalCost?.toString() || '0');
       
       console.log('PDF Labor Hold Debug:', { laborHoldHours, laborHoldCost, quote });
+      console.log('PDF Removal Debug:', { removalHours, removalCost, quote: { removalHours: quote.removalHours, removalCost: quote.removalCost } });
       
       // Survey line (only show if > 0 hours)
       if (surveyHours > 0) {
@@ -165,7 +166,7 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
       // Labor Hold line - ALWAYS show if we have labor hold data
       if (laborHoldHours > 0 || laborHoldCost > 0) {
         doc.fontSize(9)
-           .text('Labor Hold - Overage Reserve', 50, currentY)
+           .text('Labor Hold, Final bill Return', 50, currentY)
            .text(`${laborHoldHours}`, 300, currentY)
            .text(`$${hourlyRate}`, 350, currentY)
            .text(`$${laborHoldCost.toFixed(2)}`, 450, currentY);
