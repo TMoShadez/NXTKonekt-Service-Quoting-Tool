@@ -148,6 +148,7 @@ Changelog:
 - July 6, 2025. Implemented quote deletion functionality: added deleteQuote method to storage interface, created DELETE /api/quotes/:id endpoint with ownership verification, added delete quote mutation to dashboard with error handling and confirmation dialog, users can now delete old quotes using red trash icon in actions column with confirmation prompt
 - July 6, 2025. Added conditional Statement of Work for Fixed Wireless assessments: displays when connection usage is "primary" AND signal strength is "3-bars" (triggering lowSignalAntennaCable question) AND antenna cable is selected "yes", includes comprehensive installation procedures for coaxial cable work, router configuration, and testing, appears in both web quote display and PDF generation with proper formatting
 - July 6, 2025. Optimized Fixed Wireless Statement of Work PDF formatting: improved line spacing and readability with condensed bullet points, organized into 4 clear sections (Preparation, Cable Installation, Termination, Configuration), reduced font sizes for better space utilization while maintaining excellent readability, ensures single-page format with proper spacing between sections
+- July 6, 2025. Fixed PDF text overlapping issues in Fixed Wireless Statement of Work: significantly increased line spacing from 10-12pt to 14-20pt between sections and bullet points, added lineGap property for multiline text, expanded major section spacing to 20-25pt, enhanced bullet point separation to 14pt for clear readability without text overlap
 
 ## User Preferences
 
