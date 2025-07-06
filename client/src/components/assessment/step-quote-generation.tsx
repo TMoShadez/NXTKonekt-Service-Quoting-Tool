@@ -227,6 +227,122 @@ export function StepQuoteGeneration({ assessmentId, data }: StepQuoteGenerationP
             </div>
           </div>
 
+          {/* Statement of Work for Fleet Tracking */}
+          {data.serviceType === 'fleet-tracking' && (
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-nxt-gray-800 mb-4">Statement of Work: Fleet Tracker Equipment Installation (OBD-II)</h3>
+              
+              <div className="space-y-4 text-sm text-nxt-gray-700">
+                <p>
+                  This document outlines the scope of work for the professional installation of 
+                  fleet tracker equipment into your individual vehicle(s) through its Smart Data 
+                  II (OBD-II) port. This service ensures proper device connection and initial 
+                  functionality testing, enabling you to effectively monitor your fleet.
+                </p>
+                
+                <p>
+                  All hardware for the fleet tracker equipment will be provided by your 
+                  designated Wireless Vendor. All necessary installation materials (zip-
+                  ties, mounting tape) will be provided by NXTKonekt/Tekumo.
+                </p>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Summary of Services</h4>
+                  <p>Our designated technician will install fleet tracker equipment in each designated 
+                  vehicle by performing the following key steps:</p>
+                  
+                  <ul className="list-disc list-inside mt-2 space-y-1 ml-4">
+                    <li><strong>Vehicle Preparation:</strong> Identifying the vehicle's OBD-II port and ensuring a 
+                    safe work / accessible installation environment.</li>
+                    <li><strong>Device Connection:</strong> Securely plugging the fleet tracker device into the 
+                    vehicle's OBD-II port.</li>
+                    <li><strong>Cable Management:</strong> Neatly securing the device and any associated 
+                    cabling to prevent interference with vehicle operation and to ensure a 
+                    clean installation.</li>
+                    <li><strong>Device Verification:</strong> Confirming the device is powered on and 
+                    communicating correctly.</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Our Process</h4>
+                  <p>Here's a detailed breakdown of the steps our technician will take for each 
+                  vehicle:</p>
+                  
+                  <div className="mt-2 space-y-3">
+                    <div>
+                      <h5 className="font-medium">1. Pre-Installation Check</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Vehicle Identification:</strong> The technician will confirm the specific vehicle to 
+                        be worked on with your designated contact.</li>
+                        <li><strong>Access Vehicle:</strong> Access the vehicle to begin the installation process.</li>
+                        <li><strong>Locate OBD-II Port:</strong> The technician will locate the vehicle's OBD-II port, 
+                        which is typically found within 3 feet of the steering wheel, often under 
+                        the dashboard on the driver's side.</li>
+                        <li><strong>Assess Installation Area:</strong> A quick assessment of the area around the OBD-
+                        II port will be made to determine the best approach for a secure and 
+                        discrete installation.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium">2. Device Installation</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Connect Device:</strong> The fleet tracker device will be carefully plugged directly 
+                        into the vehicle's OBD-II port.</li>
+                        <li><strong>Verify Initial Power:</strong> The technician will observe the device's indicator 
+                        lights (if applicable) to ensure it is properly powered from the vehicle's 
+                        OBD-II port.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium">3. Cable Management</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Secure Device and Cables:</strong> The device and any associated cables will be 
+                        neatly secured using appropriate mounting materials (zip ties, mounting 
+                        tape) with interfering with vehicle operations, preventing tampering, and 
+                        achieving a discreet and safe installation.</li>
+                        <li><strong>Concealment (where possible):</strong> Efforts will be made to discreetly conceal 
+                        the device and cables without obstructing vehicle controls or access to 
+                        other ports.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium">4. Functionality Verification</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Power Confirmation:</strong> The technician will verify that the device is powered 
+                        and (if applicable) is detected by a specific light pattern message.</li>
+                        <li><strong>Connectivity Check:</strong> If the device has a visual indicator for cellular or GPS 
+                        signal, the technician will observe to confirm it has been 
+                        established or has established a connection. (Note: Full data transmission 
+                        verification may occur remotely by your cellular service provider).</li>
+                        <li><strong>Basic Operation Check:</strong> Ensure the device does not interfere with the 
+                        vehicle's normal systems.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Estimated Time Per Vehicle</h4>
+                  <p>
+                    The estimated time on-site for the installation of one fleet tracker device is 
+                    typically 20 minutes per vehicle, depending on vehicle size and access to the 
+                    OBD-II port access.
+                  </p>
+                  <p className="mt-2">
+                    Work will be completed within a typical timeframe, the final charge will accurately 
+                    reflect the actual time our team spends on-site. This includes the minimum service fee 
+                    plus any additional time for completion. Any on-site challenges or unexpected 
+                    extra work or unforeseen delay. A preliminary Travel hold of $190.00 in total hold.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Additional Notes */}
           <div>
             <Label className="text-sm font-medium nxt-gray-800 mb-2">
