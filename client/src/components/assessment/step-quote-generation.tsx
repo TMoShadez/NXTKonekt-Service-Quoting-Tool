@@ -694,6 +694,141 @@ export function StepQuoteGeneration({ assessmentId, data }: StepQuoteGenerationP
             </div>
           )}
 
+          {/* Third conditional Statement of Work for Fixed Wireless (Failover + Antenna) */}
+          {data.serviceType === 'site-assessment' && 
+           data.connectionUsage === 'failover' && 
+           data.lowSignalAntennaCable === 'yes' && (
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-nxt-gray-800 mb-4">Scope of Work: Comprehensive Cellular Wireless Router Installation</h3>
+              
+              <div className="space-y-4 text-sm text-nxt-gray-700">
+                <p>
+                  This document outlines the scope of work for the installation of a cellular wireless router at your designated location, providing a robust internet solution. This comprehensive service includes a detailed site survey, preparation and installation of the wireless router, potential internal coaxial cabling for an antenna, external penetration for an external antenna (if required), and network cabling back to your server or equipment rack.
+                </p>
+                
+                <p>
+                  Hardware for this project will be provided by your Wireless Vendor. All necessary materials will be provided by NXTKonekt/Tekumo.
+                </p>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Summary of Services</h4>
+                  <p className="mb-2">Our team will install a cellular wireless router, performing the following key steps:</p>
+                  <ul className="list-disc list-inside space-y-1 ml-4">
+                    <li><strong>Site Survey:</strong> A thorough assessment of your location to determine optimal placement for the wireless router and any associated antennas (internal or external) for maximum cellular signal, and to plan the most efficient routes for all necessary cabling.</li>
+                    <li><strong>Router Preparation:</strong> Unboxing and verifying all components of the wireless router, and reviewing the manufacturer's documentation.</li>
+                    <li><strong>Antenna Installation (Internal/External):</strong>
+                      <ul className="list-disc list-inside ml-6 mt-1 space-y-1">
+                        <li>Internal Antenna: If required, installation of an internal antenna with associated coaxial cabling.</li>
+                        <li>External Antenna (Optional): If required for optimal signal, installation of an external antenna, which may involve external building penetration.</li>
+                      </ul>
+                    </li>
+                    <li><strong>Important Note on External Penetrations:</strong> NXTKonekt and Tekumo are not responsible for obtaining permits or securing permission from building owners for any external building penetrations required for external antenna installations. It is the client's sole responsibility to ensure all necessary approvals are in place prior to installation.</li>
+                    <li><strong>Cabling:</strong> Running and terminating necessary coaxial cable for antenna connections (up to 200 feet) and network cabling (e.g., Cat5e/6) from the router back to your server or equipment rack.</li>
+                    <li><strong>Mounting and Installation:</strong> Securely mounting the router and any antennas (internal or external) as determined by the site survey.</li>
+                    <li><strong>Basic Router Configuration:</strong> Setting up the cellular connection, establishing Wi-Fi connectivity (if desired), and configuring the router for integration with your network.</li>
+                    <li><strong>Connection Testing:</strong> Comprehensive testing of all connections to ensure full functionality.</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Our Process</h4>
+                  <p className="mb-2">Here's a detailed breakdown of the steps our technician will take:</p>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Preparation and Planning</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Location Determination:</strong> Our technician will collaborate with your site contact to identify the preferred location for the cellular wireless router and any associated antennas. A comprehensive wireless signal survey using a cellular device will be conducted to determine optimal placement for signal strength.</li>
+                        <li><strong>Cable Path Planning:</strong> Detailed plans will be developed for all cable paths (coaxial for antenna, network for server/rack), aiming to minimize bends, avoid interference sources (e.g., power lines, fluorescent lights), and ensure adherence to building codes. Future needs and potential expansion will be considered, allowing for adequate cable slack.</li>
+                        <li><strong>Hardware Verification:</strong> All hardware, provided by the wireless vendor, will be checked to ensure all components are present and accounted for.</li>
+                        <li><strong>Documentation Review:</strong> The manufacturer's installation guide and user manual for the router and any antennas will be thoroughly reviewed.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">External Antenna Installation (If Required)</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>External Placement Survey:</strong> If an external antenna is deemed necessary for optimal signal, our technician will identify the best outdoor location, considering signal strength, line of sight, and accessibility.</li>
+                        <li><strong>External Penetration:</strong> If required, a controlled penetration through the exterior wall will be made to route the coaxial cable from the external antenna to the router's location. Client acknowledges and agrees that NXTKonekt and Tekumo are not responsible for obtaining any necessary permits or permissions from building owners for external penetrations. This responsibility rests solely with the client.</li>
+                        <li><strong>Antenna Mounting:</strong> The external antenna will be securely mounted using appropriate hardware, ensuring stability and proper orientation for optimal signal reception.</li>
+                        <li><strong>Coaxial Cable Routing (External):</strong> Coaxial cable will be routed from the external antenna, through the penetration, and to the router's location, ensuring weatherproofing at the entry point.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Internal Antenna Installation (If Required)</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Internal Placement Survey:</strong> If an internal antenna is deemed necessary, our technician will identify the best indoor location for optimal signal distribution and aesthetic integration.</li>
+                        <li><strong>Antenna Mounting:</strong> The internal antenna will be securely mounted using appropriate hardware.</li>
+                        <li><strong>Coaxial Cable Routing (Internal):</strong> Coaxial cable will be routed from the internal antenna to the router's location, typically through ceiling spaces or conduit.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Coaxial Cable Installation & Termination (For Antennas)</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Cable Routing:</strong> Coaxial cables will be carefully routed along planned paths, minimizing bends and avoiding interference.</li>
+                        <li><strong>Drilling Holes:</strong> If necessary, holes will be carefully drilled through studs or walls, ensuring they are sufficiently sized for the cable to pass through comfortably. Structural members will be avoided.</li>
+                        <li><strong>Pulling Cable:</strong> Cables will be pulled carefully and smoothly, avoiding excessive tension or abrupt movements. The cable's bend radius specifications will be adhered to.</li>
+                        <li><strong>Avoiding Interference:</strong> Coaxial cables will be kept clear of power lines and other sources of electromagnetic interference. If crossing power lines is unavoidable, it will be done at a 90-degree angle.</li>
+                        <li><strong>Securing Cables:</strong> Cable ties or clips will be used to secure the cable along its run, preventing sagging, tangling, or resting on ceiling surfaces. Cable ties will not be overtightened to prevent damage.</li>
+                        <li><strong>Termination:</strong> Coaxial cables will be stripped and terminated with appropriate F-type connectors using a compression tool, ensuring a secure and reliable connection.</li>
+                        <li><strong>Testing:</strong> A cable tester will be used to verify the integrity and continuity of all coaxial cable runs.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Network Cabling (to Server or Rack)</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Cable Path Planning:</strong> The route for the network cable (e.g., Cat5e/6) from the cellular router to your server or equipment rack will be planned to ensure efficiency and minimize disruption.</li>
+                        <li><strong>Cable Routing:</strong> The network cable will be routed through walls, ceilings, or conduits as required, adhering to industry best practices for data cabling.</li>
+                        <li><strong>Termination:</strong> The network cable will be terminated with RJ45 connectors or jacks at both the router end and the server/rack end, ensuring proper pinout.</li>
+                        <li><strong>Testing:</strong> A network cable tester will be used to verify the integrity and performance of the installed network cable run.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">SIM Card Installation</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Power Off:</strong> The router will be completely powered off before any SIM card insertion or removal.</li>
+                        <li><strong>SIM Card Slot Location:</strong> The technician will locate the SIM card slot, typically on the side or back of the router.</li>
+                        <li><strong>SIM Card Insertion:</strong> The SIM card will be carefully inserted, ensuring correct orientation. A SIM card insertion tool will be used if provided.</li>
+                        <li><strong>Secure Cover:</strong> The SIM card cover will be securely replaced.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Router Mounting & Power Connection</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Mounting:</strong> The router will be securely mounted (e.g., wall-mounted, placed in a rack) as determined during the planning phase.</li>
+                        <li><strong>Power Connection:</strong> The power adapter will be plugged into the router's power input and then into a suitable power outlet.</li>
+                        <li><strong>Power On:</strong> The router will be powered on, and the indicator lights will be observed to confirm boot-up.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Router Configuration</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Accessing Configuration Interface:</strong> A web browser on a connected device will be used to access the router's configuration interface via its IP address.</li>
+                        <li><strong>Login and Password Change:</strong> The default username and password will be entered. The technician will work with your site contact to immediately change the default password for security purposes.</li>
+                        <li><strong>Configure Cellular Connection:</strong> The cellular settings will be configured, including entering the APN (Access Point Name) provided by your cellular carrier.</li>
+                        <li><strong>Configure Network Settings:</strong> Essential network settings such as IP address, DHCP, DNS, and any necessary routing or firewall rules will be configured to integrate the router seamlessly with your existing network infrastructure.</li>
+                        <li><strong>Test the Connection:</strong> An internet connection test will be performed using a speed test from the browser to confirm the cellular connection's speed and reliability.</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Final Testing & Verification</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Comprehensive Testing:</strong> Testing will be conducted to ensure all components (cellular connection, antenna signal, network cable connectivity) are functioning correctly and integrated as planned.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Additional Notes */}
           <div>
             <Label className="text-sm font-medium nxt-gray-800 mb-2">
