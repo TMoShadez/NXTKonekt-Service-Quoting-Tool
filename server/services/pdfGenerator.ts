@@ -357,98 +357,98 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         doc.fontSize(11)
            .text('Scope of Work: Primary Cellular Wireless Router Installation with Antenna Installation', 50, currentY);
         
-        currentY += 15;
+        currentY += 25;
         doc.fontSize(8)
-           .text('This document outlines the scope of work for the installation of a cellular wireless router to serve as your primary internet service provider (ISP) at the designated location. This comprehensive service includes a detailed site survey, preparation and installation of the wireless router, and, if necessary, the running of up to 200 feet of coaxial cable for the installation of an internal antenna to optimize signal strength.', 50, currentY, { width: 500 });
+           .text('This document outlines the scope of work for the installation of a cellular wireless router to serve as your primary internet service provider (ISP) at the designated location. This comprehensive service includes a detailed site survey, preparation and installation of the wireless router, and, if necessary, the running of up to 200 feet of coaxial cable for the installation of an internal antenna to optimize signal strength.', 50, currentY, { width: 500, lineGap: 3 });
         
-        currentY += 20;
-        doc.text('Hardware for this project will be provided by your Wireless Vendor. All necessary materials will be provided by NXTKonekt/Tekumo.', 50, currentY, { width: 500 });
+        currentY += 35;
+        doc.text('Hardware for this project will be provided by your Wireless Vendor. All necessary materials will be provided by NXTKonekt/Tekumo.', 50, currentY, { width: 500, lineGap: 3 });
         
-        currentY += 18;
+        currentY += 30;
         doc.fontSize(9)
            .text('Summary of Services', 50, currentY);
         
-        currentY += 12;
+        currentY += 20;
         doc.fontSize(8)
            .text('Our team will install a cellular wireless router, performing the following key steps:', 50, currentY, { width: 500 });
         
-        currentY += 14;
+        currentY += 20;
         doc.text('• Site Survey: Assessment of location for optimal router/antenna placement', 50, currentY, { width: 500 });
-        currentY += 12;
+        currentY += 16;
         doc.text('• Router Preparation: Unboxing and component verification', 50, currentY, { width: 500 });
-        currentY += 12;
+        currentY += 16;
         doc.text('• Installation: Secure mounting of router/antenna with component connections', 50, currentY, { width: 500 });
-        currentY += 12;
+        currentY += 16;
         doc.text('• Coaxial Cable Installation: Up to 200ft cable run for antenna connection', 50, currentY, { width: 500 });
-        currentY += 12;
+        currentY += 16;
         doc.text('• Configuration: Cellular connection setup and connectivity testing', 50, currentY, { width: 500 });
         
-        currentY += 16;
+        currentY += 25;
         doc.fontSize(9)
            .text('Our Process', 50, currentY);
         
-        currentY += 12;
+        currentY += 20;
         doc.fontSize(8)
            .text('Detailed breakdown of installation steps:', 50, currentY, { width: 500 });
         
-        currentY += 16;
+        currentY += 25;
         doc.fontSize(8)
            .text('1. Preparation and Planning', 50, currentY);
         
-        currentY += 12;
+        currentY += 18;
         doc.fontSize(7)
            .text('• Location Determination: Site contact collaboration to identify optimal router placement', 50, currentY, { width: 500 });
-        currentY += 10;
+        currentY += 14;
         doc.text('• Wireless Survey: Cellular device assessment for best antenna positioning', 50, currentY, { width: 500 });
-        currentY += 10;
+        currentY += 14;
         doc.text('• Route Planning: Cable path design minimizing bends and interference sources', 50, currentY, { width: 500 });
-        currentY += 10;
+        currentY += 14;
         doc.text('• Hardware Verification: Component check and documentation review', 50, currentY, { width: 500 });
         
-        currentY += 14;
+        currentY += 20;
         doc.fontSize(8)
            .text('2. Coaxial Cable Installation (If Required)', 50, currentY);
         
-        currentY += 12;
+        currentY += 18;
         doc.fontSize(7)
            .text('• Drilling: Careful hole creation through walls, avoiding structural members', 50, currentY, { width: 500 });
-        currentY += 10;
+        currentY += 14;
         doc.text('• Cable Routing: Fish tape/rod guidance through walls and conduits', 50, currentY, { width: 500 });
-        currentY += 10;
+        currentY += 14;
         doc.text('• Cable Pulling: Smooth installation adhering to bend radius specifications', 50, currentY, { width: 500 });
-        currentY += 10;
+        currentY += 14;
         doc.text('• Interference Avoidance: Clear of power lines and electromagnetic sources', 50, currentY, { width: 500 });
-        currentY += 10;
+        currentY += 14;
         doc.text('• Securing & Labeling: Cable ties for support, unique ID labels for troubleshooting', 50, currentY, { width: 500 });
         
-        currentY += 14;
+        currentY += 20;
         doc.fontSize(8)
            .text('3. Cable Termination (If Required)', 50, currentY);
         
-        currentY += 12;
+        currentY += 18;
         doc.fontSize(7)
            .text('• Cable Preparation: Precision stripping to expose conductor and shielding', 50, currentY, { width: 500 });
-        currentY += 10;
+        currentY += 14;
         doc.text('• Connector Installation: F-type connector attachment per manufacturer specs', 50, currentY, { width: 500 });
-        currentY += 10;
+        currentY += 14;
         doc.text('• Crimping & Testing: Compression tool securing and cable tester verification', 50, currentY, { width: 500 });
         
-        currentY += 14;
+        currentY += 20;
         doc.fontSize(8)
            .text('4. Installation and Configuration', 50, currentY);
         
-        currentY += 12;
+        currentY += 18;
         doc.fontSize(7)
            .text('• Wall Plate Installation: F-type jacks connected to terminated cables', 50, currentY, { width: 500 });
-        currentY += 10;
+        currentY += 14;
         doc.text('• SIM Card Installation: Proper orientation and secure placement', 50, currentY, { width: 500 });
-        currentY += 10;
+        currentY += 14;
         doc.text('• Router Mounting: Wall mounting with appropriate hardware (if requested)', 50, currentY, { width: 500 });
-        currentY += 10;
+        currentY += 14;
         doc.text('• Power Connection: Adapter connection and boot-up verification', 50, currentY, { width: 500 });
-        currentY += 10;
+        currentY += 14;
         doc.text('• Router Configuration: Password setup, APN configuration, and connectivity testing', 50, currentY, { width: 500 });
-        currentY += 10;
+        currentY += 14;
         doc.text('• Final Testing: Speed test confirmation of primary ISP functionality', 50, currentY, { width: 500 });
       }
 
