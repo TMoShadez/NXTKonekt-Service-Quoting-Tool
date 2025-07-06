@@ -117,7 +117,18 @@ function calculateFleetTrackingPricing(assessment: Assessment): PricingBreakdown
 
 function calculateFleetCameraPricing(assessment: Assessment): PricingBreakdown {
   let surveyHours = 0;
-  let installationHours = 1;
+  
+  // Base calculation: 1 hour per vehicle (includes 1 camera per vehicle)
+  const vehicleCount = assessment.deviceCount || 1;
+  let installationHours = vehicleCount;
+  
+  // Additional labor for extra cameras beyond 1 per vehicle
+  const numberOfCameras = assessment.numberOfCameras || vehicleCount;
+  if (numberOfCameras > vehicleCount) {
+    const extraCameras = numberOfCameras - vehicleCount;
+    const extraCameraHours = extraCameras * 0.5; // 0.5 hours per additional camera
+    installationHours += extraCameraHours;
+  }
   
   // Add exactly 1 additional labor hold hour
   const laborHoldHours = 1;

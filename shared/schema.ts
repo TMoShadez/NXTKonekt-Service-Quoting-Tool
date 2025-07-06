@@ -98,6 +98,13 @@ export const assessments = pgTable("assessments", {
   interferenceSources: text("interference_sources"),
   specialRequirements: text("special_requirements"),
   
+  // Fleet Camera specific fields
+  cameraSolutionType: varchar("camera_solution_type"),
+  numberOfCameras: integer("number_of_cameras"),
+  removalNeeded: varchar("removal_needed"),
+  existingCameraSolution: varchar("existing_camera_solution"),
+  otherSolutionDetails: text("other_solution_details"),
+  
   // Fleet Tracking specific fields
   totalFleetSize: integer("total_fleet_size"),
   vehicleYear: integer("vehicle_year"),
