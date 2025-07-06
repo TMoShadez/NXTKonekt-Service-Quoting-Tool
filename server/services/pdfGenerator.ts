@@ -348,8 +348,8 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
 
       // Statement of Work for Fixed Wireless (Primary + Antenna) - optimized for readability
       if (assessment.serviceType === 'site-assessment' && 
-          assessment.connectionUsage === 'Primary' && 
-          assessment.antennaCable === 'Yes') {
+          assessment.connectionUsage === 'primary' && 
+          assessment.lowSignalAntennaCable === 'yes') {
         // Always start on new page for SOW to keep it organized
         doc.addPage();
         currentY = 50;

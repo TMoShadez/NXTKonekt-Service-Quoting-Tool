@@ -464,8 +464,8 @@ export function StepQuoteGeneration({ assessmentId, data }: StepQuoteGenerationP
 
           {/* Statement of Work for Fixed Wireless (Primary + Antenna) */}
           {data.serviceType === 'site-assessment' && 
-           data.connectionUsage === 'Primary' && 
-           data.antennaCable === 'Yes' && (
+           data.connectionUsage === 'primary' && 
+           data.lowSignalAntennaCable === 'yes' && (
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-nxt-gray-800 mb-4">Scope of Work: Primary Cellular Wireless Router Installation with Antenna Installation</h3>
               
