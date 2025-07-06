@@ -599,162 +599,109 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
            .text('While we aim for completion within a typical timeframe, the final charge will accurately reflect the actual time our team spends on-site. This includes the minimum service fee plus any additional time (billed at $190 per hour in 15-minute increments) needed for extra work or unforeseen issues. A preliminary Credit Hold of $380.00 in total Hold Amount. This will cover most external penetrations, or ceiling issues.', 50, currentY, { width: 500, lineGap: 3 });
       }
 
-      // Statement of Work for Fixed Wireless (Failover + Antenna) - optimized for readability
+      // Statement of Work for Fixed Wireless (Failover + Antenna) - ultra-condensed format
       if (assessment.serviceType === 'site-assessment' && 
           assessment.connectionUsage === 'failover' && 
           assessment.lowSignalAntennaCable === 'yes') {
+        
         // Always start on new page for SOW to keep it organized
         doc.addPage();
         currentY = 50;
         
-        doc.fontSize(11)
-           .text('Scope of Work: Comprehensive Cellular Wireless Router Installation', 50, currentY);
+        // Compact title
+        doc.fontSize(12).font('Helvetica-Bold')
+           .text('Scope of Work: Failover Cellular Router with Antenna Installation', 50, currentY, { width: 500 });
+        currentY += 20;
         
+        // Brief introduction
+        doc.fontSize(8).font('Helvetica')
+           .text('Installation of cellular wireless router as failover ISP with antenna and network cabling to server/rack. Hardware provided by Wireless Vendor, materials by NXTKonekt.', 50, currentY, { width: 500, lineGap: 3 });
         currentY += 25;
-        doc.fontSize(8)
-           .text('This document outlines the scope of work for the installation of a cellular wireless router at your designated location, providing a robust internet solution. This comprehensive service includes a detailed site survey, preparation and installation of the wireless router, potential internal coaxial cabling for an antenna, external penetration for an external antenna (if required), and network cabling back to your server or equipment rack.', 50, currentY, { width: 500, lineGap: 3 });
         
-        currentY += 35;
-        doc.text('Hardware for this project will be provided by your Wireless Vendor. All necessary materials will be provided by NXTKonekt/Tekumo.', 50, currentY, { width: 500, lineGap: 3 });
-        
-        currentY += 30;
-        doc.fontSize(9)
-           .text('Summary of Services', 50, currentY);
-        
-        currentY += 20;
-        doc.fontSize(8)
-           .text('Our team will install a cellular wireless router, performing the following key steps:', 50, currentY, { width: 500 });
-        
-        currentY += 20;
-        doc.text('• Site Survey: A thorough assessment of your location to determine optimal placement for the wireless router and any associated antennas (internal or external) for maximum cellular signal, and to plan the most efficient routes for all necessary cabling', 50, currentY, { width: 500 });
-        currentY += 16;
-        doc.text('• Router Preparation: Unboxing and verifying all components of the wireless router, and reviewing the manufacturer\'s documentation', 50, currentY, { width: 500 });
-        currentY += 16;
-        doc.text('• Antenna Installation (Internal/External):', 50, currentY, { width: 500 });
+        // Compact service summary
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Services Included', 50, currentY, { width: 500 });
         currentY += 14;
-        doc.text('  - Internal Antenna: If required, installation of an internal antenna with associated coaxial cabling', 50, currentY, { width: 500 });
+        
+        doc.fontSize(7).font('Helvetica')
+           .text('• Site survey & signal assessment • Router preparation & documentation review', 50, currentY, { width: 500, lineGap: 2 });
         currentY += 12;
-        doc.text('  - External Antenna (Optional): If required for optimal signal, installation of an external antenna, which may involve external building penetration', 50, currentY, { width: 500 });
-        currentY += 16;
-        doc.text('• Important Note on External Penetrations: NXTKonekt and Tekumo are not responsible for obtaining permits or securing permission from building owners for any external building penetrations required for external antenna installations. It is the client\'s sole responsibility to ensure all necessary approvals are in place prior to installation', 50, currentY, { width: 500 });
-        currentY += 18;
-        doc.text('• Cabling: Running and terminating necessary coaxial cable for antenna connections (up to 200 feet) and network cabling (e.g., Cat5e/6) from the router back to your server or equipment rack', 50, currentY, { width: 500 });
-        currentY += 16;
-        doc.text('• Mounting and Installation: Securely mounting the router and any antennas (internal or external) as determined by the site survey', 50, currentY, { width: 500 });
-        currentY += 16;
-        doc.text('• Basic Router Configuration: Setting up the cellular connection, establishing Wi-Fi connectivity (if desired), and configuring the router for integration with your network', 50, currentY, { width: 500 });
-        currentY += 16;
-        doc.text('• Connection Testing: Comprehensive testing of all connections to ensure full functionality', 50, currentY, { width: 500 });
         
-        currentY += 25;
-        doc.fontSize(11).font('Helvetica-Bold')
-           .text('Our Process', 50, currentY, { width: 500 });
+        doc.text('• Internal/external antenna installation • Coaxial cable routing & termination', 50, currentY, { width: 500, lineGap: 2 });
+        currentY += 12;
+        
+        doc.text('• Network cabling to server/rack • Router mounting & power connection', 50, currentY, { width: 500, lineGap: 2 });
+        currentY += 12;
+        
+        doc.text('• SIM card installation • Router configuration & testing', 50, currentY, { width: 500, lineGap: 2 });
         currentY += 18;
         
-        doc.fontSize(9).font('Helvetica')
-           .text('Detailed breakdown of installation steps:', 50, currentY, { width: 500, lineGap: 4 });
-        currentY += 18;
+        // Important notes section
+        doc.fontSize(8).font('Helvetica-Bold')
+           .text('Important Notes', 50, currentY, { width: 500 });
+        currentY += 12;
         
-        // Preparation and Planning
+        doc.fontSize(7).font('Helvetica')
+           .text('• External penetration permits are client responsibility', 50, currentY, { width: 500, lineGap: 2 });
+        currentY += 10;
+        
+        doc.text('• Up to 200 feet of coaxial cable included', 50, currentY, { width: 500, lineGap: 2 });
+        currentY += 20;
+        
+        // Detailed process - highly condensed
         doc.fontSize(10).font('Helvetica-Bold')
-           .text('Preparation and Planning', 50, currentY, { width: 500 });
-        currentY += 16;
-        
-        doc.fontSize(8).font('Helvetica')
-           .text('• Site survey for router/antenna placement and signal strength assessment', 50, currentY, { width: 500, lineGap: 3 });
+           .text('Installation Process', 50, currentY, { width: 500 });
         currentY += 14;
         
-        doc.text('• Cable path planning for coaxial and network runs with interference avoidance', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 14;
+        // Step 1
+        doc.fontSize(8).font('Helvetica-Bold')
+           .text('1. Site Survey & Planning', 50, currentY, { width: 500 });
+        currentY += 12;
         
-        doc.text('• Hardware verification and documentation review', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 18;
-        
-        // External Antenna Installation
-        doc.fontSize(10).font('Helvetica-Bold')
-           .text('External Antenna Installation (If Required)', 50, currentY, { width: 500 });
+        doc.fontSize(7).font('Helvetica')
+           .text('Signal strength assessment, optimal router/antenna placement, cable path planning with interference avoidance, hardware verification.', 50, currentY, { width: 500, lineGap: 2 });
         currentY += 16;
         
-        doc.fontSize(8).font('Helvetica')
-           .text('• Survey outdoor location, make controlled wall penetration (permits by client)', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 14;
+        // Step 2
+        doc.fontSize(8).font('Helvetica-Bold')
+           .text('2. Antenna Installation', 50, currentY, { width: 500 });
+        currentY += 12;
         
-        doc.text('• Mount antenna securely, route coaxial cable with weatherproofing', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 18;
+        doc.fontSize(7).font('Helvetica')
+           .text('External: Survey location, controlled wall penetration, secure mounting, weatherproof cable routing.', 50, currentY, { width: 500, lineGap: 2 });
+        currentY += 10;
         
-        // Internal Antenna Installation
-        doc.fontSize(10).font('Helvetica-Bold')
-           .text('Internal Antenna Installation (If Required)', 50, currentY, { width: 500 });
+        doc.text('Internal: Indoor location survey, secure mounting, ceiling/conduit cable routing.', 50, currentY, { width: 500, lineGap: 2 });
         currentY += 16;
         
-        doc.fontSize(8).font('Helvetica')
-           .text('• Survey indoor location, mount antenna securely, route coaxial through ceiling/conduit', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 18;
+        // Step 3
+        doc.fontSize(8).font('Helvetica-Bold')
+           .text('3. Cable Installation', 50, currentY, { width: 500 });
+        currentY += 12;
         
-        // Coaxial Cable Installation & Termination
-        doc.fontSize(10).font('Helvetica-Bold')
-           .text('Coaxial Cable Installation & Termination', 50, currentY, { width: 500 });
+        doc.fontSize(7).font('Helvetica')
+           .text('Coaxial: Careful routing, drilling as needed, secure with ties, F-type termination, integrity testing.', 50, currentY, { width: 500, lineGap: 2 });
+        currentY += 10;
+        
+        doc.text('Network: Route to server/rack through walls/ceilings, RJ45 termination, performance testing.', 50, currentY, { width: 500, lineGap: 2 });
         currentY += 16;
         
-        doc.fontSize(8).font('Helvetica')
-           .text('• Route cables carefully, drill holes as needed, avoid interference sources', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 14;
+        // Step 4
+        doc.fontSize(8).font('Helvetica-Bold')
+           .text('4. Router Setup & Configuration', 50, currentY, { width: 500 });
+        currentY += 12;
         
-        doc.text('• Secure with cable ties, terminate with F-type connectors, test integrity', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 18;
-        
-        // Network Cabling
-        doc.fontSize(10).font('Helvetica-Bold')
-           .text('Network Cabling (to Server or Rack)', 50, currentY, { width: 500 });
+        doc.fontSize(7).font('Helvetica')
+           .text('SIM installation, secure mounting, power connection, web interface access, password change, cellular APN configuration, network settings (IP/DHCP/DNS), routing rules, speed testing.', 50, currentY, { width: 500, lineGap: 2 });
         currentY += 16;
         
-        doc.fontSize(8).font('Helvetica')
-           .text('• Plan cable route, install through walls/ceilings, terminate with RJ45', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 14;
+        // Step 5
+        doc.fontSize(8).font('Helvetica-Bold')
+           .text('5. Final Testing', 50, currentY, { width: 500 });
+        currentY += 12;
         
-        doc.text('• Test cable integrity and performance with network tester', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 18;
-        
-        // SIM Card Installation
-        doc.fontSize(10).font('Helvetica-Bold')
-           .text('SIM Card Installation', 50, currentY, { width: 500 });
-        currentY += 16;
-        
-        doc.fontSize(8).font('Helvetica')
-           .text('• Power off router, locate SIM slot, insert card with proper orientation, secure cover', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 18;
-        
-        // Mounting & Power
-        doc.fontSize(10).font('Helvetica-Bold')
-           .text('Mounting & Power Connection', 50, currentY, { width: 500 });
-        currentY += 16;
-        
-        doc.fontSize(8).font('Helvetica')
-           .text('• Secure mounting (wall/rack), connect power adapter, power on router', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 18;
-        
-        // Router Configuration
-        doc.fontSize(10).font('Helvetica-Bold')
-           .text('Router Configuration', 50, currentY, { width: 500 });
-        currentY += 16;
-        
-        doc.fontSize(8).font('Helvetica')
-           .text('• Access web interface, change default password, configure cellular APN', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 14;
-        
-        doc.text('• Set network settings (IP, DHCP, DNS), configure routing and firewall rules', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 14;
-        
-        doc.text('• Perform speed test to confirm cellular connection reliability', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 18;
-        
-        // Final Testing
-        doc.fontSize(10).font('Helvetica-Bold')
-           .text('Final Testing & Verification', 50, currentY, { width: 500 });
-        currentY += 16;
-        
-        doc.fontSize(8).font('Helvetica')
-           .text('• Test all components (cellular, antenna signal, network cable) for proper integration', 50, currentY, { width: 500, lineGap: 3 });
+        doc.fontSize(7).font('Helvetica')
+           .text('Comprehensive testing of cellular connection, antenna signal strength, network cable connectivity, and system integration.', 50, currentY, { width: 500, lineGap: 2 });
       }
 
       // Fourth conditional Statement of Work for Fixed Wireless (Failover Only - No Antenna) - optimized for readability
