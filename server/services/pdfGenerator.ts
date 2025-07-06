@@ -647,136 +647,114 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         doc.text('• Connection Testing: Comprehensive testing of all connections to ensure full functionality', 50, currentY, { width: 500 });
         
         currentY += 25;
-        doc.fontSize(9)
-           .text('Our Process', 50, currentY);
-        
-        currentY += 20;
-        doc.fontSize(8)
-           .text('Detailed breakdown of installation steps:', 50, currentY, { width: 500 });
-        
-        currentY += 25;
-        doc.fontSize(8)
-           .text('Preparation and Planning', 50, currentY);
-        
+        doc.fontSize(11).font('Helvetica-Bold')
+           .text('Our Process', 50, currentY, { width: 500 });
         currentY += 18;
-        doc.fontSize(7)
-           .text('• Location Determination: Our technician will collaborate with your site contact to identify the preferred location for the cellular wireless router and any associated antennas. A comprehensive wireless signal survey using a cellular device will be conducted to determine optimal placement for signal strength', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Cable Path Planning: Detailed plans will be developed for all cable paths (coaxial for antenna, network for server/rack), aiming to minimize bends, avoid interference sources (e.g., power lines, fluorescent lights), and ensure adherence to building codes. Future needs and potential expansion will be considered, allowing for adequate cable slack', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Hardware Verification: All hardware, provided by the wireless vendor, will be checked to ensure all components are present and accounted for', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Documentation Review: The manufacturer\'s installation guide and user manual for the router and any antennas will be thoroughly reviewed', 50, currentY, { width: 500 });
         
-        currentY += 20;
-        doc.fontSize(8)
-           .text('External Antenna Installation (If Required)', 50, currentY);
-        
+        doc.fontSize(9).font('Helvetica')
+           .text('Detailed breakdown of installation steps:', 50, currentY, { width: 500, lineGap: 4 });
         currentY += 18;
-        doc.fontSize(7)
-           .text('• External Placement Survey: If an external antenna is deemed necessary for optimal signal, our technician will identify the best outdoor location, considering signal strength, line of sight, and accessibility', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• External Penetration: If required, a controlled penetration through the exterior wall will be made to route the coaxial cable from the external antenna to the router\'s location. Client acknowledges and agrees that NXTKonekt and Tekumo are not responsible for obtaining any necessary permits or permissions from building owners for external penetrations. This responsibility rests solely with the client', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Antenna Mounting: The external antenna will be securely mounted using appropriate hardware, ensuring stability and proper orientation for optimal signal reception', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Coaxial Cable Routing (External): Coaxial cable will be routed from the external antenna, through the penetration, and to the router\'s location, ensuring weatherproofing at the entry point', 50, currentY, { width: 500 });
         
-        currentY += 20;
-        doc.fontSize(8)
-           .text('Internal Antenna Installation (If Required)', 50, currentY);
+        // Preparation and Planning
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Preparation and Planning', 50, currentY, { width: 500 });
+        currentY += 16;
         
+        doc.fontSize(8).font('Helvetica')
+           .text('• Site survey for router/antenna placement and signal strength assessment', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
+        
+        doc.text('• Cable path planning for coaxial and network runs with interference avoidance', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
+        
+        doc.text('• Hardware verification and documentation review', 50, currentY, { width: 500, lineGap: 3 });
         currentY += 18;
-        doc.fontSize(7)
-           .text('• Internal Placement Survey: If an internal antenna is deemed necessary, our technician will identify the best indoor location for optimal signal distribution and aesthetic integration', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Antenna Mounting: The internal antenna will be securely mounted using appropriate hardware', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Coaxial Cable Routing (Internal): Coaxial cable will be routed from the internal antenna to the router\'s location, typically through ceiling spaces or conduit', 50, currentY, { width: 500 });
         
-        currentY += 20;
-        doc.fontSize(8)
-           .text('Coaxial Cable Installation & Termination (For Antennas)', 50, currentY);
+        // External Antenna Installation
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('External Antenna Installation (If Required)', 50, currentY, { width: 500 });
+        currentY += 16;
         
+        doc.fontSize(8).font('Helvetica')
+           .text('• Survey outdoor location, make controlled wall penetration (permits by client)', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
+        
+        doc.text('• Mount antenna securely, route coaxial cable with weatherproofing', 50, currentY, { width: 500, lineGap: 3 });
         currentY += 18;
-        doc.fontSize(7)
-           .text('• Cable Routing: Coaxial cables will be carefully routed along planned paths, minimizing bends and avoiding interference', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Drilling Holes: If necessary, holes will be carefully drilled through studs or walls, ensuring they are sufficiently sized for the cable to pass through comfortably. Structural members will be avoided', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Pulling Cable: Cables will be pulled carefully and smoothly, avoiding excessive tension or abrupt movements. The cable\'s bend radius specifications will be adhered to', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Avoiding Interference: Coaxial cables will be kept clear of power lines and other sources of electromagnetic interference. If crossing power lines is unavoidable, it will be done at a 90-degree angle', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Securing Cables: Cable ties or clips will be used to secure the cable along its run, preventing sagging, tangling, or resting on ceiling surfaces. Cable ties will not be overtightened to prevent damage', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Termination: Coaxial cables will be stripped and terminated with appropriate F-type connectors using a compression tool, ensuring a secure and reliable connection', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Testing: A cable tester will be used to verify the integrity and continuity of all coaxial cable runs', 50, currentY, { width: 500 });
         
-        currentY += 20;
-        doc.fontSize(8)
-           .text('Network Cabling (to Server or Rack)', 50, currentY);
+        // Internal Antenna Installation
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Internal Antenna Installation (If Required)', 50, currentY, { width: 500 });
+        currentY += 16;
         
+        doc.fontSize(8).font('Helvetica')
+           .text('• Survey indoor location, mount antenna securely, route coaxial through ceiling/conduit', 50, currentY, { width: 500, lineGap: 3 });
         currentY += 18;
-        doc.fontSize(7)
-           .text('• Cable Path Planning: The route for the network cable (e.g., Cat5e/6) from the cellular router to your server or equipment rack will be planned to ensure efficiency and minimize disruption', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Cable Routing: The network cable will be routed through walls, ceilings, or conduits as required, adhering to industry best practices for data cabling', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Termination: The network cable will be terminated with RJ45 connectors or jacks at both the router end and the server/rack end, ensuring proper pinout', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Testing: A network cable tester will be used to verify the integrity and performance of the installed network cable run', 50, currentY, { width: 500 });
         
-        currentY += 20;
-        doc.fontSize(8)
-           .text('SIM Card Installation', 50, currentY);
+        // Coaxial Cable Installation & Termination
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Coaxial Cable Installation & Termination', 50, currentY, { width: 500 });
+        currentY += 16;
         
+        doc.fontSize(8).font('Helvetica')
+           .text('• Route cables carefully, drill holes as needed, avoid interference sources', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
+        
+        doc.text('• Secure with cable ties, terminate with F-type connectors, test integrity', 50, currentY, { width: 500, lineGap: 3 });
         currentY += 18;
-        doc.fontSize(7)
-           .text('• Power Off: The router will be completely powered off before any SIM card insertion or removal', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• SIM Card Slot Location: The technician will locate the SIM card slot, typically on the side or back of the router', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• SIM Card Insertion: The SIM card will be carefully inserted, ensuring correct orientation. A SIM card insertion tool will be used if provided', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Secure Cover: The SIM card cover will be securely replaced', 50, currentY, { width: 500 });
         
-        currentY += 20;
-        doc.fontSize(8)
-           .text('Router Mounting & Power Connection', 50, currentY);
+        // Network Cabling
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Network Cabling (to Server or Rack)', 50, currentY, { width: 500 });
+        currentY += 16;
         
+        doc.fontSize(8).font('Helvetica')
+           .text('• Plan cable route, install through walls/ceilings, terminate with RJ45', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
+        
+        doc.text('• Test cable integrity and performance with network tester', 50, currentY, { width: 500, lineGap: 3 });
         currentY += 18;
-        doc.fontSize(7)
-           .text('• Mounting: The router will be securely mounted (e.g., wall-mounted, placed in a rack) as determined during the planning phase', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Power Connection: The power adapter will be plugged into the router\'s power input and then into a suitable power outlet', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Power On: The router will be powered on, and the indicator lights will be observed to confirm boot-up', 50, currentY, { width: 500 });
         
-        currentY += 20;
-        doc.fontSize(8)
-           .text('Router Configuration', 50, currentY);
+        // SIM Card Installation
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('SIM Card Installation', 50, currentY, { width: 500 });
+        currentY += 16;
         
+        doc.fontSize(8).font('Helvetica')
+           .text('• Power off router, locate SIM slot, insert card with proper orientation, secure cover', 50, currentY, { width: 500, lineGap: 3 });
         currentY += 18;
-        doc.fontSize(7)
-           .text('• Accessing Configuration Interface: A web browser on a connected device will be used to access the router\'s configuration interface via its IP address', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Login and Password Change: The default username and password will be entered. The technician will work with your site contact to immediately change the default password for security purposes', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Configure Cellular Connection: The cellular settings will be configured, including entering the APN (Access Point Name) provided by your cellular carrier', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Configure Network Settings: Essential network settings such as IP address, DHCP, DNS, and any necessary routing or firewall rules will be configured to integrate the router seamlessly with your existing network infrastructure', 50, currentY, { width: 500 });
-        currentY += 14;
-        doc.text('• Test the Connection: An internet connection test will be performed using a speed test from the browser to confirm the cellular connection\'s speed and reliability', 50, currentY, { width: 500 });
         
-        currentY += 20;
-        doc.fontSize(8)
-           .text('Final Testing & Verification', 50, currentY);
+        // Mounting & Power
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Mounting & Power Connection', 50, currentY, { width: 500 });
+        currentY += 16;
         
+        doc.fontSize(8).font('Helvetica')
+           .text('• Secure mounting (wall/rack), connect power adapter, power on router', 50, currentY, { width: 500, lineGap: 3 });
         currentY += 18;
-        doc.fontSize(7)
-           .text('• Comprehensive testing will be conducted to ensure all components (cellular connection, antenna signal, network cable connectivity) are functioning correctly and integrated as planned', 50, currentY, { width: 500 });
+        
+        // Router Configuration
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Router Configuration', 50, currentY, { width: 500 });
+        currentY += 16;
+        
+        doc.fontSize(8).font('Helvetica')
+           .text('• Access web interface, change default password, configure cellular APN', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
+        
+        doc.text('• Set network settings (IP, DHCP, DNS), configure routing and firewall rules', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
+        
+        doc.text('• Perform speed test to confirm cellular connection reliability', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 18;
+        
+        // Final Testing
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Final Testing & Verification', 50, currentY, { width: 500 });
+        currentY += 16;
+        
+        doc.fontSize(8).font('Helvetica')
+           .text('• Test all components (cellular, antenna signal, network cable) for proper integration', 50, currentY, { width: 500, lineGap: 3 });
       }
 
       // Fourth conditional Statement of Work for Fixed Wireless (Failover Only - No Antenna) - optimized for readability
