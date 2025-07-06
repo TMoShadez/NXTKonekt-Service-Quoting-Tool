@@ -355,6 +355,113 @@ export function StepQuoteGeneration({ assessmentId, data }: StepQuoteGenerationP
             </div>
           )}
 
+          {/* Statement of Work for Fleet Camera */}
+          {data.serviceType === 'fleet-camera' && (
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-nxt-gray-800 mb-4">Statement of Work: Fleet Camera Dashcam and Optional External Camera Installation</h3>
+              
+              <div className="space-y-4 text-sm text-nxt-gray-700">
+                <p>
+                  This document outlines the scope of work for the professional installation of 
+                  fleet camera equipment into your individual vehicle(s) including dashcams, external 
+                  cameras, and optional existing system removal. This service ensures proper device 
+                  connection and initial functionality testing, enabling you to effectively monitor your fleet.
+                </p>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Summary of Services</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-4">
+                    <li>Vehicle Preparation: Pre-installation check and planning</li>
+                    <li>Fleet Camera Dashcam Installation: Professional installation for optimal performance</li>
+                    <li>Optional External Camera Installation (if selected): Additional camera points for comprehensive coverage</li>
+                    <li>Optional Fleet Tracker Installation (if selected): Integration with existing fleet management systems</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Our Process</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Pre-Installation Check and Planning</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Vehicle Identification:</strong> Confirm vehicle details and access requirements</li>
+                        <li><strong>Power Assessment:</strong> Verify adequate power supply and identify optimal power connection points</li>
+                        <li><strong>Camera Positioning:</strong> Determine optimal camera placement for maximum coverage while maintaining driver visibility</li>
+                        <li><strong>Wiring Route Planning:</strong> Plan efficient and secure cable routing to minimize interference</li>
+                        <li><strong>Asset Verification:</strong> Confirm all required equipment and materials are available</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Fleet Camera Dashcam Installation</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Mounting:</strong> Securely mount dashcam in optimal position for clear forward view</li>
+                        <li><strong>Power Connection:</strong> Connect to vehicle power system with proper voltage protection</li>
+                        <li><strong>Cable Management:</strong> Route and secure all cables to prevent interference with vehicle operation</li>
+                        <li><strong>Initial Setup:</strong> Configure basic camera settings and verify proper operation</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Optional External Camera Installation (if selected)</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>Camera Positioning:</strong> Install external cameras at specified locations (rear, side, etc.)</li>
+                        <li><strong>Weather Protection:</strong> Ensure all external connections are properly sealed and weatherproofed</li>
+                        <li><strong>Integration:</strong> Connect external cameras to main dashcam unit or recording system</li>
+                        <li><strong>Testing:</strong> Verify all camera feeds are properly integrated and functioning</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-nxt-gray-800 mb-1">Optional Fleet Tracker Installation (if selected)</h5>
+                      <ul className="list-disc list-inside mt-1 space-y-1 ml-4 text-xs">
+                        <li><strong>OBD-II Connection:</strong> Connect fleet tracker to vehicle's diagnostic port</li>
+                        <li><strong>Power Verification:</strong> Confirm tracker receives adequate power and signal</li>
+                        <li><strong>Integration Testing:</strong> Verify tracker communicates properly with fleet management system</li>
+                        <li><strong>Calibration:</strong> Ensure accurate location and vehicle data reporting</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Functionality Verification</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-4 text-xs">
+                    <li><strong>Power Test:</strong> Verify all devices receive proper power and show correct status indicators</li>
+                    <li><strong>Recording Test:</strong> Confirm all cameras are recording properly with clear image quality</li>
+                    <li><strong>Storage Verification:</strong> Ensure adequate storage capacity and proper file management</li>
+                    <li><strong>System Integration:</strong> Verify all components work together seamlessly</li>
+                    <li><strong>Final Inspection:</strong> Complete system check to ensure professional installation quality</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Post-Installation Clean-up</h4>
+                  <p>
+                    Remove all installation materials and packaging. Ensure vehicle interior is clean and professional. 
+                    Provide basic operation instructions and contact information for support.
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-nxt-gray-800 mb-2">Estimated Time Per Vehicle</h4>
+                  <ul className="list-disc list-inside space-y-1 ml-4 text-xs">
+                    <li><strong>Fleet Camera Dashcam Only:</strong> Approximately 45-60 minutes per vehicle</li>
+                    <li><strong>Fleet Camera Dashcam + Optional External Cameras:</strong> Approximately 60-90 minutes per vehicle</li>
+                    <li><strong>Fleet Camera Dashcam + Optional Fleet Tracker:</strong> Approximately 60-75 minutes per vehicle</li>
+                    <li><strong>Complete Installation (All Components):</strong> Approximately 75-120 minutes per vehicle</li>
+                  </ul>
+                  <p className="mt-2 text-xs">
+                    Work will be completed within a typical timeframe, the final charge will accurately 
+                    reflect the actual time our team spends on-site. This includes the minimum service fee 
+                    plus any additional time for completion. Any on-site challenges or unexpected 
+                    extra work or unforeseen delay. A preliminary labor hold of $190.00 in total hold.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Additional Notes */}
           <div>
             <Label className="text-sm font-medium nxt-gray-800 mb-2">
