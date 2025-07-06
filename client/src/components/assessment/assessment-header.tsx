@@ -31,7 +31,7 @@ export function AssessmentHeader({
               <div className="h-6 w-6 bg-nxt-blue rounded-lg flex items-center justify-center mr-2">
                 <Wifi className="text-white" size={14} />
               </div>
-              <h1 className="text-xl font-semibold nxt-gray-800">Site Assessment</h1>
+              <h1 className="text-xl font-semibold nxt-gray-800">Fixed Wireless Access Assessment</h1>
             </div>
           </div>
           

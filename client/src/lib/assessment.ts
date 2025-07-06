@@ -22,7 +22,7 @@ export const ASSESSMENT_STEPS: AssessmentStep[] = [
   },
   {
     id: 3,
-    title: "Site Assessment",
+    title: "Fixed Wireless Access Assessment",
     description: "Assess technical requirements and site characteristics",
     fields: ['buildingType', 'coverageArea', 'floors', 'deviceCount', 'routerCount', 'powerAvailable', 'ethernetRequired', 'ceilingMount', 'outdoorCoverage', 'interferenceSources', 'specialRequirements'],
   },

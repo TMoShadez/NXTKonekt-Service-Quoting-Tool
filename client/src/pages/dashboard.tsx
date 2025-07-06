@@ -244,11 +244,11 @@ export default function Dashboard() {
               <SelectTrigger className="w-full bg-nxt-blue text-white px-6 py-4 rounded-xl font-medium hover:bg-blue-700 transition-colors border-none">
                 <div className="flex items-center">
                   <Plus className="mr-2" size={20} />
-                  <SelectValue placeholder="Create New Assessment" />
+                  <SelectValue placeholder="Generate New Quote" />
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="site-assessment">Site Assessment (Fixed Wireless)</SelectItem>
+                <SelectItem value="site-assessment">Fixed Wireless Access Assessment</SelectItem>
                 <SelectItem value="fleet-tracking">Fleet & Asset Tracking Device</SelectItem>
                 <SelectItem value="fleet-camera">Fleet Camera Installation</SelectItem>
               </SelectContent>
