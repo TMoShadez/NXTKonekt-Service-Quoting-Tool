@@ -794,151 +794,135 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         currentY += 25;
         
         // Introduction with proper line spacing
-        doc.fontSize(10).font('Helvetica')
-           .text('This document outlines the scope of work for the installation of a cellular wireless router to serve as a failover internet service provider (ISP) at your designated location. This service ensures business continuity by providing an alternative internet connection in the event of an outage with your primary ISP. The installation includes a site survey, preparation and installation of the wireless router, and basic configuration to integrate it into your existing network for seamless failover operation.', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 45;
+        doc.fontSize(9).font('Helvetica')
+           .text('This document outlines the scope of work for the installation of a cellular wireless router to serve as a failover internet service provider (ISP) at your designated location. This service ensures business continuity by providing an alternative internet connection in the event of an outage with your primary ISP.', 50, currentY, { width: 500, lineGap: 4 });
+        currentY += 35;
+        
+        doc.text('The installation includes a site survey, preparation and installation of the wireless router, and basic configuration to integrate it into your existing network for seamless failover operation.', 50, currentY, { width: 500, lineGap: 4 });
+        currentY += 35;
         
         // Hardware provider note
-        doc.text('Hardware for this project will be provided by your Wireless Vendor. All necessary materials will be provided by NXTKonekt/Tekumo.', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 30;
-        
-        // Summary of Services
-        doc.fontSize(12).font('Helvetica-Bold')
-           .text('Summary of Services', 50, currentY, { width: 500 });
-        currentY += 20;
-        
-        doc.fontSize(10).font('Helvetica')
-           .text('Our team will install a cellular wireless router, performing the following key steps:', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 18;
-        
-        // Service steps with optimized spacing
-        doc.text('• Site Survey: A thorough assessment of your location to determine the optimal placement for the wireless router, ensuring the best possible cellular signal while considering proximity to your existing network infrastructure.', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 22;
-        
-        doc.text('• Router Preparation: Unboxing and verifying all components of the wireless router, and reviewing the manufacturer\'s documentation.', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 18;
-        
-        doc.text('• Mounting and Installation: Securely mounting the router (if applicable) and connecting all necessary components, including power.', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 18;
-        
-        doc.text('• Basic Router Configuration: Setting up the cellular connection, establishing Wi-Fi connectivity (if desired), and configuring the router for failover integration with your existing primary network.', 50, currentY, { width: 500, lineGap: 3 });
-        currentY += 22;
-        
-        doc.text('• Failover Testing: Verifying the failover functionality to ensure a smooth transition to the cellular connection during a primary ISP outage.', 50, currentY, { width: 500, lineGap: 3 });
+        doc.fontSize(9).font('Helvetica')
+           .text('Hardware for this project will be provided by your Wireless Vendor. All necessary materials will be provided by NXTKonekt/Tekumo.', 50, currentY, { width: 500, lineGap: 4 });
         currentY += 25;
         
-        // Our Process
-        doc.fontSize(12).font('Helvetica-Bold')
-           .text('Our Process', 50, currentY, { width: 500 });
+        // Summary of Services
+        doc.fontSize(11).font('Helvetica-Bold')
+           .text('Summary of Services', 50, currentY, { width: 500 });
+        currentY += 18;
+        
+        doc.fontSize(9).font('Helvetica')
+           .text('Our team will install a cellular wireless router, performing the following key steps:', 50, currentY, { width: 500, lineGap: 4 });
         currentY += 20;
         
-        doc.fontSize(10).font('Helvetica')
-           .text('Here\'s a detailed breakdown of the steps our technician will take:', 50, currentY, { width: 500, lineGap: 3 });
+        // Service steps with optimized spacing
+        doc.fontSize(8).font('Helvetica')
+           .text('• Site Survey: Assessment of optimal router placement for cellular signal and network proximity.', 50, currentY, { width: 500, lineGap: 4 });
+        currentY += 18;
+        
+        doc.text('• Router Preparation: Unboxing, verification, and documentation review.', 50, currentY, { width: 500, lineGap: 4 });
+        currentY += 16;
+        
+        doc.text('• Mounting and Installation: Secure mounting and power connection.', 50, currentY, { width: 500, lineGap: 4 });
+        currentY += 16;
+        
+        doc.text('• Basic Router Configuration: Cellular connection, Wi-Fi setup, and failover integration.', 50, currentY, { width: 500, lineGap: 4 });
+        currentY += 16;
+        
+        doc.text('• Failover Testing: Verification of smooth transition during primary ISP outage.', 50, currentY, { width: 500, lineGap: 4 });
         currentY += 20;
+        
+        // Our Process
+        doc.fontSize(11).font('Helvetica-Bold')
+           .text('Our Process', 50, currentY, { width: 500 });
+        currentY += 18;
+        
+        doc.fontSize(9).font('Helvetica')
+           .text('Detailed breakdown of installation steps:', 50, currentY, { width: 500, lineGap: 4 });
+        currentY += 18;
         
         // Preparation and Planning
-        doc.fontSize(11).font('Helvetica-Bold')
+        doc.fontSize(10).font('Helvetica-Bold')
            .text('Preparation and Planning', 50, currentY, { width: 500 });
-        currentY += 18;
-        
-        doc.fontSize(9).font('Helvetica')
-           .text('• Location Determination: Our technician will work with your site contact to identify the best position for the cellular wireless router. This will involve performing a signal survey using a cellular device to determine the optimal placement for signal strength, preferably within 5 feet of a power outlet and in proximity to your existing network equipment.', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 20;
-        
-        doc.text('• Network Integration Planning: Discussion with your site contact will occur to understand the existing network topology and plan the most effective method for integrating the failover router (e.g., direct connection to a firewall/router with failover capabilities).', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 18;
-        
-        doc.text('• Hardware Verification: All hardware, provided by the wireless vendor, will be checked to ensure all components are present and accounted for.', 50, currentY, { width: 500, lineGap: 2 });
         currentY += 16;
         
-        doc.text('• Documentation Review: The manufacturer\'s installation guide and user manual for the router will be thoroughly reviewed.', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 20;
+        doc.fontSize(8).font('Helvetica')
+           .text('• Site survey for optimal router placement within 5 feet of power and network equipment', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 16;
+        
+        doc.text('• Network topology assessment and failover integration planning', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
+        
+        doc.text('• Hardware verification and component check', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
+        
+        doc.text('• Installation guide and documentation review', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 18;
         
         // SIM Card Installation
-        doc.fontSize(11).font('Helvetica-Bold')
+        doc.fontSize(10).font('Helvetica-Bold')
            .text('SIM Card Installation', 50, currentY, { width: 500 });
+        currentY += 16;
+        
+        doc.fontSize(8).font('Helvetica')
+           .text('• Power off router, locate SIM slot, insert card with proper orientation, secure cover', 50, currentY, { width: 500, lineGap: 3 });
         currentY += 18;
         
-        doc.fontSize(9).font('Helvetica')
-           .text('• Power Off: The router will be completely powered off before any SIM card insertion or removal.', 50, currentY, { width: 500, lineGap: 2 });
+        // Mounting & Power
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Mounting & Power Connection', 50, currentY, { width: 500 });
         currentY += 16;
         
-        doc.text('• SIM Card Slot Location: The technician will locate the SIM card slot, typically on the side or back of the router.', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 16;
+        doc.fontSize(8).font('Helvetica')
+           .text('• Secure wall mounting (if desired) with neat cable routing', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
         
-        doc.text('• SIM Card Insertion: The SIM card will be carefully inserted, ensuring correct orientation. A SIM card insertion tool will be used if provided.', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 16;
-        
-        doc.text('• Secure Cover: The SIM card cover will be securely replaced.', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 20;
-        
-        // Mounting (Optional)
-        doc.fontSize(11).font('Helvetica-Bold')
-           .text('Mounting (Optional)', 50, currentY, { width: 500 });
+        doc.text('• Connect power adapter and power on router, observe boot-up indicators', 50, currentY, { width: 500, lineGap: 3 });
         currentY += 18;
-        
-        doc.fontSize(9).font('Helvetica')
-           .text('• Wall Mounting: If wall-mounting is desired and feasible, the router will be secured to the wall using appropriate screws and hardware. Cables will be routed neatly.', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 20;
-        
-        // Power Connection
-        doc.fontSize(11).font('Helvetica-Bold')
-           .text('Power Connection', 50, currentY, { width: 500 });
-        currentY += 18;
-        
-        doc.fontSize(9).font('Helvetica')
-           .text('• Connect Power Adapter: The power adapter will be plugged into the router\'s power input and then into a suitable power outlet.', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 16;
-        
-        doc.text('• Power ON the Router: The router will be powered on, and the indicator lights will be observed to confirm boot-up.', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 20;
         
         // Network Connection
-        doc.fontSize(11).font('Helvetica-Bold')
+        doc.fontSize(10).font('Helvetica-Bold')
            .text('Network Connection', 50, currentY, { width: 500 });
-        currentY += 18;
-        
-        doc.fontSize(9).font('Helvetica')
-           .text('• Ethernet Connection: The router will be connected via Ethernet patch cable to your existing network equipment (e.g., firewall, primary router) as determined during the planning phase.', 50, currentY, { width: 500, lineGap: 2 });
         currentY += 16;
         
-        doc.text('• Wireless Connection (Wi-Fi - Optional): If Wi-Fi functionality is desired for the failover connection, the Wi-Fi network name (SSID) and password will be identified and configured.', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 20;
+        doc.fontSize(8).font('Helvetica')
+           .text('• Connect via Ethernet to existing network equipment (firewall/router)', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
+        
+        doc.text('• Configure Wi-Fi SSID and password (if desired for failover connection)', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 18;
         
         // Router Configuration
-        doc.fontSize(11).font('Helvetica-Bold')
+        doc.fontSize(10).font('Helvetica-Bold')
            .text('Router Configuration', 50, currentY, { width: 500 });
-        currentY += 18;
-        
-        doc.fontSize(9).font('Helvetica')
-           .text('• Accessing Configuration Interface: A web browser on a connected device will be used to access the router\'s configuration interface via its IP address.', 50, currentY, { width: 500, lineGap: 2 });
         currentY += 16;
         
-        doc.text('• Login and Password Change: The default username and password will be entered. The technician will work with your site contact to immediately change the default password for security purposes.', 50, currentY, { width: 500, lineGap: 2 });
+        doc.fontSize(8).font('Helvetica')
+           .text('• Access web interface via IP address and change default password', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
+        
+        doc.text('• Configure cellular connection with carrier APN settings', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
+        
+        doc.text('• Set network settings (IP, DHCP, DNS) for network integration', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
+        
+        doc.text('• Configure failover settings and routing rules with network admin', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
+        
+        doc.text('• Perform speed test to confirm cellular connection reliability', 50, currentY, { width: 500, lineGap: 3 });
         currentY += 18;
-        
-        doc.text('• Configure Cellular Connection: The cellular settings will be configured, including entering the APN (Access Point Name) provided by your cellular carrier.', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 16;
-        
-        doc.text('• Configure Network Settings: Essential network settings such as IP address, DHCP, and DNS will be configured to ensure proper integration with your existing network.', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 18;
-        
-        doc.text('• Configure Failover Settings: The router will be configured to work as a failover ISP. This may involve setting up appropriate routing, NAT rules, or working with your network administrator to configure failover on your existing firewall/router.', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 20;
-        
-        doc.text('• Test the Connection: An internet connection test will be performed using a speed test from the browser to confirm the cellular connection\'s speed and reliability.', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 20;
         
         // Failover Testing
-        doc.fontSize(11).font('Helvetica-Bold')
+        doc.fontSize(10).font('Helvetica-Bold')
            .text('Failover Testing', 50, currentY, { width: 500 });
-        currentY += 18;
+        currentY += 16;
         
-        doc.fontSize(9).font('Helvetica')
-           .text('• Primary Connection Test: The technician will coordinate with your site contact to temporarily disable the primary internet connection (or simulate an outage) to verify that the failover cellular router seamlessly takes over the internet traffic.', 50, currentY, { width: 500, lineGap: 2 });
-        currentY += 18;
+        doc.fontSize(8).font('Helvetica')
+           .text('• Temporarily disable primary connection to verify seamless failover transition', 50, currentY, { width: 500, lineGap: 3 });
+        currentY += 14;
         
-        doc.text('• Restoration Test: Once failover is confirmed, the primary internet connection will be re-enabled.', 50, currentY, { width: 500, lineGap: 2 });
+        doc.text('• Re-enable primary connection once failover functionality is confirmed', 50, currentY, { width: 500, lineGap: 3 });
       }
 
       // Additional notes - if any
