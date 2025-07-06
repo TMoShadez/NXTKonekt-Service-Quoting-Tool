@@ -407,83 +407,104 @@ export default function FleetCameraForm() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Camera Features Required</CardTitle>
+              <CardTitle>Camera Solution Detail</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="front-facing"
-                      checked={formData.powerAvailable || false}
-                      onCheckedChange={(checked) => handleCheckboxChange('powerAvailable', !!checked)}
-                    />
-                    <Label htmlFor="front-facing">Front-facing camera</Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="rear-facing"
-                      checked={formData.ethernetRequired || false}
-                      onCheckedChange={(checked) => handleCheckboxChange('ethernetRequired', !!checked)}
-                    />
-                    <Label htmlFor="rear-facing">Rear-facing camera</Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="driver-facing"
-                      checked={formData.ceilingMount || false}
-                      onCheckedChange={(checked) => handleCheckboxChange('ceilingMount', !!checked)}
-                    />
-                    <Label htmlFor="driver-facing">Driver-facing camera</Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="side-cameras"
-                      checked={formData.outdoorCoverage || false}
-                      onCheckedChange={(checked) => handleCheckboxChange('outdoorCoverage', !!checked)}
-                    />
-                    <Label htmlFor="side-cameras">Side/blind spot cameras</Label>
-                  </div>
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Camera Solution Type
+                  </Label>
+                  <Select value={formData.cameraSolutionType || ''} onValueChange={(value) => handleSelectChange('cameraSolutionType', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select camera solution type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="driver-facing">Driver Facing</SelectItem>
+                      <SelectItem value="front-facing">Front Facing</SelectItem>
+                      <SelectItem value="driver-front-combo">Driver/Front Combo</SelectItem>
+                      <SelectItem value="rear-facing">Rear Facing</SelectItem>
+                      <SelectItem value="trailer">Trailer</SelectItem>
+                      <SelectItem value="aux-multi-camera">Aux/Multi camera system</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                      Recording Mode
-                    </Label>
-                    <Select value={formData.ceilingType || ''} onValueChange={(value) => handleSelectChange('ceilingType', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select recording mode" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="continuous">Continuous Recording</SelectItem>
-                        <SelectItem value="event-triggered">Event-Triggered</SelectItem>
-                        <SelectItem value="live-streaming">Live Streaming</SelectItem>
-                        <SelectItem value="cloud-storage">Cloud Storage</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium nxt-gray-800 mb-2">
-                      Audio Recording
-                    </Label>
-                    <Select value={formData.signalStrength || ''} onValueChange={(value) => handleSelectChange('signalStrength', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Audio recording options" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="enabled">Audio Enabled</SelectItem>
-                        <SelectItem value="disabled">Audio Disabled</SelectItem>
-                        <SelectItem value="driver-consent">Driver Consent Required</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                    Number of Cameras
+                  </Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={formData.numberOfCameras || ''}
+                    onChange={(e) => handleSelectChange('numberOfCameras', parseInt(e.target.value) || 0)}
+                    placeholder="Enter number of cameras"
+                    className="w-full"
+                  />
                 </div>
               </div>
+
+              <div>
+                <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                  Removal of existing solution needed?
+                </Label>
+                <Select value={formData.removalNeeded || ''} onValueChange={(value) => handleSelectChange('removalNeeded', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select if removal is needed" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="yes">Yes</SelectItem>
+                    <SelectItem value="no">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {formData.removalNeeded === 'yes' && (
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                      Existing Camera Solution
+                    </Label>
+                    <Select value={formData.existingCameraSolution || ''} onValueChange={(value) => handleSelectChange('existingCameraSolution', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select existing camera solution" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="geotab">GeoTab</SelectItem>
+                        <SelectItem value="zenduit">Zenduit</SelectItem>
+                        <SelectItem value="fleethoster">Fleethoster</SelectItem>
+                        <SelectItem value="verizon-connect">Verizon Connect</SelectItem>
+                        <SelectItem value="samsara">Samsara</SelectItem>
+                        <SelectItem value="lytx">Lytx</SelectItem>
+                        <SelectItem value="motive">Motive</SelectItem>
+                        <SelectItem value="azuga">Azuga</SelectItem>
+                        <SelectItem value="teletrac">Teletrac</SelectItem>
+                        <SelectItem value="tenna">Tenna</SelectItem>
+                        <SelectItem value="airiq">AirIQ</SelectItem>
+                        <SelectItem value="smart-witness">Smart Witness</SelectItem>
+                        <SelectItem value="gps-insight">GPS Insight</SelectItem>
+                        <SelectItem value="linxup">Linxup</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {formData.existingCameraSolution === 'other' && (
+                    <div>
+                      <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                        Other Solution Details
+                      </Label>
+                      <Input
+                        value={formData.otherSolutionDetails || ''}
+                        onChange={(e) => handleSelectChange('otherSolutionDetails', e.target.value)}
+                        placeholder="Enter other solution details"
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div>
                 <Label className="text-sm font-medium nxt-gray-800 mb-2">
