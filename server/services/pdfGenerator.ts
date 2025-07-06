@@ -63,28 +63,30 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
       doc.fontSize(12)
          .text('Customer Information', 50, currentY);
       
-      currentY += 15;
+      currentY += 18;
       doc.fontSize(9)
-         .text(`${assessment.customerCompanyName || 'Not specified'} | ${assessment.customerContactName || 'Not specified'}`, 50, currentY)
-         .text(`${assessment.customerPhone || 'Not specified'} | ${assessment.customerEmail || 'Not specified'}`, 50, currentY + 10);
+         .text(`${assessment.customerCompanyName || 'Not specified'} | ${assessment.customerContactName || 'Not specified'}`, 50, currentY);
+      currentY += 12;
+      doc.text(`${assessment.customerPhone || 'Not specified'} | ${assessment.customerEmail || 'Not specified'}`, 50, currentY);
 
       // Service Information - Compact
-      currentY += 25;
+      currentY += 20;
       doc.fontSize(12)
          .text('Service Information', 50, currentY);
       
-      currentY += 15;
+      currentY += 18;
       const serviceTitle = getServiceTitle(assessment.serviceType ?? undefined);
       doc.fontSize(9)
-         .text(`Service: ${serviceTitle}`, 50, currentY)
-         .text(`Location: ${assessment.siteAddress || 'Not specified'}`, 50, currentY + 10);
+         .text(`Service: ${serviceTitle}`, 50, currentY);
+      currentY += 12;
+      doc.text(`Location: ${assessment.siteAddress || 'Not specified'}`, 50, currentY);
 
       // Pricing breakdown header
-      currentY += 25;
+      currentY += 20;
       doc.fontSize(12)
          .text('Pricing Breakdown', 50, currentY);
 
-      const lineY = currentY + 12;
+      const lineY = currentY + 15;
       
       // Table headers
       doc.fontSize(9)
@@ -94,11 +96,11 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
          .text('Cost', 450, lineY);
 
       // Draw line
-      doc.moveTo(50, lineY + 10)
-         .lineTo(550, lineY + 10)
+      doc.moveTo(50, lineY + 12)
+         .lineTo(550, lineY + 12)
          .stroke();
 
-      currentY = lineY + 15;
+      currentY = lineY + 18;
       
       // Parse numeric values from quote (handle string/decimal conversion)
       const surveyHours = parseFloat(quote.surveyHours?.toString() || '0');
@@ -121,7 +123,7 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
            .text(`${surveyHours}`, 300, currentY)
            .text(`$${hourlyRate}`, 350, currentY)
            .text(`$${surveyCost.toFixed(2)}`, 450, currentY);
-        currentY += 12;
+        currentY += 14;
       }
       
       // Installation line
@@ -131,7 +133,7 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
          .text(`$${hourlyRate}`, 350, currentY)
          .text(`$${installationCost.toFixed(2)}`, 450, currentY);
       
-      currentY += 12;
+      currentY += 14;
       
       // Configuration line (only show if > 0 hours and cost > 0)
       if (configurationHours > 0 && configurationCost > 0) {
@@ -140,12 +142,12 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
            .text(`${configurationHours}`, 300, currentY)
            .text(`$${hourlyRate}`, 350, currentY)
            .text(`$${configurationCost.toFixed(2)}`, 450, currentY);
-        currentY += 12;
+        currentY += 14;
       } else if (configurationHours > 0) {
         doc.fontSize(9)
            .text('Configuration & Testing', 50, currentY)
            .text('Included', 450, currentY);
-        currentY += 12;
+        currentY += 14;
       }
       
       // Labor Hold line - ALWAYS show if we have labor hold data
@@ -155,7 +157,7 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
            .text(`${laborHoldHours}`, 300, currentY)
            .text(`$${hourlyRate}`, 350, currentY)
            .text(`$${laborHoldCost.toFixed(2)}`, 450, currentY);
-        currentY += 12;
+        currentY += 14;
       }
       
       // Hardware line (cable costs)
@@ -165,7 +167,7 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
            .text('', 300, currentY)
            .text('', 350, currentY)
            .text(`$${hardwareCost.toFixed(2)}`, 450, currentY);
-        currentY += 12;
+        currentY += 14;
       }
       
       // Training line
@@ -188,11 +190,15 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
       // Terms and conditions - compact
       currentY += 20;
       doc.fontSize(9)
-         .text('Terms & Conditions:', 50, currentY)
-         .text('• Quote valid for 30 days from generation date', 50, currentY + 10)
-         .text('• Labor hold returned if unused in final billing', 50, currentY + 20)
-         .text('• Installation subject to site assessment approval', 50, currentY + 30)
-         .text('• Contact your sales representative for questions', 50, currentY + 40);
+         .text('Terms & Conditions:', 50, currentY);
+      currentY += 12;
+      doc.text('• Quote valid for 30 days from generation date', 50, currentY);
+      currentY += 12;
+      doc.text('• Labor hold returned if unused in final billing', 50, currentY);
+      currentY += 12;
+      doc.text('• Installation subject to site assessment approval', 50, currentY);
+      currentY += 12;
+      doc.text('• Contact your sales representative for questions', 50, currentY);
 
       // Statement of Work for Fleet Tracking - optimized for space
       if (assessment.serviceType === 'fleet-tracking') {
@@ -203,40 +209,40 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         doc.fontSize(11)
            .text('Statement of Work: Fleet Tracker Equipment Installation (OBD-II)', 50, currentY);
         
-        currentY += 15;
+        currentY += 18;
         doc.fontSize(8)
            .text('This document outlines the scope of work for the professional installation of fleet tracker equipment into your individual vehicle(s) through its Smart Data II (OBD-II) port. This service ensures proper device connection and initial functionality testing, enabling you to effectively monitor your fleet. All hardware will be provided by your designated Wireless Vendor. All installation materials (zip-ties, mounting tape) will be provided by NXTKonekt/Tekumo.', 50, currentY, { width: 500 });
         
-        currentY += 30;
+        currentY += 35;
         doc.fontSize(9)
            .text('Summary of Services', 50, currentY);
         
-        currentY += 10;
+        currentY += 14;
         doc.fontSize(8)
            .text('Our technician will install fleet tracker equipment in each vehicle by performing: • Vehicle Preparation: Identifying OBD-II port and ensuring safe installation environment. • Device Connection: Securely plugging tracker into OBD-II port. • Cable Management: Neatly securing device and cabling. • Device Verification: Confirming power and communication.', 50, currentY, { width: 500 });
         
-        currentY += 25;
+        currentY += 30;
         doc.fontSize(9)
            .text('Installation Process', 50, currentY);
         
-        currentY += 10;
+        currentY += 14;
         doc.fontSize(8)
            .text('1. Pre-Installation: Vehicle identification, access vehicle, locate OBD-II port (typically within 3 feet of steering wheel, under dashboard), assess installation area for secure and discrete placement.', 50, currentY, { width: 500 });
         
-        currentY += 15;
+        currentY += 18;
         doc.text('2. Device Installation: Connect tracker directly to OBD-II port, verify initial power through indicator lights to ensure proper power from vehicle port.', 50, currentY, { width: 500 });
         
-        currentY += 15;
+        currentY += 18;
         doc.text('3. Cable Management: Secure device and cables using mounting materials (zip ties, mounting tape) without interfering with vehicle operations, preventing tampering, achieving discreet installation. Conceal device and cables when possible without obstructing vehicle controls.', 50, currentY, { width: 500 });
         
-        currentY += 20;
+        currentY += 25;
         doc.text('4. Functionality Verification: Confirm device power and light pattern detection, check cellular/GPS signal indicators if available (full transmission verification by cellular provider), ensure no interference with vehicle systems.', 50, currentY, { width: 500 });
         
-        currentY += 25;
+        currentY += 30;
         doc.fontSize(9)
            .text('Time Estimate', 50, currentY);
         
-        currentY += 10;
+        currentY += 14;
         doc.fontSize(8)
            .text('Estimated installation time: 20 minutes per vehicle, depending on vehicle size and OBD-II port access. Final charge reflects actual time on-site including minimum service fee plus additional time for completion. Preliminary labor hold of $190.00 for unforeseen challenges or delays.', 50, currentY, { width: 500 });
       }
