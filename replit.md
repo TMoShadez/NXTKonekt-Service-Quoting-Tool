@@ -140,6 +140,7 @@ Changelog:
 - July 5, 2025. Implemented dynamic vehicle detail collection: Fleet Tracking form now creates the same number of Year/Make/Model sets as specified in "Number of Vehicles for Installation" field, with vehicle details preserved when count changes and helpful visual indicators
 - July 5, 2025. Updated Fleet Tracking pricing logic for OBD Port Installation efficiency: 1 base hour covers up to 3 vehicles for OBD installations (1-3 vehicles = 1 hour, 4-6 vehicles = 2 hours), other installation types remain 1 hour per vehicle, maintains +1 labor hold hour for all installations
 - July 6, 2025. Added comprehensive Fleet Tracker Equipment Installation Statement of Work to both web quote display and PDF generation: includes detailed 4-step installation process (Pre-Installation Check, Device Installation, Cable Management, Functionality Verification), estimated 20-minute per vehicle timeframe, and complete scope of work documentation for OBD-II port installations
+- July 6, 2025. Optimized PDF layout for readability and space efficiency: fixed text overlapping issues by adjusting line spacing from 10-12pt to 12-18pt, improved table row spacing, properly separated information sections, and ensured all PDFs fit within 3 pages maximum while maintaining clear readability
 
 ## User Preferences
 
