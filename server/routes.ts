@@ -308,6 +308,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/quotes/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const quoteId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      // Verify quote ownership by getting user's quotes and checking if this quote exists
+      const userQuotes = await storage.getQuotesByUserId(userId);
+      const quoteExists = userQuotes.find(q => q.id === quoteId);
+
+      if (!quoteExists) {
+        return res.status(404).json({ message: "Quote not found or access denied" });
+      }
+
+      await storage.deleteQuote(quoteId);
+      res.json({ success: true, message: "Quote deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting quote:", error);
+      res.status(500).json({ message: "Failed to delete quote" });
+    }
+  });
+
   // File serving routes
   app.get('/api/files/pdf/:filename', (req, res) => {
     const filename = req.params.filename;

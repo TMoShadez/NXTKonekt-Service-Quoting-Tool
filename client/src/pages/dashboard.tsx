@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -7,8 +7,8 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, CheckCircle, Clock, Plus, Download, LogOut, User, ChevronDown } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { FileText, CheckCircle, Clock, Plus, Download, LogOut, User, ChevronDown, Trash2 } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import nxtKonektLogo from "@assets/NxtKonekt Logo_1749973360626.png";
 
@@ -43,6 +43,44 @@ export default function Dashboard() {
     enabled: isAuthenticated,
     retry: false,
   });
+
+  const deleteQuoteMutation = useMutation({
+    mutationFn: async (quoteId: number) => {
+      await apiRequest("DELETE", `/api/quotes/${quoteId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Quote deleted successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error as Error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      
+      toast({
+        title: "Error",
+        description: "Failed to delete quote",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteQuote = (quoteId: number, quoteNumber: string) => {
+    if (confirm(`Are you sure you want to delete quote #${quoteNumber}? This action cannot be undone.`)) {
+      deleteQuoteMutation.mutate(quoteId);
+    }
+  };
 
   const handleLogout = () => {
     window.location.href = "/api/logout";
@@ -291,12 +329,20 @@ export default function Dashboard() {
                           {quote.pdfUrl && (
                             <Button 
                               variant="link" 
-                              className="nxt-gray-500 hover:text-nxt-gray-700 p-0"
+                              className="nxt-gray-500 hover:text-nxt-gray-700 p-0 mr-3"
                               onClick={() => window.open(quote.pdfUrl, '_blank')}
                             >
                               Download
                             </Button>
                           )}
+                          <Button 
+                            variant="link" 
+                            className="text-red-500 hover:text-red-700 p-0"
+                            onClick={() => handleDeleteQuote(quote.id, quote.quoteNumber)}
+                            disabled={deleteQuoteMutation.isPending}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </td>
                       </tr>
                     ))}

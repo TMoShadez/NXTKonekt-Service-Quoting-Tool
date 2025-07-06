@@ -40,6 +40,7 @@ export interface IStorage {
   updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote>;
   getQuotesByUserId(userId: string): Promise<(Quote & { assessment: Assessment })[]>;
   getQuoteByAssessmentId(assessmentId: number): Promise<Quote | undefined>;
+  deleteQuote(id: number): Promise<void>;
   
   // File operations
   createUploadedFile(file: InsertUploadedFile): Promise<UploadedFile>;
@@ -202,6 +203,12 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(uploadedFiles)
       .where(eq(uploadedFiles.id, id));
+  }
+
+  async deleteQuote(id: number): Promise<void> {
+    await db
+      .delete(quotes)
+      .where(eq(quotes.id, id));
   }
 }
 
