@@ -260,7 +260,7 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
            .text('Estimated installation time: 20 minutes per vehicle, depending on vehicle size and OBD-II port access. Final charge reflects actual time on-site including minimum service fee plus additional time for completion. Preliminary labor hold of $190.00 for unforeseen challenges or delays.', 50, currentY, { width: 500 });
       }
 
-      // Statement of Work for Fleet Camera - optimized for space and maximum 4 pages
+      // Statement of Work for Fleet Camera - optimized for readability with proper spacing
       if (assessment.serviceType === 'fleet-camera') {
         // Always start on new page for SOW to keep it organized
         doc.addPage();
@@ -269,60 +269,80 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         doc.fontSize(11)
            .text('Statement of Work: Fleet Camera Dashcam and Optional External Camera Installation', 50, currentY);
         
-        currentY += 18;
+        currentY += 20;
         doc.fontSize(8)
            .text('This document outlines the scope of work for the professional installation of fleet camera equipment into your individual vehicle(s) including dashcams, external cameras, and optional existing system removal. This service ensures proper device connection and initial functionality testing, enabling you to effectively monitor your fleet.', 50, currentY, { width: 500 });
         
-        currentY += 35;
+        currentY += 28;
         doc.fontSize(9)
            .text('Summary of Services', 50, currentY);
         
-        currentY += 14;
+        currentY += 16;
         doc.fontSize(8)
-           .text('• Vehicle Preparation: Pre-installation check and planning • Fleet Camera Dashcam Installation: Professional installation for optimal performance • Optional External Camera Installation (if selected): Additional camera points for comprehensive coverage • Optional Fleet Tracker Installation (if selected): Integration with existing fleet management systems', 50, currentY, { width: 500 });
+           .text('• Vehicle Preparation: Pre-installation check and planning', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('• Fleet Camera Dashcam Installation: Professional installation for optimal performance', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('• Optional External Camera Installation (if selected): Additional camera points for comprehensive coverage', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('• Optional Fleet Tracker Installation (if selected): Integration with existing fleet management systems', 50, currentY, { width: 500 });
         
-        currentY += 30;
+        currentY += 20;
         doc.fontSize(9)
            .text('Our Process', 50, currentY);
         
-        currentY += 14;
+        currentY += 16;
         doc.fontSize(8)
            .text('Pre-Installation Check and Planning: Vehicle identification to confirm details and access requirements, power assessment to verify adequate supply and identify optimal connection points, camera positioning to determine optimal placement for maximum coverage while maintaining driver visibility, wiring route planning for efficient and secure cable routing.', 50, currentY, { width: 500 });
         
-        currentY += 25;
+        currentY += 30;
         doc.text('Fleet Camera Dashcam Installation: Securely mount dashcam in optimal position for clear forward view, connect to vehicle power system with proper voltage protection, route and secure all cables to prevent interference with vehicle operation, configure basic camera settings and verify proper operation.', 50, currentY, { width: 500 });
         
-        currentY += 25;
+        currentY += 30;
         doc.text('Optional External Camera Installation (if selected): Install external cameras at specified locations (rear, side, etc.), ensure all external connections are properly sealed and weatherproofed, connect external cameras to main dashcam unit or recording system, verify all camera feeds are properly integrated and functioning.', 50, currentY, { width: 500 });
         
-        currentY += 25;
+        currentY += 30;
         doc.text('Optional Fleet Tracker Installation (if selected): Connect fleet tracker to vehicle\'s diagnostic port, confirm tracker receives adequate power and signal, verify tracker communicates properly with fleet management system, ensure accurate location and vehicle data reporting.', 50, currentY, { width: 500 });
         
-        currentY += 30;
+        currentY += 25;
         doc.fontSize(9)
            .text('Functionality Verification', 50, currentY);
         
-        currentY += 14;
+        currentY += 16;
         doc.fontSize(8)
-           .text('Power Test: Verify all devices receive proper power and show correct status indicators. Recording Test: Confirm all cameras are recording properly with clear image quality. Storage Verification: Ensure adequate storage capacity and proper file management. System Integration: Verify all components work together seamlessly. Final Inspection: Complete system check to ensure professional installation quality.', 50, currentY, { width: 500 });
+           .text('Power Test: Verify all devices receive proper power and show correct status indicators.', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('Recording Test: Confirm all cameras are recording properly with clear image quality.', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('Storage Verification: Ensure adequate storage capacity and proper file management.', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('System Integration: Verify all components work together seamlessly.', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('Final Inspection: Complete system check to ensure professional installation quality.', 50, currentY, { width: 500 });
         
-        currentY += 30;
+        currentY += 20;
         doc.fontSize(9)
            .text('Post-Installation Clean-up', 50, currentY);
         
-        currentY += 14;
+        currentY += 16;
         doc.fontSize(8)
            .text('Remove all installation materials and packaging. Ensure vehicle interior is clean and professional. Provide basic operation instructions and contact information for support.', 50, currentY, { width: 500 });
         
-        currentY += 25;
+        currentY += 20;
         doc.fontSize(9)
            .text('Estimated Time Per Vehicle', 50, currentY);
         
-        currentY += 14;
+        currentY += 16;
         doc.fontSize(8)
-           .text('Fleet Camera Dashcam Only: Approximately 45-60 minutes per vehicle. Fleet Camera Dashcam + Optional External Cameras: Approximately 60-90 minutes per vehicle. Fleet Camera Dashcam + Optional Fleet Tracker: Approximately 60-75 minutes per vehicle. Complete Installation (All Components): Approximately 75-120 minutes per vehicle.', 50, currentY, { width: 500 });
+           .text('Fleet Camera Dashcam Only: Approximately 45-60 minutes per vehicle.', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('Fleet Camera Dashcam + Optional External Cameras: Approximately 60-90 minutes per vehicle.', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('Fleet Camera Dashcam + Optional Fleet Tracker: Approximately 60-75 minutes per vehicle.', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('Complete Installation (All Components): Approximately 75-120 minutes per vehicle.', 50, currentY, { width: 500 });
         
-        currentY += 20;
+        currentY += 18;
         doc.text('Work will be completed within a typical timeframe, the final charge will accurately reflect the actual time our team spends on-site. This includes the minimum service fee plus any additional time for completion. Any on-site challenges or unexpected extra work or unforeseen delay. A preliminary labor hold of $190.00 in total hold.', 50, currentY, { width: 500 });
       }
 
