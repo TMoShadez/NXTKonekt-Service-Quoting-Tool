@@ -6,11 +6,13 @@ export interface PricingBreakdown {
   configurationCost: number;
   trainingCost: number;
   hardwareCost: number;
+  removalCost?: number;
   totalCost: number;
   // Hours breakdown for display
   surveyHours: number;
   installationHours: number;
   configurationHours: number;
+  removalHours?: number;
   laborHoldHours: number;
   laborHoldCost: number;
   hourlyRate: number;
@@ -130,6 +132,14 @@ function calculateFleetCameraPricing(assessment: Assessment): PricingBreakdown {
     installationHours += extraCameraHours;
   }
   
+  // Removal costs if existing solution needs removal
+  let removalHours = 0;
+  let removalCost = 0;
+  if (assessment.removalNeeded === 'yes' && assessment.removalVehicleCount) {
+    removalHours = assessment.removalVehicleCount * 0.5; // 0.5 hours per vehicle for removal
+    removalCost = Math.round(removalHours * HOURLY_RATE * 100) / 100;
+  }
+  
   // Add exactly 1 additional labor hold hour
   const laborHoldHours = 1;
   
@@ -138,7 +148,7 @@ function calculateFleetCameraPricing(assessment: Assessment): PricingBreakdown {
   const laborHoldCost = Math.round(laborHoldHours * HOURLY_RATE * 100) / 100;
   const configurationCost = 0; // Included in service
   const trainingCost = 0; // Included in service
-  const totalCost = Math.round((surveyCost + installationCost + laborHoldCost) * 100) / 100;
+  const totalCost = Math.round((surveyCost + installationCost + removalCost + laborHoldCost) * 100) / 100;
 
   return {
     surveyCost,
@@ -146,10 +156,12 @@ function calculateFleetCameraPricing(assessment: Assessment): PricingBreakdown {
     configurationCost,
     trainingCost,
     hardwareCost: 0,
+    removalCost: removalCost > 0 ? removalCost : undefined,
     totalCost,
     surveyHours,
     installationHours,
     configurationHours: 0,
+    removalHours: removalHours > 0 ? removalHours : undefined,
     laborHoldHours,
     laborHoldCost,
     hourlyRate: HOURLY_RATE,

@@ -102,6 +102,7 @@ export const assessments = pgTable("assessments", {
   cameraSolutionType: varchar("camera_solution_type"),
   numberOfCameras: integer("number_of_cameras"),
   removalNeeded: varchar("removal_needed"),
+  removalVehicleCount: integer("removal_vehicle_count"),
   existingCameraSolution: varchar("existing_camera_solution"),
   otherSolutionDetails: text("other_solution_details"),
   

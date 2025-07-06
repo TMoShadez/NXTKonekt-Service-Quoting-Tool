@@ -464,6 +464,20 @@ export default function FleetCameraForm() {
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium nxt-gray-800 mb-2">
+                      How many Vehicles?
+                    </Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={formData.removalVehicleCount || ''}
+                      onChange={(e) => handleSelectChange('removalVehicleCount', parseInt(e.target.value) || 0)}
+                      placeholder="Number of vehicles requiring removal"
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium nxt-gray-800 mb-2">
                       Existing Camera Solution
                     </Label>
                     <Select value={formData.existingCameraSolution || ''} onValueChange={(value) => handleSelectChange('existingCameraSolution', value)}>

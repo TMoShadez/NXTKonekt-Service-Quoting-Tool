@@ -113,6 +113,8 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
       const installationCost = parseFloat(quote.installationCost?.toString() || '0');
       const configurationCost = parseFloat(quote.configurationCost?.toString() || '0');
       const laborHoldCost = parseFloat(quote.laborHoldCost?.toString() || '0');
+      const removalHours = parseFloat(quote.removalHours?.toString() || '0');
+      const removalCost = parseFloat(quote.removalCost?.toString() || '0');
       
       console.log('PDF Labor Hold Debug:', { laborHoldHours, laborHoldCost, quote });
       
@@ -147,6 +149,16 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         doc.fontSize(9)
            .text('Configuration & Testing', 50, currentY)
            .text('Included', 450, currentY);
+        currentY += 14;
+      }
+      
+      // Existing System Removal line (only for Fleet Camera with removal needed)
+      if (removalHours > 0 && removalCost > 0) {
+        doc.fontSize(9)
+           .text('Existing System Removal', 50, currentY)
+           .text(`${removalHours}`, 300, currentY)
+           .text(`$${hourlyRate}`, 350, currentY)
+           .text(`$${removalCost.toFixed(2)}`, 450, currentY);
         currentY += 14;
       }
       
