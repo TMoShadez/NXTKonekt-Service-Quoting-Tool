@@ -61,7 +61,11 @@ export class HubSpotService {
         phone: assessment.customerPhone || '',
         lifecyclestage: 'lead',
         hs_lead_status: 'NEW',
-        notes_last_contacted: `NXTKonekt Assessment - Service: ${assessment.serviceType}, Site: ${assessment.siteAddress}, Assessment ID: ${assessment.id}, Installation Date: ${assessment.preferredInstallationDate?.toISOString() || 'TBD'}`
+        service_type: assessment.serviceType || '',
+        site_address: assessment.siteAddress || '',
+        industry: assessment.industry || '',
+        preferred_installation_date: assessment.preferredInstallationDate?.toISOString() || '',
+        nxtkonekt_assessment_id: assessment.id?.toString() || ''
       };
 
       // Try to find existing contact by email first
