@@ -258,7 +258,15 @@ export default function CustomerPortal() {
             <Button 
               variant="outline" 
               className="flex items-center"
-              onClick={() => window.open(quote.pdfUrl || `/api/quotes/${quote.id}/pdf`, '_blank')}
+              onClick={() => {
+                if (quote.pdfUrl) {
+                  // Extract filename from the stored path (e.g., "uploads/pdfs/quote-Q-2025-0029.pdf" -> "quote-Q-2025-0029.pdf")
+                  const filename = quote.pdfUrl.split('/').pop();
+                  window.open(`/api/files/pdf/${filename}`, '_blank');
+                } else {
+                  window.open(`/api/quotes/${quote.id}/pdf`, '_blank');
+                }
+              }}
             >
               <Download className="w-4 h-4 mr-2" />
               Download Full Quote (PDF)
