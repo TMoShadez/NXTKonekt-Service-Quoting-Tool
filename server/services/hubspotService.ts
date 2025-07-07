@@ -59,18 +59,16 @@ export class HubSpotService {
         lastname: assessment.customerContactName?.split(' ').slice(1).join(' ') || '',
         company: assessment.customerCompanyName || '',
         phone: assessment.customerPhone || '',
-        industry: assessment.industry || '',
-        site_address: assessment.siteAddress || '',
-        preferred_installation_date: assessment.preferredInstallationDate?.toISOString() || '',
-        service_type: assessment.serviceType || '',
-        nxtkonekt_assessment_id: assessment.id?.toString() || '',
-        lead_source: 'NXTKonekt Assessment Tool'
+        lifecyclestage: 'lead',
+        hs_lead_status: 'NEW',
+        notes_last_contacted: `NXTKonekt Assessment - Service: ${assessment.serviceType}, Site: ${assessment.siteAddress}, Assessment ID: ${assessment.id}, Installation Date: ${assessment.preferredInstallationDate?.toISOString() || 'TBD'}`
       };
 
       // Try to find existing contact by email first
       let contact;
       try {
         console.log('🔍 Searching for existing contact with email:', assessment.customerEmail);
+        console.log('📝 Contact data to send:', JSON.stringify(contactData, null, 2));
         const searchResponse = await this.client.crm.contacts.searchApi.doSearch({
           filterGroups: [
             {
