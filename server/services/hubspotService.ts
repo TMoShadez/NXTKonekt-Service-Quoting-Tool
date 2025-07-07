@@ -1,8 +1,6 @@
 import { Client } from '@hubspot/api-client';
 import type { Assessment, Quote, Organization } from '@shared/schema';
 
-const hubspotClient = new Client({ accessToken: process.env.HUBSPOT_ACCESS_TOKEN });
-
 export interface HubSpotContact {
   id: string;
   email: string;
@@ -33,9 +31,21 @@ export class HubSpotService {
 
   constructor() {
     if (!process.env.HUBSPOT_ACCESS_TOKEN) {
+      console.error('❌ HUBSPOT_ACCESS_TOKEN environment variable is missing');
       throw new Error('HUBSPOT_ACCESS_TOKEN environment variable is required');
     }
-    this.client = hubspotClient;
+
+    console.log('🔑 Initializing HubSpot client with token length:', process.env.HUBSPOT_ACCESS_TOKEN.length);
+
+    try {
+      this.client = new Client({
+        accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
+      });
+      console.log('✅ HubSpot client initialized successfully');
+    } catch (error) {
+      console.error('❌ Failed to initialize HubSpot client:', error);
+      throw error;
+    }
   }
 
   /**
