@@ -4,6 +4,8 @@ import {
   assessments,
   quotes,
   uploadedFiles,
+  partnerInvitations,
+  signupAnalytics,
   type User,
   type UpsertUser,
   type Organization,
@@ -14,6 +16,10 @@ import {
   type InsertQuote,
   type UploadedFile,
   type InsertUploadedFile,
+  type PartnerInvitation,
+  type InsertPartnerInvitation,
+  type SignupAnalytics,
+  type InsertSignupAnalytics,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -60,6 +66,16 @@ export interface IStorage {
   createUploadedFile(file: InsertUploadedFile): Promise<UploadedFile>;
   getFilesByAssessmentId(assessmentId: number): Promise<UploadedFile[]>;
   deleteFile(id: number): Promise<void>;
+  
+  // Partner invitation operations
+  createPartnerInvitation(invitation: InsertPartnerInvitation): Promise<PartnerInvitation>;
+  getPartnerInvitation(token: string): Promise<PartnerInvitation | undefined>;
+  updatePartnerInvitationStatus(id: number, status: string, acceptedAt?: Date): Promise<PartnerInvitation>;
+  getPartnerInvitations(): Promise<PartnerInvitation[]>;
+  
+  // Analytics operations
+  trackSignupEvent(analytics: InsertSignupAnalytics): Promise<SignupAnalytics>;
+  getSignupAnalytics(startDate?: Date, endDate?: Date): Promise<SignupAnalytics[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -331,6 +347,63 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(quotes)
       .where(eq(quotes.id, id));
+  }
+
+  // Partner invitation operations
+  async createPartnerInvitation(invitation: InsertPartnerInvitation): Promise<PartnerInvitation> {
+    const [created] = await db
+      .insert(partnerInvitations)
+      .values(invitation)
+      .returning();
+    return created;
+  }
+
+  async getPartnerInvitation(token: string): Promise<PartnerInvitation | undefined> {
+    const [invitation] = await db
+      .select()
+      .from(partnerInvitations)
+      .where(eq(partnerInvitations.invitationToken, token));
+    return invitation;
+  }
+
+  async updatePartnerInvitationStatus(id: number, status: string, acceptedAt?: Date): Promise<PartnerInvitation> {
+    const [updated] = await db
+      .update(partnerInvitations)
+      .set({ status, acceptedAt })
+      .where(eq(partnerInvitations.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getPartnerInvitations(): Promise<PartnerInvitation[]> {
+    return await db
+      .select()
+      .from(partnerInvitations)
+      .orderBy(desc(partnerInvitations.createdAt));
+  }
+
+  // Analytics operations
+  async trackSignupEvent(analytics: InsertSignupAnalytics): Promise<SignupAnalytics> {
+    const [created] = await db
+      .insert(signupAnalytics)
+      .values(analytics)
+      .returning();
+    return created;
+  }
+
+  async getSignupAnalytics(startDate?: Date, endDate?: Date): Promise<SignupAnalytics[]> {
+    let query = db.select().from(signupAnalytics);
+    
+    if (startDate && endDate) {
+      query = query.where(
+        and(
+          sql`${signupAnalytics.timestamp} >= ${startDate.toISOString()}`,
+          sql`${signupAnalytics.timestamp} <= ${endDate.toISOString()}`
+        )
+      );
+    }
+    
+    return await query.orderBy(desc(signupAnalytics.timestamp));
   }
 }
 

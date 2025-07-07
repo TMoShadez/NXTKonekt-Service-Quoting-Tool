@@ -7,6 +7,8 @@ import { calculatePricing } from "./services/pricingEngine";
 import { generateQuotePDF } from "./services/pdfGenerator";
 import { hubspotService } from "./services/hubspotService";
 import { insertAssessmentSchema, insertOrganizationSchema } from "@shared/schema";
+import { emailService } from "./services/emailService";
+import { randomBytes } from "crypto";
 import path from "path";
 import fs from "fs";
 
@@ -634,6 +636,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error toggling user status:", error);
       res.status(500).json({ message: "Failed to toggle user status" });
+    }
+  });
+
+  // Email invitation routes
+  app.post('/api/admin/send-invitation', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { email, recipientName, companyName } = req.body;
+      const adminUserId = req.user.claims.sub;
+      const adminUser = await storage.getUser(adminUserId);
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      // Generate invitation token
+      const invitationToken = randomBytes(32).toString('hex');
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
+
+      // Create invitation record
+      const invitation = await storage.createPartnerInvitation({
+        email,
+        invitedBy: adminUserId,
+        invitedByName: `${adminUser?.firstName || ''} ${adminUser?.lastName || ''}`.trim() || adminUser?.email || 'Admin',
+        invitationToken,
+        expiresAt,
+      });
+
+      // Generate signup link with tracking
+      const signupLink = `${req.protocol}://${req.get('host')}/api/login?invitation=${invitationToken}`;
+
+      // Send email invitation
+      const emailResult = await emailService.sendPartnerInvitation({
+        recipientEmail: email,
+        recipientName,
+        senderName: invitation.invitedByName,
+        signupLink,
+        companyName,
+      });
+
+      if (emailResult.success) {
+        // Track invitation sent
+        await storage.trackSignupEvent({
+          event: 'invitation_sent',
+          email,
+          invitationId: invitation.id,
+          metadata: { messageId: emailResult.messageId },
+        });
+
+        res.json({ 
+          success: true, 
+          invitation,
+          message: 'Invitation sent successfully'
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          error: emailResult.error,
+          message: 'Failed to send invitation email'
+        });
+      }
+    } catch (error) {
+      console.error("Error sending invitation:", error);
+      res.status(500).json({ message: "Failed to send invitation" });
+    }
+  });
+
+  // Get partner invitations
+  app.get('/api/admin/invitations', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const invitations = await storage.getPartnerInvitations();
+      res.json(invitations);
+    } catch (error) {
+      console.error("Error fetching invitations:", error);
+      res.status(500).json({ message: "Failed to fetch invitations" });
+    }
+  });
+
+  // Get signup analytics
+  app.get('/api/admin/analytics', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      const start = startDate ? new Date(startDate as string) : undefined;
+      const end = endDate ? new Date(endDate as string) : undefined;
+      
+      const analytics = await storage.getSignupAnalytics(start, end);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
     }
   });
 

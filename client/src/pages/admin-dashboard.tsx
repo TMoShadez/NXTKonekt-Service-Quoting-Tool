@@ -9,7 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Users, FileText, BarChart3, CheckCircle, XCircle, Clock, Settings, Link, Copy } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Shield, Users, FileText, BarChart3, CheckCircle, XCircle, Clock, Settings, Link, Copy, Mail, Send, TrendingUp } from "lucide-react";
 import type { User, Organization, Assessment, Quote } from "@shared/schema";
 
 interface AdminStats {
@@ -64,6 +67,18 @@ export default function AdminDashboard() {
     enabled: user?.role === 'admin',
   });
 
+  // Invitations query
+  const { data: invitations } = useQuery({
+    queryKey: ["/api/admin/invitations"],
+    enabled: user?.role === 'admin',
+  });
+
+  // Analytics query
+  const { data: analytics } = useQuery({
+    queryKey: ["/api/admin/analytics"],
+    enabled: user?.role === 'admin',
+  });
+
   // Update partner status mutation
   const updatePartnerMutation = useMutation({
     mutationFn: async ({ partnerId, status }: { partnerId: string; status: string }) => {
@@ -102,6 +117,28 @@ export default function AdminDashboard() {
       toast({
         title: "Update Failed",
         description: "Failed to update user status.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Send email invitation mutation
+  const sendInvitationMutation = useMutation({
+    mutationFn: async (data: { email: string; recipientName?: string; companyName?: string }) => {
+      return apiRequest("POST", "/api/admin/send-invitation", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invitation Sent",
+        description: "Partner invitation email has been sent successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/invitations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Invitation Failed",
+        description: "Failed to send partner invitation",
         variant: "destructive",
       });
     },
@@ -173,14 +210,98 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                      size="sm"
+                    >
+                      <Mail className="h-4 w-4" />
+                      Send Email Invitation
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Send Partner Invitation</DialogTitle>
+                      <DialogDescription>
+                        Send a branded email invitation to potential partners
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={(e) => {
+                      e.preventDefault();
+                      const formData = new FormData(e.currentTarget);
+                      sendInvitationMutation.mutate({
+                        email: formData.get('email') as string,
+                        recipientName: formData.get('recipientName') as string,
+                        companyName: formData.get('companyName') as string,
+                      });
+                    }}>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="email" className="text-right">
+                            Email *
+                          </Label>
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            required
+                            className="col-span-3"
+                            placeholder="partner@company.com"
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="recipientName" className="text-right">
+                            Name
+                          </Label>
+                          <Input
+                            id="recipientName"
+                            name="recipientName"
+                            className="col-span-3"
+                            placeholder="John Doe"
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="companyName" className="text-right">
+                            Company
+                          </Label>
+                          <Input
+                            id="companyName"
+                            name="companyName"
+                            className="col-span-3"
+                            placeholder="ABC Installation Services"
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button 
+                          type="submit" 
+                          disabled={sendInvitationMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          {sendInvitationMutation.isPending ? (
+                            <>Sending...</>
+                          ) : (
+                            <>
+                              <Send className="h-4 w-4 mr-2" />
+                              Send Invitation
+                            </>
+                          )}
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+                
                 <Button
                   onClick={copySignupLink}
                   className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
                   size="sm"
                 >
                   <Copy className="h-4 w-4" />
-                  Copy Partner Signup Link
+                  Copy Signup Link
                 </Button>
+                
                 <Button 
                   variant="outline" 
                   onClick={() => window.location.href = "/"}
@@ -249,6 +370,8 @@ export default function AdminDashboard() {
         <Tabs defaultValue="partners" className="space-y-4">
           <TabsList>
             <TabsTrigger value="partners">Partners</TabsTrigger>
+            <TabsTrigger value="invitations">Invitations</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="assessments">Assessments</TabsTrigger>
             <TabsTrigger value="quotes">Quotes</TabsTrigger>
           </TabsList>
@@ -347,6 +470,124 @@ export default function AdminDashboard() {
                       ))}
                     </TableBody>
                   </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="invitations" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Partner Invitations</CardTitle>
+                <CardDescription>
+                  Track sent invitations and signup progress
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {invitations ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Invited By</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Sent Date</TableHead>
+                        <TableHead>Expires</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {invitations.map((invitation: any) => (
+                        <TableRow key={invitation.id}>
+                          <TableCell className="font-medium">{invitation.email}</TableCell>
+                          <TableCell>{invitation.invitedByName}</TableCell>
+                          <TableCell>
+                            <Badge variant={
+                              invitation.status === 'accepted' ? 'default' :
+                              invitation.status === 'expired' ? 'destructive' : 'secondary'
+                            }>
+                              {invitation.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{new Date(invitation.createdAt).toLocaleDateString()}</TableCell>
+                          <TableCell>{new Date(invitation.expiresAt).toLocaleDateString()}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="text-center py-4">Loading invitations...</div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Signup Analytics</CardTitle>
+                <CardDescription>
+                  Track partner signup funnel and conversion rates
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {analytics ? (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {analytics.filter((a: any) => a.event === 'invitation_sent').length}
+                        </div>
+                        <div className="text-sm text-blue-600">Invitations Sent</div>
+                      </div>
+                      <div className="bg-yellow-50 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-yellow-600">
+                          {analytics.filter((a: any) => a.event === 'invitation_clicked').length}
+                        </div>
+                        <div className="text-sm text-yellow-600">Clicks</div>
+                      </div>
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {analytics.filter((a: any) => a.event === 'signup_completed').length}
+                        </div>
+                        <div className="text-sm text-green-600">Signups</div>
+                      </div>
+                      <div className="bg-purple-50 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {analytics.filter((a: any) => a.event === 'organization_created').length}
+                        </div>
+                        <div className="text-sm text-purple-600">Organizations</div>
+                      </div>
+                    </div>
+                    
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Event</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Timestamp</TableHead>
+                          <TableHead>Details</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {analytics.slice(0, 10).map((event: any) => (
+                          <TableRow key={event.id}>
+                            <TableCell>
+                              <Badge variant="outline">
+                                {event.event.replace('_', ' ')}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{event.email || 'N/A'}</TableCell>
+                            <TableCell>{new Date(event.timestamp).toLocaleString()}</TableCell>
+                            <TableCell className="text-xs text-gray-500">
+                              {event.metadata ? JSON.stringify(event.metadata).slice(0, 50) + '...' : 'N/A'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">Loading analytics...</div>
                 )}
               </CardContent>
             </Card>

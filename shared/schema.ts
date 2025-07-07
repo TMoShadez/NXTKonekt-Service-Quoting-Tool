@@ -213,12 +213,57 @@ export const uploadedFilesRelations = relations(uploadedFiles, ({ one }) => ({
   }),
 }));
 
+// Partner invitations tracking table
+export const partnerInvitations = pgTable("partner_invitations", {
+  id: serial("id").primaryKey(),
+  email: varchar("email").notNull(),
+  invitedBy: varchar("invited_by").notNull(),
+  invitedByName: varchar("invited_by_name").notNull(),
+  status: varchar("status").notNull().default("pending"), // pending, accepted, expired
+  invitationToken: varchar("invitation_token").unique(),
+  expiresAt: timestamp("expires_at"),
+  acceptedAt: timestamp("accepted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Signup analytics tracking table  
+export const signupAnalytics = pgTable("signup_analytics", {
+  id: serial("id").primaryKey(),
+  event: varchar("event").notNull(), // invitation_sent, invitation_clicked, signup_completed, organization_created
+  email: varchar("email"),
+  userId: varchar("user_id"),
+  invitationId: integer("invitation_id"),
+  metadata: jsonb("metadata"), // Additional data like user agent, referrer, etc.
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+export const partnerInvitationsRelations = relations(partnerInvitations, ({ one, many }) => ({
+  invitedByUser: one(users, {
+    fields: [partnerInvitations.invitedBy],
+    references: [users.id],
+  }),
+  analytics: many(signupAnalytics),
+}));
+
+export const signupAnalyticsRelations = relations(signupAnalytics, ({ one }) => ({
+  invitation: one(partnerInvitations, {
+    fields: [signupAnalytics.invitationId],
+    references: [partnerInvitations.id],
+  }),
+  user: one(users, {
+    fields: [signupAnalytics.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users);
 export const insertOrganizationSchema = createInsertSchema(organizations).omit({ id: true, createdAt: true });
 export const insertAssessmentSchema = createInsertSchema(assessments).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertQuoteSchema = createInsertSchema(quotes).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertUploadedFileSchema = createInsertSchema(uploadedFiles).omit({ id: true, createdAt: true });
+export const insertPartnerInvitationSchema = createInsertSchema(partnerInvitations).omit({ id: true, createdAt: true });
+export const insertSignupAnalyticsSchema = createInsertSchema(signupAnalytics).omit({ id: true, timestamp: true });
 
 // Types
 export type UpsertUser = typeof users.$inferInsert;
@@ -231,3 +276,7 @@ export type Quote = typeof quotes.$inferSelect;
 export type InsertQuote = z.infer<typeof insertQuoteSchema>;
 export type UploadedFile = typeof uploadedFiles.$inferSelect;
 export type InsertUploadedFile = z.infer<typeof insertUploadedFileSchema>;
+export type PartnerInvitation = typeof partnerInvitations.$inferSelect;
+export type InsertPartnerInvitation = z.infer<typeof insertPartnerInvitationSchema>;
+export type SignupAnalytics = typeof signupAnalytics.$inferSelect;
+export type InsertSignupAnalytics = z.infer<typeof insertSignupAnalyticsSchema>;
