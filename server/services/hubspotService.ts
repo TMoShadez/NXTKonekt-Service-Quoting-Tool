@@ -305,8 +305,12 @@ export class HubSpotService {
       console.log(`HubSpot sync completed for quote ${quote.quoteNumber}`);
       
       return { contact, deal, ticket };
-    } catch (error) {
-      console.error('Error syncing quote to HubSpot:', error);
+    } catch (error: any) {
+      console.error('❌ HubSpot sync failed for quote', quote.quoteNumber);
+      console.error('Error type:', error.constructor.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('Full error object:', JSON.stringify(error, null, 2));
       throw error;
     }
   }
