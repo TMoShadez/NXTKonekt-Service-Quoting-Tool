@@ -256,13 +256,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Sync to HubSpot (async, don't block response)
         (async () => {
           try {
+            console.log(`🔄 Starting automatic HubSpot sync for quote ${quote.quoteNumber}...`);
             const organization = await storage.getOrganizationByUserId(userId);
             if (organization) {
               await hubspotService.syncQuoteToHubSpot(quote, assessment, organization);
-              console.log(`Quote ${quote.quoteNumber} synced to HubSpot successfully`);
+              console.log(`✅ Quote ${quote.quoteNumber} synced to HubSpot successfully`);
+            } else {
+              console.warn('⚠️ No organization found for user, skipping HubSpot sync');
             }
-          } catch (hubspotError) {
-            console.error(`Failed to sync quote ${quote.quoteNumber} to HubSpot:`, hubspotError);
+          } catch (hubspotError: any) {
+            console.error(`❌ Failed to sync quote ${quote.quoteNumber} to HubSpot:`, hubspotError);
+            console.error('HubSpot sync error details:', JSON.stringify(hubspotError, null, 2));
             // Don't fail the request if HubSpot sync fails
           }
         })();
@@ -458,17 +462,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // HubSpot integration routes
   app.get('/api/hubspot/test', isAuthenticated, async (req, res) => {
     try {
+      console.log('🧪 Starting HubSpot connection test from dashboard...');
       const isConnected = await hubspotService.testConnection();
+      console.log('🧪 HubSpot test result:', isConnected);
+      
       res.json({ 
         connected: isConnected,
         message: isConnected ? 'HubSpot connection successful' : 'HubSpot connection failed'
       });
-    } catch (error) {
-      console.error("HubSpot test failed:", error);
+    } catch (error: any) {
+      console.error("❌ HubSpot test failed with exception:", error);
+      console.error("Error details:", JSON.stringify(error, null, 2));
+      
       res.status(500).json({ 
         connected: false, 
         message: "HubSpot test failed",
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
+        details: error.toString()
       });
     }
   });

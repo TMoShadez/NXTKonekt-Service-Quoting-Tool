@@ -320,17 +320,20 @@ export class HubSpotService {
    */
   async testConnection(): Promise<boolean> {
     try {
-      console.log('Testing HubSpot connection...');
+      console.log('🔍 Testing HubSpot connection...');
+      console.log('Token length:', process.env.HUBSPOT_ACCESS_TOKEN?.length || 0);
+      
       // Try a simple API call to test authentication
       const response = await this.client.crm.contacts.getAll({ limit: 1 });
-      console.log('HubSpot connection successful');
+      console.log('✅ HubSpot connection successful, found', response.results?.length || 0, 'contacts');
       return true;
     } catch (error: any) {
-      console.error('HubSpot connection test failed:');
+      console.error('❌ HubSpot connection test failed:');
       console.error('- Error type:', error.constructor.name);
       console.error('- Error message:', error.message);
       console.error('- Status code:', error.code || error.status);
       console.error('- Response body:', error.body || error.response?.data);
+      console.error('- Full error:', JSON.stringify(error, null, 2));
       
       // Check for missing scopes specifically
       if (error.message && error.message.includes('required scopes')) {
