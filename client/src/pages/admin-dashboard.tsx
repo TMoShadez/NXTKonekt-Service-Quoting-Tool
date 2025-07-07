@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Users, FileText, BarChart3, CheckCircle, XCircle, Clock, Settings } from "lucide-react";
+import { Shield, Users, FileText, BarChart3, CheckCircle, XCircle, Clock, Settings, Link, Copy } from "lucide-react";
 import type { User, Organization, Assessment, Quote } from "@shared/schema";
 
 interface AdminStats {
@@ -107,6 +107,30 @@ export default function AdminDashboard() {
     },
   });
 
+  // Copy signup link function
+  const copySignupLink = async () => {
+    const signupLink = `${window.location.origin}/api/login`;
+    try {
+      await navigator.clipboard.writeText(signupLink);
+      toast({
+        title: "Link Copied",
+        description: "Partner signup link has been copied to clipboard",
+      });
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = signupLink;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      toast({
+        title: "Link Copied",
+        description: "Partner signup link has been copied to clipboard",
+      });
+    }
+  };
+
   if (authLoading || user?.role !== 'admin') {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -148,14 +172,24 @@ export default function AdminDashboard() {
                   <p className="text-sm text-gray-500 dark:text-gray-400">NXTKonekt Partner Management</p>
                 </div>
               </div>
-              <Button 
-                variant="outline" 
-                onClick={() => window.location.href = "/"}
-                className="flex items-center gap-2"
-              >
-                <Settings className="h-4 w-4" />
-                Back to App
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={copySignupLink}
+                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+                  size="sm"
+                >
+                  <Copy className="h-4 w-4" />
+                  Copy Partner Signup Link
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.location.href = "/"}
+                  className="flex items-center gap-2"
+                >
+                  <Settings className="h-4 w-4" />
+                  Back to App
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -222,10 +256,21 @@ export default function AdminDashboard() {
           <TabsContent value="partners" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Partner Management</CardTitle>
-                <CardDescription>
-                  Manage partner registrations and approvals
-                </CardDescription>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle>Partner Management</CardTitle>
+                    <CardDescription>
+                      Manage partner registrations and approvals. Use the "Copy Partner Signup Link" button above to share the registration link with new partners.
+                    </CardDescription>
+                  </div>
+                  <div className="text-xs text-gray-500 bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-md">
+                    <div className="font-medium mb-1">Partner Signup Process:</div>
+                    <div>1. Copy the signup link above</div>
+                    <div>2. Email to potential partners</div>
+                    <div>3. They sign in and create organization</div>
+                    <div>4. Approve their status here</div>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 {partnersLoading ? (
