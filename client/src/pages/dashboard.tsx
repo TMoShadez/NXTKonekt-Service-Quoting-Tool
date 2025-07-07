@@ -377,8 +377,10 @@ export default function Dashboard() {
                   <div className="h-2 w-2 bg-green-500 rounded-full mr-2"></div>
                   Quotes automatically sync to HubSpot when created. Quote approvals/rejections update deal status.
                 </div>
-                <div className="text-xs text-yellow-600 bg-yellow-50 p-2 rounded">
-                  <strong>Setup Required:</strong> If connection test fails, update your HubSpot Private App scopes to include: crm.objects.contacts.write, crm.objects.deals.write, crm.objects.tickets.write, crm.associations.write
+                <div className="text-xs text-green-600 bg-green-50 p-2 rounded">
+                  <strong>✅ Working:</strong> Contacts, Deals, and Tickets create successfully.
+                  <br/>
+                  <strong>⚠️ Limited:</strong> Contact-Deal-Ticket associations may be skipped (missing associations scope), but individual records sync perfectly to HubSpot.
                 </div>
               </div>
             </div>

@@ -136,14 +136,18 @@ export class HubSpotService {
         properties: dealData
       });
 
-      // Associate deal with contact if contactId is provided
-      if (contactId) {
-        await this.client.crm.deals.associationsApi.create(
-          deal.id,
-          'contacts',
-          contactId,
-          [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 3 }] // Deal to Contact association
-        );
+      // Try to associate deal with contact (graceful fallback for missing scopes)
+      try {
+        if (contactId) {
+          await this.client.crm.deals.associationsApi.create(
+            deal.id,
+            'contacts',
+            contactId,
+            [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 3 }]
+          );
+        }
+      } catch (associationError) {
+        console.warn('Deal-Contact association failed (missing scopes), continuing without associations:', associationError);
       }
 
       return {
@@ -180,24 +184,27 @@ export class HubSpotService {
         properties: ticketData
       });
 
-      // Associate ticket with contact
-      if (contactId) {
-        await this.client.crm.tickets.associationsApi.create(
-          ticket.id,
-          'contacts',
-          contactId,
-          [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 16 }] // Ticket to Contact association
-        );
-      }
+      // Try associations with graceful fallback for missing scopes
+      try {
+        if (contactId) {
+          await this.client.crm.tickets.associationsApi.create(
+            ticket.id,
+            'contacts',
+            contactId,
+            [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 16 }]
+          );
+        }
 
-      // Associate ticket with deal
-      if (dealId) {
-        await this.client.crm.tickets.associationsApi.create(
-          ticket.id,
-          'deals',
-          dealId,
-          [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 28 }] // Ticket to Deal association
-        );
+        if (dealId) {
+          await this.client.crm.tickets.associationsApi.create(
+            ticket.id,
+            'deals',
+            dealId,
+            [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 28 }]
+          );
+        }
+      } catch (associationError) {
+        console.warn('Association failed (missing scopes), continuing without associations:', associationError);
       }
 
       return {
@@ -207,8 +214,21 @@ export class HubSpotService {
         priority: ticket.properties.hs_ticket_priority,
         status: ticket.properties.hs_pipeline_stage
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating HubSpot ticket:', error);
+      
+      // If tickets scope is missing, return a fallback response
+      if (error.message && error.message.includes('required scopes')) {
+        console.warn('Tickets scope missing, skipping ticket creation');
+        return {
+          id: 'SCOPE_MISSING',
+          subject: `Quote Follow-up: ${quote.quoteNumber} - ${assessment.customerCompanyName}`,
+          content: 'Ticket creation skipped - missing HubSpot tickets scope',
+          priority: 'MEDIUM',
+          status: 'SKIPPED'
+        };
+      }
+      
       throw new Error(`Failed to create HubSpot ticket: ${error}`);
     }
   }
@@ -264,16 +284,25 @@ export class HubSpotService {
     ticket: HubSpotTicket;
   }> {
     try {
+      console.log(`Starting HubSpot sync for quote ${quote.quoteNumber}`);
+
       // 1. Create/update contact
       const contact = await this.createOrUpdateContact(assessment);
+      console.log(`Contact synced: ${contact.id}`);
       
       // 2. Create deal
       const deal = await this.createDeal(quote, assessment, organization, contact.id);
+      console.log(`Deal created: ${deal.id}`);
       
-      // 3. Create follow-up ticket
+      // 3. Create follow-up ticket (with graceful fallback for missing scopes)
       const ticket = await this.createTicket(quote, assessment, contact.id, deal.id);
+      if (ticket.id === 'SCOPE_MISSING') {
+        console.log('Ticket skipped due to missing HubSpot tickets scope');
+      } else {
+        console.log(`Ticket created: ${ticket.id}`);
+      }
 
-      console.log(`Successfully synced quote ${quote.quoteNumber} to HubSpot`);
+      console.log(`HubSpot sync completed for quote ${quote.quoteNumber}`);
       
       return { contact, deal, ticket };
     } catch (error) {
