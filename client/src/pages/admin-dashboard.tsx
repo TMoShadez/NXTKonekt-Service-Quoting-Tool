@@ -67,10 +67,7 @@ export default function AdminDashboard() {
   // Update partner status mutation
   const updatePartnerMutation = useMutation({
     mutationFn: async ({ partnerId, status }: { partnerId: string; status: string }) => {
-      await apiRequest(`/api/admin/partners/${partnerId}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status }),
-      });
+      await apiRequest("PATCH", `/api/admin/partners/${partnerId}/status`, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
@@ -92,10 +89,7 @@ export default function AdminDashboard() {
   // Toggle user active status mutation
   const toggleUserMutation = useMutation({
     mutationFn: async ({ userId, isActive }: { userId: string; isActive: boolean }) => {
-      await apiRequest(`/api/admin/users/${userId}/toggle`, {
-        method: "PATCH",
-        body: JSON.stringify({ isActive }),
-      });
+      await apiRequest("PATCH", `/api/admin/users/${userId}/toggle`, { isActive });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });

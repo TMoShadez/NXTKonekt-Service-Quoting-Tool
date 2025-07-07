@@ -166,11 +166,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateOrganizationStatus(id: number, status: string): Promise<Organization> {
+    console.log("💾 Database update: org ID", id, "to status", status);
+    
     const [organization] = await db
       .update(organizations)
-      .set({ partnerStatus: status })
+      .set({ partnerStatus: status, updatedAt: new Date() })
       .where(eq(organizations.id, id))
       .returning();
+      
+    console.log("💾 Database result:", organization);
     return organization;
   }
 
