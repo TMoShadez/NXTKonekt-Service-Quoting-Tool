@@ -7,7 +7,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, CheckCircle, Clock, Plus, Download, LogOut, User, ChevronDown, Trash2, Share, Copy } from "lucide-react";
+import { FileText, CheckCircle, Clock, Plus, Download, LogOut, User, ChevronDown, Trash2, Share, Copy, Settings, ExternalLink } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import nxtKonektLogo from "@assets/NxtKonekt Logo_1749973360626.png";
@@ -107,6 +107,68 @@ export default function Dashboard() {
       }
     }
   };
+
+  // HubSpot integration mutations
+  const hubspotTestMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("GET", "/api/hubspot/test", {});
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: data.connected ? "HubSpot Connected" : "HubSpot Connection Failed",
+        description: data.message,
+        variant: data.connected ? "default" : "destructive",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "HubSpot Test Failed",
+        description: "Failed to test HubSpot connection",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const hubspotSyncMutation = useMutation({
+    mutationFn: async (quoteId: number) => {
+      return apiRequest("POST", `/api/hubspot/sync-quote/${quoteId}`, {});
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "HubSpot Sync Successful",
+        description: `Quote synced to HubSpot. Contact ID: ${data.hubspotData.contactId}`,
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "HubSpot Sync Failed",
+        description: "Failed to sync quote to HubSpot",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleLogout = () => {
     window.location.href = "/api/logout";
@@ -290,6 +352,34 @@ export default function Dashboard() {
           </Button>
         </div>
 
+        {/* HubSpot Integration Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center text-lg font-semibold nxt-gray-800">
+              <Settings className="mr-2" size={20} />
+              HubSpot CRM Integration
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button 
+                variant="outline"
+                onClick={() => hubspotTestMutation.mutate()}
+                disabled={hubspotTestMutation.isPending}
+                className="flex items-center"
+              >
+                <ExternalLink className="mr-2" size={16} />
+                {hubspotTestMutation.isPending ? "Testing..." : "Test HubSpot Connection"}
+              </Button>
+              
+              <div className="text-sm text-gray-600 flex items-center">
+                <div className="h-2 w-2 bg-green-500 rounded-full mr-2"></div>
+                Quotes automatically sync to HubSpot when created. Quote approvals/rejections update deal status.
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Recent Quotes Table */}
         <Card>
           <CardHeader>
@@ -368,6 +458,15 @@ export default function Dashboard() {
                             title="Share customer portal link"
                           >
                             <Share className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="link" 
+                            className="text-green-600 hover:text-green-700 p-0 mr-3"
+                            onClick={() => hubspotSyncMutation.mutate(quote.id)}
+                            disabled={hubspotSyncMutation.isPending}
+                            title="Sync to HubSpot"
+                          >
+                            <ExternalLink className="h-4 w-4" />
                           </Button>
                           <Button 
                             variant="link" 

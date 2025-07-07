@@ -5,6 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { upload, saveFileToDatabase, deleteFileFromDisk } from "./services/fileUpload";
 import { calculatePricing } from "./services/pricingEngine";
 import { generateQuotePDF } from "./services/pdfGenerator";
+import { hubspotService } from "./services/hubspotService";
 import { insertAssessmentSchema, insertOrganizationSchema } from "@shared/schema";
 import path from "path";
 import fs from "fs";
@@ -251,6 +252,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalCost: pricing.totalCost.toString(),
           status: 'completed',
         });
+
+        // Sync to HubSpot (async, don't block response)
+        (async () => {
+          try {
+            const organization = await storage.getOrganizationByUserId(userId);
+            if (organization) {
+              await hubspotService.syncQuoteToHubSpot(quote, assessment, organization);
+              console.log(`Quote ${quote.quoteNumber} synced to HubSpot successfully`);
+            }
+          } catch (hubspotError) {
+            console.error(`Failed to sync quote ${quote.quoteNumber} to HubSpot:`, hubspotError);
+            // Don't fail the request if HubSpot sync fails
+          }
+        })();
       }
 
       res.json(quote);
@@ -393,6 +408,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // In a real implementation, you'd store customer feedback in a separate field
       });
 
+      // Update HubSpot deal status (async, don't block response)
+      (async () => {
+        try {
+          await hubspotService.updateDealStatus(quote.id, action as 'approved' | 'rejected');
+          console.log(`HubSpot deal status updated for quote ${quote.quoteNumber}`);
+        } catch (hubspotError) {
+          console.error(`Failed to update HubSpot deal status for quote ${quote.quoteNumber}:`, hubspotError);
+          // Don't fail the request if HubSpot sync fails
+        }
+      })();
+
       res.json({ 
         success: true, 
         message: `Quote ${action}d successfully`,
@@ -426,6 +452,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.sendFile(filePath);
     } else {
       res.status(404).json({ message: "File not found" });
+    }
+  });
+
+  // HubSpot integration routes
+  app.get('/api/hubspot/test', isAuthenticated, async (req, res) => {
+    try {
+      const isConnected = await hubspotService.testConnection();
+      res.json({ 
+        connected: isConnected,
+        message: isConnected ? 'HubSpot connection successful' : 'HubSpot connection failed'
+      });
+    } catch (error) {
+      console.error("HubSpot test failed:", error);
+      res.status(500).json({ 
+        connected: false, 
+        message: "HubSpot test failed",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.post('/api/hubspot/sync-quote/:id', isAuthenticated, async (req, res) => {
+    try {
+      const quoteId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      const quote = await storage.getQuote(quoteId);
+      if (!quote || quote.assessment.userId !== userId) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+
+      const organization = await storage.getOrganizationByUserId(userId);
+      if (!organization) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+
+      const result = await hubspotService.syncQuoteToHubSpot(quote, quote.assessment, organization);
+      
+      res.json({
+        success: true,
+        message: `Quote ${quote.quoteNumber} synced to HubSpot successfully`,
+        hubspotData: {
+          contactId: result.contact.id,
+          dealId: result.deal.id,
+          ticketId: result.ticket.id
+        }
+      });
+    } catch (error) {
+      console.error("Manual HubSpot sync failed:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to sync to HubSpot",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
