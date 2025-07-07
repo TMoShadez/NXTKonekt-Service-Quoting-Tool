@@ -79,6 +79,29 @@ export default function AdminDashboard() {
     enabled: user?.role === 'admin',
   });
 
+  // Test email connection mutation
+  const testEmailMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("GET", "/api/admin/test-email");
+    },
+    onSuccess: (data) => {
+      toast({
+        title: data.success ? "Email Connection Success" : "Email Connection Failed",
+        description: data.success 
+          ? "Company mailbox is properly configured and ready to send invitations"
+          : `Email configuration error: ${data.error}`,
+        variant: data.success ? "default" : "destructive",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Email Test Failed",
+        description: "Failed to test email connection",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Update partner status mutation
   const updatePartnerMutation = useMutation({
     mutationFn: async ({ partnerId, status }: { partnerId: string; status: string }) => {
@@ -293,6 +316,17 @@ export default function AdminDashboard() {
                   </DialogContent>
                 </Dialog>
                 
+                <Button
+                  onClick={() => testEmailMutation.mutate()}
+                  disabled={testEmailMutation.isPending}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  size="sm"
+                >
+                  <Mail className="h-4 w-4" />
+                  {testEmailMutation.isPending ? "Testing..." : "Test Email"}
+                </Button>
+
                 <Button
                   onClick={copySignupLink}
                   className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"

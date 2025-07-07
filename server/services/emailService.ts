@@ -200,13 +200,21 @@ export class EmailService {
   private transporter: nodemailer.Transporter | null = null;
 
   constructor() {
+    console.log("📧 Initializing EmailService...");
     this.initializeTransporter();
   }
 
   private initializeTransporter() {
     // Check if we have email credentials configured
+    console.log("📧 Checking SMTP configuration...");
+    console.log(`SMTP_HOST: ${process.env.SMTP_HOST ? '✅ Set' : '❌ Not set'}`);
+    console.log(`SMTP_USER: ${process.env.SMTP_USER ? '✅ Set' : '❌ Not set'}`);
+    console.log(`SMTP_PASS: ${process.env.SMTP_PASS ? '✅ Set' : '❌ Not set'}`);
+    console.log(`SMTP_PORT: ${process.env.SMTP_PORT || 'Using default 587'}`);
+    console.log(`SMTP_SECURE: ${process.env.SMTP_SECURE || 'Using default false'}`);
+    
     if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-      this.transporter = nodemailer.createTransporter({
+      this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || '587'),
         secure: process.env.SMTP_SECURE === 'true',
@@ -214,6 +222,14 @@ export class EmailService {
           user: process.env.SMTP_USER,
           pass: process.env.SMTP_PASS,
         },
+      });
+      console.log("✅ Email transporter initialized successfully");
+    } else {
+      console.log("❌ Email credentials not found. Email features will be disabled.");
+      console.log("Missing variables:", {
+        SMTP_HOST: !process.env.SMTP_HOST,
+        SMTP_USER: !process.env.SMTP_USER,
+        SMTP_PASS: !process.env.SMTP_PASS
       });
     }
   }

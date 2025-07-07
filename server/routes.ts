@@ -729,6 +729,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test email connection
+  app.get('/api/admin/test-email', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const testResult = await emailService.testConnection();
+      res.json(testResult);
+    } catch (error) {
+      console.error("Error testing email connection:", error);
+      res.status(500).json({ message: "Failed to test email connection" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
