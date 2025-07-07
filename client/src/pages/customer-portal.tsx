@@ -33,10 +33,7 @@ export default function CustomerPortal() {
   // Quote approval mutation
   const approvalMutation = useMutation({
     mutationFn: async ({ action, feedback }: { action: "approve" | "reject"; feedback?: string }) => {
-      return apiRequest(`/api/customer/quote/${token}/${action}`, {
-        method: "POST",
-        body: JSON.stringify({ feedback }),
-      });
+      return apiRequest("POST", `/api/customer/quote/${token}/${action}`, { feedback });
     },
     onSuccess: (_, variables) => {
       toast({
