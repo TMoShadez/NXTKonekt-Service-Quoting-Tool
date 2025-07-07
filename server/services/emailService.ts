@@ -214,19 +214,40 @@ export class EmailService {
     console.log(`SMTP_SECURE: ${process.env.SMTP_SECURE || 'Using default false'}`);
     
     if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-      this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: process.env.SMTP_SECURE === 'true',
-        requireTLS: true, // Force TLS for Office 365
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-        tls: {
-          ciphers: 'SSLv3' // Required for some Office 365 configurations
-        }
-      });
+      // Try Office 365 with service configuration for better compatibility
+      if (process.env.SMTP_HOST.includes('office365')) {
+        console.log("🏢 Detected Office 365, using service configuration");
+        this.transporter = nodemailer.createTransport({
+          service: 'hotmail', // Use predefined Office 365 service
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          },
+          tls: {
+            rejectUnauthorized: false
+          },
+          debug: true,
+          logger: true
+        });
+      } else {
+        // Standard SMTP configuration for other providers
+        this.transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: parseInt(process.env.SMTP_PORT || '587'),
+          secure: process.env.SMTP_SECURE === 'true',
+          requireTLS: true,
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          },
+          tls: {
+            ciphers: 'SSLv3',
+            rejectUnauthorized: false
+          },
+          debug: true,
+          logger: true
+        });
+      }
       console.log("✅ Email transporter initialized successfully");
     } else {
       console.log("❌ Email credentials not found. Email features will be disabled.");
@@ -317,6 +338,7 @@ For support: support@nxtkonekt.com
       console.log(`Connecting to: ${process.env.SMTP_HOST}:${process.env.SMTP_PORT}`);
       console.log(`Using secure: ${process.env.SMTP_SECURE === 'true'}`);
       console.log(`Auth user: ${process.env.SMTP_USER}`);
+      console.log(`Password length: ${process.env.SMTP_PASS?.length} chars`);
       
       await this.transporter.verify();
       console.log("✅ Email connection test successful");
@@ -326,14 +348,20 @@ For support: support@nxtkonekt.com
       const errorMessage = error instanceof Error ? error.message : 'Unknown email connection error';
       console.error('Full error details:', error);
       
-      // Provide more specific error guidance
+      // Provide Office 365 specific error guidance
       let specificError = errorMessage;
-      if (errorMessage.includes('EAUTH') || errorMessage.includes('Invalid login')) {
-        specificError = 'Authentication failed. Please check your email username and password.';
+      if (errorMessage.includes('EAUTH') || errorMessage.includes('Invalid login') || errorMessage.includes('535')) {
+        specificError = 'Office 365 Authentication Failed. Solutions:\n' +
+                       '1. Enable "Less secure app access" in Microsoft 365 admin center\n' +
+                       '2. Create an App Password (recommended for 2FA accounts)\n' +
+                       '3. Use OAuth2 authentication instead of basic auth\n' +
+                       '4. Check if account has MFA enabled (requires app password)';
       } else if (errorMessage.includes('ECONNREFUSED')) {
-        specificError = 'Connection refused. Please check your SMTP host and port settings.';
+        specificError = 'Connection refused. Verify smtp.office365.com:587 is accessible.';
       } else if (errorMessage.includes('ETIMEOUT')) {
-        specificError = 'Connection timeout. Please verify your SMTP host and network connection.';
+        specificError = 'Connection timeout. Check network connectivity to Office 365.';
+      } else if (errorMessage.includes('certificate') || errorMessage.includes('TLS')) {
+        specificError = 'TLS/Certificate issue. Office 365 requires modern TLS configuration.';
       }
       
       return {
