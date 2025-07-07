@@ -483,6 +483,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test HubSpot on server startup
+  (async () => {
+    try {
+      console.log('🧪 Testing HubSpot connection on server startup...');
+      const testResult = await hubspotService.testConnection();
+      console.log('🧪 Server startup HubSpot test:', testResult ? 'PASSED' : 'FAILED');
+    } catch (error) {
+      console.error('🧪 Server startup HubSpot test failed:', error);
+    }
+  })();
+
   app.post('/api/hubspot/sync-quote/:id', isAuthenticated, async (req, res) => {
     try {
       const quoteId = parseInt(req.params.id);

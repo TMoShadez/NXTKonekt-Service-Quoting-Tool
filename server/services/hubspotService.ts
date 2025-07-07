@@ -70,6 +70,7 @@ export class HubSpotService {
       // Try to find existing contact by email first
       let contact;
       try {
+        console.log('🔍 Searching for existing contact with email:', assessment.customerEmail);
         const searchResponse = await this.client.crm.contacts.searchApi.doSearch({
           filterGroups: [
             {
@@ -88,15 +89,19 @@ export class HubSpotService {
 
         if (searchResponse.results && searchResponse.results.length > 0) {
           // Update existing contact
+          console.log('✅ Found existing contact, updating:', searchResponse.results[0].id);
           contact = await this.client.crm.contacts.basicApi.update(
             searchResponse.results[0].id,
             { properties: contactData }
           );
+          console.log('✅ Contact updated successfully');
         } else {
           // Create new contact
+          console.log('📝 No existing contact found, creating new contact');
           contact = await this.client.crm.contacts.basicApi.create({
             properties: contactData
           });
+          console.log('✅ New contact created:', contact.id);
         }
       } catch (searchError) {
         // If search fails, try to create new contact
@@ -334,7 +339,7 @@ export class HubSpotService {
       console.log('Token length:', process.env.HUBSPOT_ACCESS_TOKEN?.length || 0);
       
       // Try a simple API call to test authentication
-      const response = await this.client.crm.contacts.getAll({ limit: 1 });
+      const response = await this.client.crm.contacts.basicApi.getPage(undefined, undefined, undefined, undefined, undefined, 1);
       console.log('✅ HubSpot connection successful, found', response.results?.length || 0, 'contacts');
       return true;
     } catch (error: any) {
