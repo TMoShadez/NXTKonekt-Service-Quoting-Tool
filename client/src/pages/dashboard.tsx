@@ -372,9 +372,14 @@ export default function Dashboard() {
                 {hubspotTestMutation.isPending ? "Testing..." : "Test HubSpot Connection"}
               </Button>
               
-              <div className="text-sm text-gray-600 flex items-center">
-                <div className="h-2 w-2 bg-green-500 rounded-full mr-2"></div>
-                Quotes automatically sync to HubSpot when created. Quote approvals/rejections update deal status.
+              <div className="text-sm text-gray-600">
+                <div className="flex items-center mb-2">
+                  <div className="h-2 w-2 bg-green-500 rounded-full mr-2"></div>
+                  Quotes automatically sync to HubSpot when created. Quote approvals/rejections update deal status.
+                </div>
+                <div className="text-xs text-yellow-600 bg-yellow-50 p-2 rounded">
+                  <strong>Setup Required:</strong> If connection test fails, update your HubSpot Private App scopes to include: crm.objects.contacts.write, crm.objects.deals.write, crm.objects.tickets.write, crm.associations.write
+                </div>
               </div>
             </div>
           </CardContent>

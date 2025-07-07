@@ -287,10 +287,23 @@ export class HubSpotService {
    */
   async testConnection(): Promise<boolean> {
     try {
-      await this.client.crm.owners.getAll();
+      console.log('Testing HubSpot connection...');
+      // Try a simple API call to test authentication
+      const response = await this.client.crm.contacts.getAll({ limit: 1 });
+      console.log('HubSpot connection successful');
       return true;
-    } catch (error) {
-      console.error('HubSpot connection test failed:', error);
+    } catch (error: any) {
+      console.error('HubSpot connection test failed:');
+      console.error('- Error type:', error.constructor.name);
+      console.error('- Error message:', error.message);
+      console.error('- Status code:', error.code || error.status);
+      console.error('- Response body:', error.body || error.response?.data);
+      
+      // Check for missing scopes specifically
+      if (error.message && error.message.includes('required scopes')) {
+        console.error('❌ MISSING HUBSPOT SCOPES - Please update your private app permissions');
+      }
+      
       return false;
     }
   }
