@@ -186,8 +186,8 @@ export class HubSpotService {
       const ticketData = {
         subject: `Quote Follow-up: ${quote.quoteNumber} - ${assessment.customerCompanyName}`,
         content: `Follow-up required for NXTKonekt quote ${quote.quoteNumber}.\n\nCustomer: ${assessment.customerCompanyName}\nContact: ${assessment.customerContactName}\nService: ${assessment.serviceType}\nQuote Amount: $${quote.totalCost}\nStatus: ${quote.status}\n\nSales Executive: ${assessment.salesExecutiveName}`,
-        hs_pipeline: 'support_pipeline', // Customize as needed
-        hs_pipeline_stage: 'new', // Customize as needed
+        hs_pipeline: '0', // Default pipeline 
+        hs_pipeline_stage: '1', // First stage in pipeline
         hs_ticket_priority: 'MEDIUM',
         source_type: 'OTHER',
         nxtkonekt_quote_number: quote.quoteNumber,
@@ -239,6 +239,18 @@ export class HubSpotService {
           id: 'SCOPE_MISSING',
           subject: `Quote Follow-up: ${quote.quoteNumber} - ${assessment.customerCompanyName}`,
           content: 'Ticket creation skipped - missing HubSpot tickets scope',
+          priority: 'MEDIUM',
+          status: 'SKIPPED'
+        };
+      }
+      
+      // Handle pipeline validation errors
+      if (error.message && error.message.includes('pipeline stage')) {
+        console.warn('Pipeline stage validation error, skipping ticket creation');
+        return {
+          id: 'PIPELINE_ERROR',
+          subject: `Quote Follow-up: ${quote.quoteNumber} - ${assessment.customerCompanyName}`,
+          content: 'Ticket creation skipped - pipeline stage validation error',
           priority: 'MEDIUM',
           status: 'SKIPPED'
         };
