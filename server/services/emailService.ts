@@ -218,10 +218,14 @@ export class EmailService {
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || '587'),
         secure: process.env.SMTP_SECURE === 'true',
+        requireTLS: true, // Force TLS for Office 365
         auth: {
           user: process.env.SMTP_USER,
           pass: process.env.SMTP_PASS,
         },
+        tls: {
+          ciphers: 'SSLv3' // Required for some Office 365 configurations
+        }
       });
       console.log("✅ Email transporter initialized successfully");
     } else {
@@ -298,20 +302,43 @@ For support: support@nxtkonekt.com
 
   // Test email configuration
   async testConnection(): Promise<{ success: boolean; error?: string }> {
+    console.log("🧪 Testing email connection...");
+    
     if (!this.transporter) {
+      console.log("❌ No transporter found");
       return {
         success: false,
-        error: 'Email service not configured',
+        error: 'Email service not configured. Please check SMTP settings.',
       };
     }
 
     try {
+      console.log("🔍 Verifying SMTP connection...");
+      console.log(`Connecting to: ${process.env.SMTP_HOST}:${process.env.SMTP_PORT}`);
+      console.log(`Using secure: ${process.env.SMTP_SECURE === 'true'}`);
+      console.log(`Auth user: ${process.env.SMTP_USER}`);
+      
       await this.transporter.verify();
+      console.log("✅ Email connection test successful");
       return { success: true };
     } catch (error) {
+      console.error('❌ Email connection test failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown email connection error';
+      console.error('Full error details:', error);
+      
+      // Provide more specific error guidance
+      let specificError = errorMessage;
+      if (errorMessage.includes('EAUTH') || errorMessage.includes('Invalid login')) {
+        specificError = 'Authentication failed. Please check your email username and password.';
+      } else if (errorMessage.includes('ECONNREFUSED')) {
+        specificError = 'Connection refused. Please check your SMTP host and port settings.';
+      } else if (errorMessage.includes('ETIMEOUT')) {
+        specificError = 'Connection timeout. Please verify your SMTP host and network connection.';
+      }
+      
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Connection test failed',
+        error: specificError,
       };
     }
   }
