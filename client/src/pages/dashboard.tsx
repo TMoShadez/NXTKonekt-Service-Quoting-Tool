@@ -85,18 +85,26 @@ export default function Dashboard() {
   const handleShareCustomerPortal = async (quoteId: number, customerName: string) => {
     const customerPortalUrl = `${window.location.origin}/customer/${quoteId}`;
     
+    // Try to copy to clipboard first
     try {
       await navigator.clipboard.writeText(customerPortalUrl);
       toast({
-        title: "Customer Portal Link Copied",
-        description: `Share this link with ${customerName} to view and approve the quote`,
+        title: "Customer Portal Link Copied!",
+        description: `Link copied to clipboard. Share with ${customerName} to view and approve the quote.`,
       });
     } catch (error) {
-      // Fallback for browsers that don't support clipboard API
-      toast({
-        title: "Customer Portal Link",
-        description: customerPortalUrl,
-      });
+      // Fallback: Show a prompt with the URL for manual copying
+      const userAction = prompt(
+        `Copy this customer portal link to share with ${customerName}:`, 
+        customerPortalUrl
+      );
+      
+      if (userAction !== null) {
+        toast({
+          title: "Customer Portal Link Ready",
+          description: `Share this link with ${customerName} to view and approve the quote`,
+        });
+      }
     }
   };
 
