@@ -26,7 +26,7 @@ export default function CustomerPortal() {
 
   // Fetch quote data using secure token
   const { data: quoteData, isLoading } = useQuery<CustomerQuoteData>({
-    queryKey: ["/api/customer/quote", token],
+    queryKey: [`/api/customer/quote/${token}`],
     enabled: !!token,
   });
 
