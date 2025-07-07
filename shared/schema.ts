@@ -34,6 +34,8 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  role: varchar("role").default("partner").notNull(), // admin, partner, sales_executive
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -44,6 +46,9 @@ export const organizations = pgTable("organizations", {
   userId: varchar("user_id").notNull().references(() => users.id),
   partnerOrganization: text("partner_organization"),
   phone: varchar("phone"),
+  partnerStatus: varchar("partner_status").default("pending").notNull(), // pending, approved, suspended
+  partnerType: varchar("partner_type").default("installer").notNull(), // installer, sales_agent, reseller
+  commission: decimal("commission", { precision: 5, scale: 2 }).default("0.00"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

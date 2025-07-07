@@ -530,6 +530,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Routes
+  const isAdmin: RequestHandler = async (req: any, res, next) => {
+    if (!req.isAuthenticated() || !req.user?.claims?.sub) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    const user = await storage.getUser(req.user.claims.sub);
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+    
+    next();
+  };
+
+  app.get('/api/admin/stats', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getAdminStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ message: "Failed to fetch admin stats" });
+    }
+  });
+
+  app.get('/api/admin/partners', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const partnersWithOrgs = await Promise.all(
+        users.map(async (user) => {
+          const organization = await storage.getOrganizationByUserId(user.id);
+          return { ...user, organization };
+        })
+      );
+      res.json(partnersWithOrgs);
+    } catch (error) {
+      console.error("Error fetching partners:", error);
+      res.status(500).json({ message: "Failed to fetch partners" });
+    }
+  });
+
+  app.get('/api/admin/assessments', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const allAssessments = await db.select().from(assessments).orderBy(desc(assessments.createdAt));
+      res.json(allAssessments);
+    } catch (error) {
+      console.error("Error fetching assessments:", error);
+      res.status(500).json({ message: "Failed to fetch assessments" });
+    }
+  });
+
+  app.get('/api/admin/quotes', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const allQuotes = await db.select().from(quotes).orderBy(desc(quotes.createdAt));
+      res.json(allQuotes);
+    } catch (error) {
+      console.error("Error fetching quotes:", error);
+      res.status(500).json({ message: "Failed to fetch quotes" });
+    }
+  });
+
+  app.patch('/api/admin/partners/:id/status', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      if (!status || !['pending', 'approved', 'suspended'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      const organization = await storage.updateOrganizationStatus(parseInt(id), status);
+      res.json(organization);
+    } catch (error) {
+      console.error("Error updating partner status:", error);
+      res.status(500).json({ message: "Failed to update partner status" });
+    }
+  });
+
+  app.patch('/api/admin/users/:id/toggle', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { isActive } = req.body;
+      
+      const user = await storage.toggleUserActive(id, isActive);
+      res.json(user);
+    } catch (error) {
+      console.error("Error toggling user status:", error);
+      res.status(500).json({ message: "Failed to toggle user status" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

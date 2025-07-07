@@ -7,7 +7,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, CheckCircle, Clock, Plus, Download, LogOut, User, ChevronDown, Trash2, Share, Copy, Settings, ExternalLink } from "lucide-react";
+import { FileText, CheckCircle, Clock, Plus, Download, LogOut, User, ChevronDown, Trash2, Share, Copy, Settings, ExternalLink, Shield } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import nxtKonektLogo from "@assets/NxtKonekt Logo_1749973360626.png";
@@ -270,6 +270,16 @@ export default function Dashboard() {
                     <User className="text-white" size={16} />
                   )}
                 </div>
+                {user?.role === 'admin' && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => window.location.href = "/admin"}
+                    className="text-blue-600 hover:bg-blue-50"
+                  >
+                    <Shield size={16} />
+                  </Button>
+                )}
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
                   <LogOut size={16} />
                 </Button>

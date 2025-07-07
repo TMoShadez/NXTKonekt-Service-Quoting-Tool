@@ -11,6 +11,7 @@ import Assessment from "@/pages/assessment";
 import FleetTrackingForm from "@/pages/fleet-tracking";
 import FleetCameraForm from "@/pages/fleet-camera";
 import CustomerPortal from "@/pages/customer-portal";
+import AdminDashboard from "@/pages/admin-dashboard";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -26,6 +27,7 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Dashboard} />
+          <Route path="/admin" component={AdminDashboard} />
           <Route path="/assessment/:id?" component={Assessment} />
           <Route path="/fleet-tracking/:id?" component={FleetTrackingForm} />
           <Route path="/fleet-camera/:id?" component={FleetCameraForm} />
