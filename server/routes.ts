@@ -338,8 +338,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // For this mockup, we'll use the quote ID as the token
       const quoteId = parseInt(token);
       
-      const quotes = await storage.getQuotesByUserId('*'); // Get all quotes for demo
-      const quote = quotes.find(q => q.id === quoteId);
+      if (isNaN(quoteId)) {
+        return res.status(400).json({ message: "Invalid quote ID" });
+      }
+      
+      const quote = await storage.getQuote(quoteId);
       
       if (!quote) {
         return res.status(404).json({ message: "Quote not found" });
@@ -374,8 +377,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // In a real implementation, you'd decode/verify the token
       const quoteId = parseInt(token);
       
-      const quotes = await storage.getQuotesByUserId('*'); // Get all quotes for demo
-      const quote = quotes.find(q => q.id === quoteId);
+      if (isNaN(quoteId)) {
+        return res.status(400).json({ message: "Invalid quote ID" });
+      }
+      
+      const quote = await storage.getQuote(quoteId);
       
       if (!quote) {
         return res.status(404).json({ message: "Quote not found" });

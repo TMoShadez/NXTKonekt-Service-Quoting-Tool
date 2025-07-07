@@ -38,6 +38,7 @@ export interface IStorage {
   // Quote operations
   createQuote(quote: InsertQuote): Promise<Quote>;
   updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote>;
+  getQuote(id: number): Promise<(Quote & { assessment: Assessment }) | undefined>;
   getQuotesByUserId(userId: string): Promise<(Quote & { assessment: Assessment })[]>;
   getQuoteByAssessmentId(assessmentId: number): Promise<Quote | undefined>;
   deleteQuote(id: number): Promise<void>;
@@ -139,6 +140,39 @@ export class DatabaseStorage implements IStorage {
       .where(eq(quotes.id, id))
       .returning();
     return updatedQuote;
+  }
+
+  async getQuote(id: number): Promise<(Quote & { assessment: Assessment }) | undefined> {
+    const [result] = await db
+      .select({
+        id: quotes.id,
+        assessmentId: quotes.assessmentId,
+        quoteNumber: quotes.quoteNumber,
+        surveyCost: quotes.surveyCost,
+        installationCost: quotes.installationCost,
+        configurationCost: quotes.configurationCost,
+        trainingCost: quotes.trainingCost,
+        hardwareCost: quotes.hardwareCost,
+        removalCost: quotes.removalCost,
+        totalCost: quotes.totalCost,
+        surveyHours: quotes.surveyHours,
+        installationHours: quotes.installationHours,
+        configurationHours: quotes.configurationHours,
+        removalHours: quotes.removalHours,
+        laborHoldHours: quotes.laborHoldHours,
+        laborHoldCost: quotes.laborHoldCost,
+        hourlyRate: quotes.hourlyRate,
+        status: quotes.status,
+        pdfUrl: quotes.pdfUrl,
+        emailSent: quotes.emailSent,
+        createdAt: quotes.createdAt,
+        updatedAt: quotes.updatedAt,
+        assessment: assessments,
+      })
+      .from(quotes)
+      .innerJoin(assessments, eq(quotes.assessmentId, assessments.id))
+      .where(eq(quotes.id, id));
+    return result;
   }
 
   async getQuotesByUserId(userId: string): Promise<(Quote & { assessment: Assessment })[]> {
