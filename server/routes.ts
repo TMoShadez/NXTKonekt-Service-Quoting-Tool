@@ -650,7 +650,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .where(or(eq(users.isSystemAdmin, false), isNull(users.isSystemAdmin))) // Include non-system admin users
       .orderBy(desc(quotes.createdAt));
       
-      console.log('Admin quotes result sample:', allQuotes[0]);
+
       res.json(allQuotes);
     } catch (error) {
       console.error("Error fetching quotes:", error);
