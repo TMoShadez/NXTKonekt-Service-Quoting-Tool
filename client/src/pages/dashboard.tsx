@@ -277,8 +277,7 @@ export default function Dashboard() {
                     onClick={() => window.location.href = "/admin"}
                     className="text-blue-600 hover:bg-blue-50"
                   >
-                    <Shield size={16} className="mr-1" />
-                    Admin
+                    <Shield size={16} />
                   </Button>
                 )}
                 <Button variant="ghost" size="sm" onClick={handleLogout}>

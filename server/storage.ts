@@ -53,7 +53,6 @@ export interface IStorage {
   updateAssessment(id: number, assessment: Partial<InsertAssessment>): Promise<Assessment>;
   getAssessment(id: number): Promise<Assessment | undefined>;
   getAssessmentsByUserId(userId: string): Promise<Assessment[]>;
-  getAllAssessments(): Promise<(Assessment & { user: { email: string; firstName?: string; lastName?: string }; organization?: { name: string } })[]>;
   
   // Quote operations
   createQuote(quote: InsertQuote): Promise<Quote>;
@@ -62,7 +61,6 @@ export interface IStorage {
   getQuotesByUserId(userId: string): Promise<(Quote & { assessment: Assessment })[]>;
   getQuoteByAssessmentId(assessmentId: number): Promise<Quote | undefined>;
   deleteQuote(id: number): Promise<void>;
-  getAllQuotes(): Promise<(Quote & { assessment: Assessment; user: { email: string; firstName?: string; lastName?: string }; organization?: { name: string } })[]>;
   
   // File operations
   createUploadedFile(file: InsertUploadedFile): Promise<UploadedFile>;
@@ -90,23 +88,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    // Ensure new users get 'partner' role by default, not admin
-    const userDataWithRole = {
-      ...userData,
-      role: userData.role || 'partner', // Default to partner role for new signups
-    };
-    
     const [user] = await db
       .insert(users)
-      .values(userDataWithRole)
+      .values(userData)
       .onConflictDoUpdate({
         target: users.id,
         set: {
-          // Only update profile info, preserve existing role
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          profileImageUrl: userData.profileImageUrl,
+          ...userData,
           updatedAt: new Date(),
         },
       })
@@ -240,58 +228,6 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(assessments.createdAt));
   }
 
-  async getAllAssessments(): Promise<(Assessment & { user: { email: string; firstName?: string; lastName?: string }; organization?: { name: string } })[]> {
-    const result = await db
-      .select({
-        // Assessment fields
-        id: assessments.id,
-        userId: assessments.userId,
-        organizationId: assessments.organizationId,
-        serviceType: assessments.serviceType,
-        status: assessments.status,
-        customerName: assessments.customerName,
-        customerEmail: assessments.customerEmail,
-        customerPhone: assessments.customerPhone,
-        customerCompany: assessments.customerCompany,
-        siteAddress: assessments.siteAddress,
-        preferredInstallationDate: assessments.preferredInstallationDate,
-        createdAt: assessments.createdAt,
-        updatedAt: assessments.updatedAt,
-        // User info
-        userEmail: users.email,
-        userFirstName: users.firstName,
-        userLastName: users.lastName,
-        // Organization info
-        organizationName: organizations.name,
-      })
-      .from(assessments)
-      .leftJoin(users, eq(assessments.userId, users.id))
-      .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
-      .orderBy(desc(assessments.createdAt));
-
-    return result.map(row => ({
-      id: row.id,
-      userId: row.userId,
-      organizationId: row.organizationId,
-      serviceType: row.serviceType,
-      status: row.status,
-      customerName: row.customerName,
-      customerEmail: row.customerEmail,
-      customerPhone: row.customerPhone,
-      customerCompany: row.customerCompany,
-      siteAddress: row.siteAddress,
-      preferredInstallationDate: row.preferredInstallationDate,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      user: {
-        email: row.userEmail!,
-        firstName: row.userFirstName || undefined,
-        lastName: row.userLastName || undefined,
-      },
-      organization: row.organizationName ? { name: row.organizationName } : undefined,
-    }));
-  }
-
   // Quote operations
   async createQuote(quote: InsertQuote): Promise<Quote> {
     const [newQuote] = await db
@@ -411,103 +347,6 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(quotes)
       .where(eq(quotes.id, id));
-  }
-
-  async getAllQuotes(): Promise<(Quote & { assessment: Assessment; user: { email: string; firstName?: string; lastName?: string }; organization?: { name: string } })[]> {
-    const result = await db
-      .select({
-        // Quote fields
-        id: quotes.id,
-        assessmentId: quotes.assessmentId,
-        quoteNumber: quotes.quoteNumber,
-        surveyCost: quotes.surveyCost,
-        installationCost: quotes.installationCost,
-        configurationCost: quotes.configurationCost,
-        trainingCost: quotes.trainingCost,
-        hardwareCost: quotes.hardwareCost,
-        removalCost: quotes.removalCost,
-        totalCost: quotes.totalCost,
-        surveyHours: quotes.surveyHours,
-        installationHours: quotes.installationHours,
-        configurationHours: quotes.configurationHours,
-        removalHours: quotes.removalHours,
-        laborHoldHours: quotes.laborHoldHours,
-        laborHoldCost: quotes.laborHoldCost,
-        hourlyRate: quotes.hourlyRate,
-        status: quotes.status,
-        customerShareUrl: quotes.customerShareUrl,
-        expiresAt: quotes.expiresAt,
-        acceptedAt: quotes.acceptedAt,
-        rejectedAt: quotes.rejectedAt,
-        createdAt: quotes.createdAt,
-        updatedAt: quotes.updatedAt,
-        // Assessment fields
-        assessmentServiceType: assessments.serviceType,
-        assessmentCustomerName: assessments.customerName,
-        assessmentCustomerEmail: assessments.customerEmail,
-        assessmentCustomerCompany: assessments.customerCompany,
-        assessmentSiteAddress: assessments.siteAddress,
-        assessmentUserId: assessments.userId,
-        // User info
-        userEmail: users.email,
-        userFirstName: users.firstName,
-        userLastName: users.lastName,
-        // Organization info
-        organizationName: organizations.name,
-      })
-      .from(quotes)
-      .leftJoin(assessments, eq(quotes.assessmentId, assessments.id))
-      .leftJoin(users, eq(assessments.userId, users.id))
-      .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
-      .orderBy(desc(quotes.createdAt));
-
-    return result.map(row => ({
-      id: row.id,
-      assessmentId: row.assessmentId,
-      quoteNumber: row.quoteNumber,
-      surveyCost: row.surveyCost,
-      installationCost: row.installationCost,
-      configurationCost: row.configurationCost,
-      trainingCost: row.trainingCost,
-      hardwareCost: row.hardwareCost,
-      removalCost: row.removalCost,
-      totalCost: row.totalCost,
-      surveyHours: row.surveyHours,
-      installationHours: row.installationHours,
-      configurationHours: row.configurationHours,
-      removalHours: row.removalHours,
-      laborHoldHours: row.laborHoldHours,
-      laborHoldCost: row.laborHoldCost,
-      hourlyRate: row.hourlyRate,
-      status: row.status,
-      customerShareUrl: row.customerShareUrl,
-      expiresAt: row.expiresAt,
-      acceptedAt: row.acceptedAt,
-      rejectedAt: row.rejectedAt,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      assessment: {
-        id: row.assessmentId,
-        userId: row.assessmentUserId!,
-        organizationId: null,
-        serviceType: row.assessmentServiceType!,
-        status: 'completed',
-        customerName: row.assessmentCustomerName,
-        customerEmail: row.assessmentCustomerEmail,
-        customerPhone: null,
-        customerCompany: row.assessmentCustomerCompany,
-        siteAddress: row.assessmentSiteAddress,
-        preferredInstallationDate: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      user: {
-        email: row.userEmail!,
-        firstName: row.userFirstName || undefined,
-        lastName: row.userLastName || undefined,
-      },
-      organization: row.organizationName ? { name: row.organizationName } : undefined,
-    }));
   }
 
   // Partner invitation operations

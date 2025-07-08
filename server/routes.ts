@@ -574,7 +574,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/assessments', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const allAssessments = await storage.getAllAssessments();
+      const allAssessments = await db.select().from(assessments).orderBy(desc(assessments.createdAt));
       res.json(allAssessments);
     } catch (error) {
       console.error("Error fetching assessments:", error);
@@ -584,7 +584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/quotes', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const allQuotes = await storage.getAllQuotes();
+      const allQuotes = await db.select().from(quotes).orderBy(desc(quotes.createdAt));
       res.json(allQuotes);
     } catch (error) {
       console.error("Error fetching quotes:", error);
