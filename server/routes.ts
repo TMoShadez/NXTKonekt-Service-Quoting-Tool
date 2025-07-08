@@ -11,6 +11,9 @@ import { emailService } from "./services/emailService";
 import { randomBytes } from "crypto";
 import path from "path";
 import fs from "fs";
+import { db } from "./db";
+import { assessments, quotes, users, organizations } from "@shared/schema";
+import { eq, ne, desc } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -621,7 +624,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .leftJoin(assessments, eq(quotes.assessmentId, assessments.id))
       .leftJoin(users, eq(assessments.userId, users.id))
       .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
-      .where(eq(users.isSystemAdmin, false)) // Exclude system admin quotes
+      .where(ne(users.isSystemAdmin, true)) // Exclude system admin quotes
       .orderBy(desc(quotes.createdAt));
       
       res.json(allQuotes);
