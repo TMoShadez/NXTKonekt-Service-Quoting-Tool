@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,7 +7,8 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, CheckCircle, Clock, Plus, Download, LogOut, User, ChevronDown, Trash2, Share, Copy, Settings, ExternalLink, Shield } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FileText, CheckCircle, Clock, Plus, Download, LogOut, User, ChevronDown, Trash2, Share, Copy, Settings, ExternalLink, Shield, Eye } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import nxtKonektLogo from "@assets/NxtKonekt Logo_1749973360626.png";
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, navigate] = useLocation();
+  const [selectedQuote, setSelectedQuote] = useState<any>(null);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -455,9 +457,9 @@ export default function Dashboard() {
                           <Button 
                             variant="link" 
                             className="text-nxt-blue hover:text-blue-700 p-0 mr-3"
-                            onClick={() => navigate(`/assessment/${quote.assessmentId}`)}
+                            onClick={() => setSelectedQuote(quote)}
                           >
-                            View
+                            <Eye className="h-4 w-4" />
                           </Button>
                           {quote.pdfUrl && (
                             <Button 
@@ -502,6 +504,90 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+
+        {/* Quote View Modal */}
+        <Dialog open={!!selectedQuote} onOpenChange={() => setSelectedQuote(null)}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Quote Details - {selectedQuote?.quoteNumber}</DialogTitle>
+              <DialogDescription>
+                Complete quote information and pricing breakdown
+              </DialogDescription>
+            </DialogHeader>
+            {selectedQuote && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-semibold mb-2">Customer Information</h3>
+                    <p><strong>Name:</strong> {selectedQuote.assessment?.customerContactName || 'N/A'}</p>
+                    <p><strong>Company:</strong> {selectedQuote.assessment?.customerCompanyName || 'N/A'}</p>
+                    <p><strong>Email:</strong> {selectedQuote.assessment?.customerEmail || 'N/A'}</p>
+                    <p><strong>Phone:</strong> {selectedQuote.assessment?.customerPhone || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-2">Quote Summary</h3>
+                    <p><strong>Quote Number:</strong> {selectedQuote.quoteNumber}</p>
+                    <p><strong>Service Type:</strong> <Badge variant="outline">{selectedQuote.assessment?.serviceType?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'N/A'}</Badge></p>
+                    <p><strong>Total Cost:</strong> ${parseFloat(selectedQuote.totalCost).toFixed(2)}</p>
+                    <p><strong>Status:</strong> <Badge variant={selectedQuote.status === 'approved' ? 'default' : 'secondary'}>{selectedQuote.status}</Badge></p>
+                    <p><strong>Created:</strong> {new Date(selectedQuote.createdAt).toLocaleString()}</p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold mb-2">Pricing Breakdown</h3>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <p>Survey Hours: {selectedQuote.surveyHours || 0}</p>
+                    <p>Survey Cost: ${parseFloat(selectedQuote.surveyCost || 0).toFixed(2)}</p>
+                    <p>Installation Hours: {selectedQuote.installationHours || 0}</p>
+                    <p>Installation Cost: ${parseFloat(selectedQuote.installationCost || 0).toFixed(2)}</p>
+                    <p>Configuration Hours: {selectedQuote.configurationHours || 0}</p>
+                    <p>Configuration Cost: ${parseFloat(selectedQuote.configurationCost || 0).toFixed(2)}</p>
+                    <p>Hardware Cost: ${parseFloat(selectedQuote.hardwareCost || 0).toFixed(2)}</p>
+                    <p>Labor Hold: ${parseFloat(selectedQuote.laborHoldCost || 0).toFixed(2)}</p>
+                    {selectedQuote.removalCost && parseFloat(selectedQuote.removalCost) > 0 && (
+                      <>
+                        <p>Removal Hours: {selectedQuote.removalHours || 0}</p>
+                        <p>Removal Cost: ${parseFloat(selectedQuote.removalCost).toFixed(2)}</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-2">Site Information</h3>
+                  <p><strong>Address:</strong> {selectedQuote.assessment?.siteAddress || 'N/A'}</p>
+                  <p><strong>Industry:</strong> {selectedQuote.assessment?.industry || 'N/A'}</p>
+                  <p><strong>Building Type:</strong> {selectedQuote.assessment?.buildingType || 'N/A'}</p>
+                </div>
+
+                <div className="flex gap-2">
+                  {selectedQuote.pdfUrl && (
+                    <Button 
+                      variant="outline"
+                      onClick={() => window.open(selectedQuote.pdfUrl, '_blank')}
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Download PDF
+                    </Button>
+                  )}
+                  <Button 
+                    variant="outline"
+                    onClick={() => handleShareCustomerPortal(selectedQuote.id, selectedQuote.assessment?.customerCompanyName)}
+                  >
+                    <Share className="mr-2 h-4 w-4" />
+                    Share Customer Portal
+                  </Button>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="secondary" onClick={() => setSelectedQuote(null)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
