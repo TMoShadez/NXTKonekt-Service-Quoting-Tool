@@ -646,6 +646,7 @@ export default function AdminDashboard() {
                         <TableHead>Service Type</TableHead>
                         <TableHead>Customer</TableHead>
                         <TableHead>Sales Executive</TableHead>
+                        <TableHead>Partner Org</TableHead>
                         <TableHead>Created</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -656,8 +657,16 @@ export default function AdminDashboard() {
                           <TableCell className="capitalize">
                             {assessment.serviceType?.replace('-', ' ')}
                           </TableCell>
-                          <TableCell>{assessment.customerCompanyName}</TableCell>
-                          <TableCell>{assessment.salesExecutiveName}</TableCell>
+                          <TableCell>
+                            {assessment.customerName || assessment.customerCompany || 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            {assessment.userFirstName && assessment.userLastName 
+                              ? `${assessment.userFirstName} ${assessment.userLastName}`
+                              : assessment.userEmail || 'N/A'
+                            }
+                          </TableCell>
+                          <TableCell>{assessment.organizationName || 'N/A'}</TableCell>
                           <TableCell>
                             {new Date(assessment.createdAt!).toLocaleDateString()}
                           </TableCell>
@@ -687,6 +696,8 @@ export default function AdminDashboard() {
                       <TableRow>
                         <TableHead>Quote #</TableHead>
                         <TableHead>Customer</TableHead>
+                        <TableHead>Sales Executive</TableHead>
+                        <TableHead>Partner Org</TableHead>
                         <TableHead>Amount</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Created</TableHead>
@@ -696,7 +707,16 @@ export default function AdminDashboard() {
                       {quotes?.slice(0, 10).map((quote) => (
                         <TableRow key={quote.id}>
                           <TableCell>{quote.quoteNumber}</TableCell>
-                          <TableCell>{quote.customerName}</TableCell>
+                          <TableCell>
+                            {quote.customerName || quote.customerCompany || 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            {quote.userFirstName && quote.userLastName 
+                              ? `${quote.userFirstName} ${quote.userLastName}`
+                              : quote.userEmail || 'N/A'
+                            }
+                          </TableCell>
+                          <TableCell>{quote.organizationName || 'N/A'}</TableCell>
                           <TableCell>${quote.totalCost}</TableCell>
                           <TableCell className="capitalize">
                             <Badge variant={quote.status === 'approved' ? 'default' : 'secondary'}>
