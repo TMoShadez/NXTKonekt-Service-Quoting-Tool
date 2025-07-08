@@ -82,17 +82,7 @@ export default function AdminDashboard() {
     enabled: user?.isSystemAdmin || user?.role === 'admin',
   });
 
-  // Quote details query
-  const { data: quoteDetails } = useQuery({
-    queryKey: ["/api/admin/quotes", selectedQuote?.id],
-    enabled: !!selectedQuote?.id,
-  });
-
-  // Assessment details query  
-  const { data: assessmentDetails } = useQuery({
-    queryKey: ["/api/admin/assessments", selectedAssessment?.id],
-    enabled: !!selectedAssessment?.id,
-  });
+  // No need for additional queries since admin dashboard already has all data
 
   // Test email connection mutation
   const testEmailMutation = useMutation({
@@ -741,10 +731,7 @@ export default function AdminDashboard() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => {
-                                console.log('Selected assessment data:', assessment);
-                                setSelectedAssessment(assessment);
-                              }}
+                              onClick={() => setSelectedAssessment(assessment)}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -811,10 +798,7 @@ export default function AdminDashboard() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => {
-                                  console.log('Selected quote data:', quote);
-                                  setSelectedQuote(quote);
-                                }}
+                                onClick={() => setSelectedQuote(quote)}
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
@@ -848,44 +832,45 @@ export default function AdminDashboard() {
               Complete quote information and management options
             </DialogDescription>
           </DialogHeader>
-          {(quoteDetails || selectedQuote) && (
+          {selectedQuote && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-semibold mb-2">Customer Information</h3>
-                  <p><strong>Name:</strong> {quoteDetails.assessment?.customerContactName || selectedQuote?.customerName || 'N/A'}</p>
-                  <p><strong>Company:</strong> {quoteDetails.assessment?.customerCompanyName || selectedQuote?.customerCompany || 'N/A'}</p>
-                  <p><strong>Email:</strong> {quoteDetails.assessment?.customerEmail || selectedQuote?.customerEmail || 'N/A'}</p>
-                  <p><strong>Phone:</strong> {quoteDetails.assessment?.customerPhone || selectedQuote?.customerPhone || 'N/A'}</p>
+                  <p><strong>Name:</strong> {selectedQuote.customerName || 'N/A'}</p>
+                  <p><strong>Company:</strong> {selectedQuote.customerCompany || 'N/A'}</p>
+                  <p><strong>Email:</strong> {selectedQuote.customerEmail || 'N/A'}</p>
+                  <p><strong>Phone:</strong> {selectedQuote.customerPhone || 'N/A'}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold mb-2">Quote Summary</h3>
-                  <p><strong>Service Type:</strong> {(quoteDetails.assessment?.serviceType || selectedQuote?.serviceType || 'N/A').replace('-', ' ')}</p>
-                  <p><strong>Total Cost:</strong> ${quoteDetails.totalCost || selectedQuote?.totalCost || 0}</p>
-                  <p><strong>Status:</strong> <Badge variant={(quoteDetails.status || selectedQuote?.status) === 'approved' ? 'default' : 'secondary'}>{quoteDetails.status || selectedQuote?.status || 'N/A'}</Badge></p>
-                  <p><strong>Created:</strong> {new Date(quoteDetails.createdAt || selectedQuote?.createdAt || Date.now()).toLocaleString()}</p>
+                  <p><strong>Quote Number:</strong> {selectedQuote.quoteNumber || 'N/A'}</p>
+                  <p><strong>Service Type:</strong> {selectedQuote.serviceType?.replace('-', ' ') || 'N/A'}</p>
+                  <p><strong>Total Cost:</strong> ${selectedQuote.totalCost || 0}</p>
+                  <p><strong>Status:</strong> <Badge variant={selectedQuote.status === 'approved' ? 'default' : 'secondary'}>{selectedQuote.status || 'N/A'}</Badge></p>
+                  <p><strong>Created:</strong> {new Date(selectedQuote.createdAt || Date.now()).toLocaleString()}</p>
                 </div>
               </div>
               
               <div>
                 <h3 className="font-semibold mb-2">Pricing Breakdown</h3>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <p>Survey Hours: {quoteDetails.surveyHours || selectedQuote?.surveyHours || 0}</p>
-                  <p>Survey Cost: ${quoteDetails.surveyCost || selectedQuote?.surveyCost || 0}</p>
-                  <p>Installation Hours: {quoteDetails.installationHours || selectedQuote?.installationHours || 0}</p>
-                  <p>Installation Cost: ${quoteDetails.installationCost || selectedQuote?.installationCost || 0}</p>
-                  <p>Configuration Hours: {quoteDetails.configurationHours || selectedQuote?.configurationHours || 0}</p>
-                  <p>Configuration Cost: ${quoteDetails.configurationCost || selectedQuote?.configurationCost || 0}</p>
-                  <p>Hardware Cost: ${quoteDetails.hardwareCost || selectedQuote?.hardwareCost || 0}</p>
-                  <p>Labor Hold: ${quoteDetails.laborHoldCost || selectedQuote?.laborHoldCost || 0}</p>
+                  <p>Survey Hours: {selectedQuote.surveyHours || 0}</p>
+                  <p>Survey Cost: ${selectedQuote.surveyCost || 0}</p>
+                  <p>Installation Hours: {selectedQuote.installationHours || 0}</p>
+                  <p>Installation Cost: ${selectedQuote.installationCost || 0}</p>
+                  <p>Configuration Hours: {selectedQuote.configurationHours || 0}</p>
+                  <p>Configuration Cost: ${selectedQuote.configurationCost || 0}</p>
+                  <p>Hardware Cost: ${selectedQuote.hardwareCost || 0}</p>
+                  <p>Labor Hold: ${selectedQuote.laborHoldCost || 0}</p>
                 </div>
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">Site Information</h3>
-                <p><strong>Address:</strong> {quoteDetails.assessment?.siteAddress || selectedQuote?.siteAddress || 'N/A'}</p>
-                <p><strong>Industry:</strong> {quoteDetails.assessment?.industry || selectedQuote?.industry || 'N/A'}</p>
-                <p><strong>Building Type:</strong> {quoteDetails.assessment?.buildingType || selectedQuote?.buildingType || 'N/A'}</p>
+                <h3 className="font-semibold mb-2">Sales Executive Information</h3>
+                <p><strong>Name:</strong> {selectedQuote.userFirstName && selectedQuote.userLastName ? `${selectedQuote.userFirstName} ${selectedQuote.userLastName}` : selectedQuote.userEmail || 'N/A'}</p>
+                <p><strong>Email:</strong> {selectedQuote.userEmail || 'N/A'}</p>
+                <p><strong>Organization:</strong> {selectedQuote.organizationName || 'N/A'}</p>
               </div>
             </div>
           )}
@@ -921,69 +906,38 @@ export default function AdminDashboard() {
               Complete assessment information and technical details
             </DialogDescription>
           </DialogHeader>
-          {(assessmentDetails || selectedAssessment) && (
+          {selectedAssessment && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-semibold mb-2">Customer Information</h3>
-                  <p><strong>Name:</strong> {assessmentDetails.customerContactName || selectedAssessment?.customerName || 'N/A'}</p>
-                  <p><strong>Company:</strong> {assessmentDetails.customerCompanyName || selectedAssessment?.customerCompany || 'N/A'}</p>
-                  <p><strong>Email:</strong> {assessmentDetails.customerEmail || selectedAssessment?.customerEmail || 'N/A'}</p>
-                  <p><strong>Phone:</strong> {assessmentDetails.customerPhone || selectedAssessment?.customerPhone || 'N/A'}</p>
+                  <p><strong>Name:</strong> {selectedAssessment.customerContactName || 'N/A'}</p>
+                  <p><strong>Company:</strong> {selectedAssessment.customerCompanyName || 'N/A'}</p>
+                  <p><strong>Email:</strong> {selectedAssessment.customerEmail || 'N/A'}</p>
+                  <p><strong>Phone:</strong> {selectedAssessment.customerPhone || 'N/A'}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold mb-2">Assessment Summary</h3>
-                  <p><strong>Service Type:</strong> {(assessmentDetails.serviceType || selectedAssessment?.serviceType || 'N/A').replace('-', ' ')}</p>
-                  <p><strong>Site Address:</strong> {assessmentDetails.siteAddress || selectedAssessment?.siteAddress || 'N/A'}</p>
-                  <p><strong>Industry:</strong> {assessmentDetails.industry || selectedAssessment?.industry || 'N/A'}</p>
-                  <p><strong>Created:</strong> {new Date(assessmentDetails.createdAt || selectedAssessment?.createdAt || Date.now()).toLocaleString()}</p>
+                  <p><strong>Assessment ID:</strong> #{selectedAssessment.id}</p>
+                  <p><strong>Service Type:</strong> {selectedAssessment.serviceType?.replace('-', ' ') || 'N/A'}</p>
+                  <p><strong>Created:</strong> {new Date(selectedAssessment.createdAt || Date.now()).toLocaleString()}</p>
+                  <p><strong>Last Updated:</strong> {new Date(selectedAssessment.updatedAt || selectedAssessment.createdAt || Date.now()).toLocaleString()}</p>
                 </div>
               </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Sales Executive Information</h3>
+                <p><strong>Name:</strong> {selectedAssessment.userFirstName && selectedAssessment.userLastName ? `${selectedAssessment.userFirstName} ${selectedAssessment.userLastName}` : selectedAssessment.userEmail || 'N/A'}</p>
+                <p><strong>Email:</strong> {selectedAssessment.userEmail || 'N/A'}</p>
+                <p><strong>Organization:</strong> {selectedAssessment.organizationName || 'N/A'}</p>
+              </div>
               
-              {assessmentDetails.serviceType === 'site-assessment' && (
-                <div>
-                  <h3 className="font-semibold mb-2">Technical Requirements</h3>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <p>Building Type: {assessmentDetails.buildingType || 'N/A'}</p>
-                    <p>Floors: {assessmentDetails.floors || 'N/A'}</p>
-                    <p>Device Count: {assessmentDetails.deviceCount || 'N/A'}</p>
-                    <p>Network Signal: {assessmentDetails.networkSignal || 'N/A'}</p>
-                    <p>Signal Strength: {assessmentDetails.signalStrength || 'N/A'}</p>
-                    <p>Connection Usage: {assessmentDetails.connectionUsage || 'N/A'}</p>
-                  </div>
-                </div>
-              )}
-
-              {assessmentDetails.serviceType === 'fleet-tracking' && (
-                <div>
-                  <h3 className="font-semibold mb-2">Fleet Information</h3>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <p>Total Fleet Size: {assessmentDetails.totalFleetSize || 'N/A'}</p>
-                    <p>Tracker Type: {assessmentDetails.trackerType || 'N/A'}</p>
-                    <p>IoT Partner: {assessmentDetails.iotTrackingPartner || 'N/A'}</p>
-                    <p>Carrier SIM: {assessmentDetails.carrierSim || 'N/A'}</p>
-                  </div>
-                </div>
-              )}
-
-              {assessmentDetails.serviceType === 'fleet-camera' && (
-                <div>
-                  <h3 className="font-semibold mb-2">Camera Information</h3>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <p>Solution Type: {assessmentDetails.cameraSolutionType || 'N/A'}</p>
-                    <p>Number of Cameras: {assessmentDetails.numberOfCameras || 'N/A'}</p>
-                    <p>Removal Needed: {assessmentDetails.removalNeeded ? 'Yes' : 'No'}</p>
-                    <p>Existing Solution: {assessmentDetails.existingCameraSolution || 'N/A'}</p>
-                  </div>
-                </div>
-              )}
-
-              {assessmentDetails.additionalNotes && (
-                <div>
-                  <h3 className="font-semibold mb-2">Additional Notes</h3>
-                  <p className="text-sm bg-gray-50 p-3 rounded">{assessmentDetails.additionalNotes}</p>
-                </div>
-              )}
+              <div>
+                <h3 className="font-semibold mb-2">Note</h3>
+                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+                  For detailed technical information about this assessment, please access the full assessment record through the main dashboard.
+                </p>
+              </div>
             </div>
           )}
           <DialogFooter>
