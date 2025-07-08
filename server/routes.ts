@@ -642,6 +642,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin close quote route
+  app.patch('/api/admin/quotes/:id/close', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      const updatedQuote = await storage.updateQuote(parseInt(id), { status });
+      res.json(updatedQuote);
+    } catch (error) {
+      console.error("Error closing quote:", error);
+      res.status(500).json({ message: "Failed to close quote" });
+    }
+  });
+
+  // Admin delete quote route
+  app.delete('/api/admin/quotes/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      await storage.deleteQuote(parseInt(id));
+      res.json({ message: "Quote deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting quote:", error);
+      res.status(500).json({ message: "Failed to delete quote" });
+    }
+  });
+
   app.patch('/api/admin/partners/:id/status', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { id } = req.params;

@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
@@ -12,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Shield, Users, FileText, BarChart3, CheckCircle, XCircle, Clock, Settings, Link, Copy, Mail, Send, TrendingUp } from "lucide-react";
+import { Shield, Users, FileText, BarChart3, CheckCircle, XCircle, Clock, Settings, Link, Copy, Mail, Send, TrendingUp, Eye, Trash2 } from "lucide-react";
 import type { User, Organization, Assessment, Quote } from "@shared/schema";
 
 interface AdminStats {
@@ -30,6 +31,8 @@ interface PartnerWithOrg extends User {
 export default function AdminDashboard() {
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const [selectedQuote, setSelectedQuote] = useState<any>(null);
+  const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
 
   // Redirect if not system admin
   useEffect(() => {
@@ -77,6 +80,18 @@ export default function AdminDashboard() {
   const { data: analytics } = useQuery({
     queryKey: ["/api/admin/analytics"],
     enabled: user?.isSystemAdmin || user?.role === 'admin',
+  });
+
+  // Quote details query
+  const { data: quoteDetails } = useQuery({
+    queryKey: ["/api/quotes", selectedQuote?.id],
+    enabled: !!selectedQuote?.id,
+  });
+
+  // Assessment details query  
+  const { data: assessmentDetails } = useQuery({
+    queryKey: ["/api/assessments", selectedAssessment?.id],
+    enabled: !!selectedAssessment?.id,
   });
 
   // Test email connection mutation
@@ -190,6 +205,57 @@ export default function AdminDashboard() {
       });
     }
   };
+
+  // Close quote mutation
+  const closeQuoteMutation = useMutation({
+    mutationFn: async (quoteId: number) => {
+      await apiRequest(`/api/admin/quotes/${quoteId}/close`, {
+        method: "PATCH",
+        body: { status: "closed" },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/quotes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      setSelectedQuote(null);
+      toast({
+        title: "Quote Closed",
+        description: "Quote has been closed successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to close quote. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete quote mutation
+  const deleteQuoteMutation = useMutation({
+    mutationFn: async (quoteId: number) => {
+      await apiRequest(`/api/admin/quotes/${quoteId}`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/quotes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      setSelectedQuote(null);
+      toast({
+        title: "Quote Deleted",
+        description: "Quote has been permanently deleted.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete quote. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   if (authLoading || (!user?.isSystemAdmin && user?.role !== 'admin')) {
     return (
@@ -648,6 +714,7 @@ export default function AdminDashboard() {
                         <TableHead>Sales Executive</TableHead>
                         <TableHead>Partner Org</TableHead>
                         <TableHead>Created</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -669,6 +736,15 @@ export default function AdminDashboard() {
                           <TableCell>{assessment.organizationName || 'N/A'}</TableCell>
                           <TableCell>
                             {new Date(assessment.createdAt!).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedAssessment(assessment)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -701,6 +777,7 @@ export default function AdminDashboard() {
                         <TableHead>Amount</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Created</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -726,6 +803,25 @@ export default function AdminDashboard() {
                           <TableCell>
                             {new Date(quote.createdAt!).toLocaleDateString()}
                           </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setSelectedQuote(quote)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteQuoteMutation.mutate(quote.id)}
+                                disabled={deleteQuoteMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -736,6 +832,161 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Quote Details Modal */}
+      <Dialog open={!!selectedQuote} onOpenChange={() => setSelectedQuote(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Quote Details - {selectedQuote?.quoteNumber}</DialogTitle>
+            <DialogDescription>
+              Complete quote information and management options
+            </DialogDescription>
+          </DialogHeader>
+          {quoteDetails && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-semibold mb-2">Customer Information</h3>
+                  <p><strong>Name:</strong> {quoteDetails.assessment?.customerContactName || 'N/A'}</p>
+                  <p><strong>Company:</strong> {quoteDetails.assessment?.customerCompanyName || 'N/A'}</p>
+                  <p><strong>Email:</strong> {quoteDetails.assessment?.customerEmail || 'N/A'}</p>
+                  <p><strong>Phone:</strong> {quoteDetails.assessment?.customerPhone || 'N/A'}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-2">Quote Summary</h3>
+                  <p><strong>Service Type:</strong> {quoteDetails.assessment?.serviceType?.replace('-', ' ') || 'N/A'}</p>
+                  <p><strong>Total Cost:</strong> ${quoteDetails.totalCost}</p>
+                  <p><strong>Status:</strong> <Badge variant={quoteDetails.status === 'approved' ? 'default' : 'secondary'}>{quoteDetails.status}</Badge></p>
+                  <p><strong>Created:</strong> {new Date(quoteDetails.createdAt!).toLocaleString()}</p>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold mb-2">Pricing Breakdown</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <p>Survey Hours: {quoteDetails.surveyHours || 0}</p>
+                  <p>Survey Cost: ${quoteDetails.surveyCost || 0}</p>
+                  <p>Installation Hours: {quoteDetails.installationHours || 0}</p>
+                  <p>Installation Cost: ${quoteDetails.installationCost || 0}</p>
+                  <p>Configuration Hours: {quoteDetails.configurationHours || 0}</p>
+                  <p>Configuration Cost: ${quoteDetails.configurationCost || 0}</p>
+                  <p>Hardware Cost: ${quoteDetails.hardwareCost || 0}</p>
+                  <p>Labor Hold: ${quoteDetails.laborHoldCost || 0}</p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Site Information</h3>
+                <p><strong>Address:</strong> {quoteDetails.assessment?.siteAddress || 'N/A'}</p>
+                <p><strong>Industry:</strong> {quoteDetails.assessment?.industry || 'N/A'}</p>
+                <p><strong>Building Type:</strong> {quoteDetails.assessment?.buildingType || 'N/A'}</p>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="destructive"
+              onClick={() => closeQuoteMutation.mutate(selectedQuote.id)}
+              disabled={closeQuoteMutation.isPending}
+            >
+              Close Quote
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => deleteQuoteMutation.mutate(selectedQuote.id)}
+              disabled={deleteQuoteMutation.isPending}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Quote
+            </Button>
+            <Button variant="secondary" onClick={() => setSelectedQuote(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assessment Details Modal */}
+      <Dialog open={!!selectedAssessment} onOpenChange={() => setSelectedAssessment(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Assessment Details - #{selectedAssessment?.id}</DialogTitle>
+            <DialogDescription>
+              Complete assessment information and technical details
+            </DialogDescription>
+          </DialogHeader>
+          {assessmentDetails && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-semibold mb-2">Customer Information</h3>
+                  <p><strong>Name:</strong> {assessmentDetails.customerContactName || 'N/A'}</p>
+                  <p><strong>Company:</strong> {assessmentDetails.customerCompanyName || 'N/A'}</p>
+                  <p><strong>Email:</strong> {assessmentDetails.customerEmail || 'N/A'}</p>
+                  <p><strong>Phone:</strong> {assessmentDetails.customerPhone || 'N/A'}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-2">Assessment Summary</h3>
+                  <p><strong>Service Type:</strong> {assessmentDetails.serviceType?.replace('-', ' ') || 'N/A'}</p>
+                  <p><strong>Site Address:</strong> {assessmentDetails.siteAddress || 'N/A'}</p>
+                  <p><strong>Industry:</strong> {assessmentDetails.industry || 'N/A'}</p>
+                  <p><strong>Created:</strong> {new Date(assessmentDetails.createdAt!).toLocaleString()}</p>
+                </div>
+              </div>
+              
+              {assessmentDetails.serviceType === 'site-assessment' && (
+                <div>
+                  <h3 className="font-semibold mb-2">Technical Requirements</h3>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <p>Building Type: {assessmentDetails.buildingType || 'N/A'}</p>
+                    <p>Floors: {assessmentDetails.floors || 'N/A'}</p>
+                    <p>Device Count: {assessmentDetails.deviceCount || 'N/A'}</p>
+                    <p>Network Signal: {assessmentDetails.networkSignal || 'N/A'}</p>
+                    <p>Signal Strength: {assessmentDetails.signalStrength || 'N/A'}</p>
+                    <p>Connection Usage: {assessmentDetails.connectionUsage || 'N/A'}</p>
+                  </div>
+                </div>
+              )}
+
+              {assessmentDetails.serviceType === 'fleet-tracking' && (
+                <div>
+                  <h3 className="font-semibold mb-2">Fleet Information</h3>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <p>Total Fleet Size: {assessmentDetails.totalFleetSize || 'N/A'}</p>
+                    <p>Tracker Type: {assessmentDetails.trackerType || 'N/A'}</p>
+                    <p>IoT Partner: {assessmentDetails.iotTrackingPartner || 'N/A'}</p>
+                    <p>Carrier SIM: {assessmentDetails.carrierSim || 'N/A'}</p>
+                  </div>
+                </div>
+              )}
+
+              {assessmentDetails.serviceType === 'fleet-camera' && (
+                <div>
+                  <h3 className="font-semibold mb-2">Camera Information</h3>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <p>Solution Type: {assessmentDetails.cameraSolutionType || 'N/A'}</p>
+                    <p>Number of Cameras: {assessmentDetails.numberOfCameras || 'N/A'}</p>
+                    <p>Removal Needed: {assessmentDetails.removalNeeded ? 'Yes' : 'No'}</p>
+                    <p>Existing Solution: {assessmentDetails.existingCameraSolution || 'N/A'}</p>
+                  </div>
+                </div>
+              )}
+
+              {assessmentDetails.additionalNotes && (
+                <div>
+                  <h3 className="font-semibold mb-2">Additional Notes</h3>
+                  <p className="text-sm bg-gray-50 p-3 rounded">{assessmentDetails.additionalNotes}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setSelectedAssessment(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
