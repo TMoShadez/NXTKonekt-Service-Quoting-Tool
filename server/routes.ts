@@ -669,6 +669,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin get single quote route
+  app.get('/api/admin/quotes/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const quote = await storage.getQuote(parseInt(id));
+      
+      if (!quote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      
+      res.json(quote);
+    } catch (error) {
+      console.error("Error fetching quote:", error);
+      res.status(500).json({ message: "Failed to fetch quote" });
+    }
+  });
+
+  // Admin get single assessment route
+  app.get('/api/admin/assessments/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const assessment = await storage.getAssessment(parseInt(id));
+      
+      if (!assessment) {
+        return res.status(404).json({ message: "Assessment not found" });
+      }
+      
+      res.json(assessment);
+    } catch (error) {
+      console.error("Error fetching assessment:", error);
+      res.status(500).json({ message: "Failed to fetch assessment" });
+    }
+  });
+
   app.patch('/api/admin/partners/:id/status', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { id } = req.params;

@@ -84,13 +84,13 @@ export default function AdminDashboard() {
 
   // Quote details query
   const { data: quoteDetails } = useQuery({
-    queryKey: ["/api/quotes", selectedQuote?.id],
+    queryKey: ["/api/admin/quotes", selectedQuote?.id],
     enabled: !!selectedQuote?.id,
   });
 
   // Assessment details query  
   const { data: assessmentDetails } = useQuery({
-    queryKey: ["/api/assessments", selectedAssessment?.id],
+    queryKey: ["/api/admin/assessments", selectedAssessment?.id],
     enabled: !!selectedAssessment?.id,
   });
 
@@ -741,7 +741,10 @@ export default function AdminDashboard() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => setSelectedAssessment(assessment)}
+                              onClick={() => {
+                                console.log('Selected assessment data:', assessment);
+                                setSelectedAssessment(assessment);
+                              }}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -808,7 +811,10 @@ export default function AdminDashboard() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setSelectedQuote(quote)}
+                                onClick={() => {
+                                  console.log('Selected quote data:', quote);
+                                  setSelectedQuote(quote);
+                                }}
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
@@ -842,58 +848,58 @@ export default function AdminDashboard() {
               Complete quote information and management options
             </DialogDescription>
           </DialogHeader>
-          {quoteDetails && (
+          {(quoteDetails || selectedQuote) && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-semibold mb-2">Customer Information</h3>
-                  <p><strong>Name:</strong> {quoteDetails.assessment?.customerContactName || 'N/A'}</p>
-                  <p><strong>Company:</strong> {quoteDetails.assessment?.customerCompanyName || 'N/A'}</p>
-                  <p><strong>Email:</strong> {quoteDetails.assessment?.customerEmail || 'N/A'}</p>
-                  <p><strong>Phone:</strong> {quoteDetails.assessment?.customerPhone || 'N/A'}</p>
+                  <p><strong>Name:</strong> {quoteDetails.assessment?.customerContactName || selectedQuote?.customerName || 'N/A'}</p>
+                  <p><strong>Company:</strong> {quoteDetails.assessment?.customerCompanyName || selectedQuote?.customerCompany || 'N/A'}</p>
+                  <p><strong>Email:</strong> {quoteDetails.assessment?.customerEmail || selectedQuote?.customerEmail || 'N/A'}</p>
+                  <p><strong>Phone:</strong> {quoteDetails.assessment?.customerPhone || selectedQuote?.customerPhone || 'N/A'}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold mb-2">Quote Summary</h3>
-                  <p><strong>Service Type:</strong> {quoteDetails.assessment?.serviceType?.replace('-', ' ') || 'N/A'}</p>
-                  <p><strong>Total Cost:</strong> ${quoteDetails.totalCost}</p>
-                  <p><strong>Status:</strong> <Badge variant={quoteDetails.status === 'approved' ? 'default' : 'secondary'}>{quoteDetails.status}</Badge></p>
-                  <p><strong>Created:</strong> {new Date(quoteDetails.createdAt!).toLocaleString()}</p>
+                  <p><strong>Service Type:</strong> {(quoteDetails.assessment?.serviceType || selectedQuote?.serviceType || 'N/A').replace('-', ' ')}</p>
+                  <p><strong>Total Cost:</strong> ${quoteDetails.totalCost || selectedQuote?.totalCost || 0}</p>
+                  <p><strong>Status:</strong> <Badge variant={(quoteDetails.status || selectedQuote?.status) === 'approved' ? 'default' : 'secondary'}>{quoteDetails.status || selectedQuote?.status || 'N/A'}</Badge></p>
+                  <p><strong>Created:</strong> {new Date(quoteDetails.createdAt || selectedQuote?.createdAt || Date.now()).toLocaleString()}</p>
                 </div>
               </div>
               
               <div>
                 <h3 className="font-semibold mb-2">Pricing Breakdown</h3>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <p>Survey Hours: {quoteDetails.surveyHours || 0}</p>
-                  <p>Survey Cost: ${quoteDetails.surveyCost || 0}</p>
-                  <p>Installation Hours: {quoteDetails.installationHours || 0}</p>
-                  <p>Installation Cost: ${quoteDetails.installationCost || 0}</p>
-                  <p>Configuration Hours: {quoteDetails.configurationHours || 0}</p>
-                  <p>Configuration Cost: ${quoteDetails.configurationCost || 0}</p>
-                  <p>Hardware Cost: ${quoteDetails.hardwareCost || 0}</p>
-                  <p>Labor Hold: ${quoteDetails.laborHoldCost || 0}</p>
+                  <p>Survey Hours: {quoteDetails.surveyHours || selectedQuote?.surveyHours || 0}</p>
+                  <p>Survey Cost: ${quoteDetails.surveyCost || selectedQuote?.surveyCost || 0}</p>
+                  <p>Installation Hours: {quoteDetails.installationHours || selectedQuote?.installationHours || 0}</p>
+                  <p>Installation Cost: ${quoteDetails.installationCost || selectedQuote?.installationCost || 0}</p>
+                  <p>Configuration Hours: {quoteDetails.configurationHours || selectedQuote?.configurationHours || 0}</p>
+                  <p>Configuration Cost: ${quoteDetails.configurationCost || selectedQuote?.configurationCost || 0}</p>
+                  <p>Hardware Cost: ${quoteDetails.hardwareCost || selectedQuote?.hardwareCost || 0}</p>
+                  <p>Labor Hold: ${quoteDetails.laborHoldCost || selectedQuote?.laborHoldCost || 0}</p>
                 </div>
               </div>
 
               <div>
                 <h3 className="font-semibold mb-2">Site Information</h3>
-                <p><strong>Address:</strong> {quoteDetails.assessment?.siteAddress || 'N/A'}</p>
-                <p><strong>Industry:</strong> {quoteDetails.assessment?.industry || 'N/A'}</p>
-                <p><strong>Building Type:</strong> {quoteDetails.assessment?.buildingType || 'N/A'}</p>
+                <p><strong>Address:</strong> {quoteDetails.assessment?.siteAddress || selectedQuote?.siteAddress || 'N/A'}</p>
+                <p><strong>Industry:</strong> {quoteDetails.assessment?.industry || selectedQuote?.industry || 'N/A'}</p>
+                <p><strong>Building Type:</strong> {quoteDetails.assessment?.buildingType || selectedQuote?.buildingType || 'N/A'}</p>
               </div>
             </div>
           )}
           <DialogFooter className="flex gap-2">
             <Button
               variant="destructive"
-              onClick={() => closeQuoteMutation.mutate(selectedQuote.id)}
+              onClick={() => closeQuoteMutation.mutate(selectedQuote?.id)}
               disabled={closeQuoteMutation.isPending}
             >
               Close Quote
             </Button>
             <Button
               variant="outline"
-              onClick={() => deleteQuoteMutation.mutate(selectedQuote.id)}
+              onClick={() => deleteQuoteMutation.mutate(selectedQuote?.id)}
               disabled={deleteQuoteMutation.isPending}
             >
               <Trash2 className="h-4 w-4 mr-2" />
@@ -915,22 +921,22 @@ export default function AdminDashboard() {
               Complete assessment information and technical details
             </DialogDescription>
           </DialogHeader>
-          {assessmentDetails && (
+          {(assessmentDetails || selectedAssessment) && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-semibold mb-2">Customer Information</h3>
-                  <p><strong>Name:</strong> {assessmentDetails.customerContactName || 'N/A'}</p>
-                  <p><strong>Company:</strong> {assessmentDetails.customerCompanyName || 'N/A'}</p>
-                  <p><strong>Email:</strong> {assessmentDetails.customerEmail || 'N/A'}</p>
-                  <p><strong>Phone:</strong> {assessmentDetails.customerPhone || 'N/A'}</p>
+                  <p><strong>Name:</strong> {assessmentDetails.customerContactName || selectedAssessment?.customerName || 'N/A'}</p>
+                  <p><strong>Company:</strong> {assessmentDetails.customerCompanyName || selectedAssessment?.customerCompany || 'N/A'}</p>
+                  <p><strong>Email:</strong> {assessmentDetails.customerEmail || selectedAssessment?.customerEmail || 'N/A'}</p>
+                  <p><strong>Phone:</strong> {assessmentDetails.customerPhone || selectedAssessment?.customerPhone || 'N/A'}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold mb-2">Assessment Summary</h3>
-                  <p><strong>Service Type:</strong> {assessmentDetails.serviceType?.replace('-', ' ') || 'N/A'}</p>
-                  <p><strong>Site Address:</strong> {assessmentDetails.siteAddress || 'N/A'}</p>
-                  <p><strong>Industry:</strong> {assessmentDetails.industry || 'N/A'}</p>
-                  <p><strong>Created:</strong> {new Date(assessmentDetails.createdAt!).toLocaleString()}</p>
+                  <p><strong>Service Type:</strong> {(assessmentDetails.serviceType || selectedAssessment?.serviceType || 'N/A').replace('-', ' ')}</p>
+                  <p><strong>Site Address:</strong> {assessmentDetails.siteAddress || selectedAssessment?.siteAddress || 'N/A'}</p>
+                  <p><strong>Industry:</strong> {assessmentDetails.industry || selectedAssessment?.industry || 'N/A'}</p>
+                  <p><strong>Created:</strong> {new Date(assessmentDetails.createdAt || selectedAssessment?.createdAt || Date.now()).toLocaleString()}</p>
                 </div>
               </div>
               
