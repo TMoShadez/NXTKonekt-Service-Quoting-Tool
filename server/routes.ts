@@ -13,7 +13,7 @@ import path from "path";
 import fs from "fs";
 import { db } from "./db";
 import { assessments, quotes, users, organizations } from "@shared/schema";
-import { eq, ne, desc } from "drizzle-orm";
+import { eq, ne, desc, or, isNull } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -583,8 +583,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: assessments.userId,
         organizationId: assessments.organizationId,
         serviceType: assessments.serviceType,
-        customerName: assessments.customerName,
-        customerCompany: assessments.customerCompany,
+        customerContactName: assessments.customerContactName,
+        customerCompanyName: assessments.customerCompanyName,
         customerEmail: assessments.customerEmail,
         customerPhone: assessments.customerPhone,
         createdAt: assessments.createdAt,
@@ -597,7 +597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .from(assessments)
       .leftJoin(users, eq(assessments.userId, users.id))
       .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
-      .where(eq(users.isSystemAdmin, false)) // Exclude system admin assessments
+      .where(or(eq(users.isSystemAdmin, false), isNull(users.isSystemAdmin))) // Include non-system admin users
       .orderBy(desc(assessments.createdAt));
       
       res.json(allAssessments);
@@ -619,8 +619,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: quotes.createdAt,
         updatedAt: quotes.updatedAt,
         assessmentServiceType: assessments.serviceType,
-        customerName: assessments.customerName,
-        customerCompany: assessments.customerCompany,
+        customerContactName: assessments.customerContactName,
+        customerCompanyName: assessments.customerCompanyName,
         customerEmail: assessments.customerEmail,
         customerPhone: assessments.customerPhone,
         userEmail: users.email,
@@ -632,7 +632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .leftJoin(assessments, eq(quotes.assessmentId, assessments.id))
       .leftJoin(users, eq(assessments.userId, users.id))
       .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
-      .where(ne(users.isSystemAdmin, true)) // Exclude system admin quotes
+      .where(or(eq(users.isSystemAdmin, false), isNull(users.isSystemAdmin))) // Include non-system admin users
       .orderBy(desc(quotes.createdAt));
       
       res.json(allQuotes);

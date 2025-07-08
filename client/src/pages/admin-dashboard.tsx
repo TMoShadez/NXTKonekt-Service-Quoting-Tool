@@ -658,7 +658,7 @@ export default function AdminDashboard() {
                             {assessment.serviceType?.replace('-', ' ')}
                           </TableCell>
                           <TableCell>
-                            {assessment.customerName || assessment.customerCompany || 'N/A'}
+                            {assessment.customerContactName || assessment.customerCompanyName || 'N/A'}
                           </TableCell>
                           <TableCell>
                             {assessment.userFirstName && assessment.userLastName 
@@ -708,7 +708,7 @@ export default function AdminDashboard() {
                         <TableRow key={quote.id}>
                           <TableCell>{quote.quoteNumber}</TableCell>
                           <TableCell>
-                            {quote.customerName || quote.customerCompany || 'N/A'}
+                            {quote.customerContactName || quote.customerCompanyName || 'N/A'}
                           </TableCell>
                           <TableCell>
                             {quote.userFirstName && quote.userLastName 
