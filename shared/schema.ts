@@ -7,13 +7,12 @@ import {
   index,
   serial,
   integer,
-  decimal,
   boolean,
-  date,
+  decimal,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 // Session storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
@@ -36,30 +35,27 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   role: varchar("role").default("partner").notNull(), // admin, partner, sales_executive
-  isActive: boolean("is_active").default(true).notNull(),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const organizations = pgTable("organizations", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
   name: text("name").notNull(),
-  address: text("address"),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  partnerOrganization: text("partner_organization"),
   phone: varchar("phone"),
-  website: varchar("website"),
-  status: varchar("status").default("pending").notNull(), // pending, approved, suspended
+  partnerStatus: varchar("partner_status").default("pending").notNull(), // pending, approved, suspended
   partnerType: varchar("partner_type").default("installer").notNull(), // installer, sales_agent, reseller
   commission: decimal("commission", { precision: 5, scale: 2 }).default("0.00"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Consolidated quotes table that includes all assessment data
-export const quotes = pgTable("quotes", {
+export const assessments = pgTable("assessments", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   organizationId: integer("organization_id").references(() => organizations.id),
-  quoteNumber: varchar("quote_number").notNull().unique(),
   
   // Service Type
   serviceType: varchar("service_type", { enum: ["site-assessment", "fleet-tracking", "fleet-camera"] }).default("site-assessment"),
@@ -72,15 +68,13 @@ export const quotes = pgTable("quotes", {
   // Customer Info
   customerCompanyName: text("customer_company_name").notNull(),
   customerContactName: text("customer_contact_name").notNull(),
-  customerName: text("customer_name"), // Alias for customerContactName
   customerEmail: varchar("customer_email").notNull(),
   customerPhone: varchar("customer_phone"),
-  customerCompany: text("customer_company"), // Alias for customerCompanyName
   siteAddress: text("site_address").notNull(),
   industry: varchar("industry"),
   preferredInstallationDate: timestamp("preferred_installation_date"),
   
-  // Site Assessment - Fixed Wireless
+  // Site Assessment
   buildingType: varchar("building_type"),
   coverageArea: integer("coverage_area"),
   floors: integer("floors"),
@@ -118,12 +112,27 @@ export const quotes = pgTable("quotes", {
   otherSolutionDetails: text("other_solution_details"),
   
   // Fleet Tracking specific fields
-  numberOfVehicles: integer("number_of_vehicles"), // For fleet services
   totalFleetSize: integer("total_fleet_size"),
-  vehicleDetails: jsonb("vehicle_details"), // Array of vehicle info
+  vehicleYear: integer("vehicle_year"),
+  vehicleMake: varchar("vehicle_make"),
+  vehicleModel: varchar("vehicle_model"),
   trackerType: varchar("tracker_type"),
   iotTrackingPartner: varchar("iot_tracking_partner"),
   carrierSim: varchar("carrier_sim"),
+  
+  // Quote Info
+  totalCost: decimal("total_cost", { precision: 10, scale: 2 }),
+  additionalNotes: text("additional_notes"),
+  
+  status: varchar("status").default("draft"), // draft, completed, sent
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const quotes = pgTable("quotes", {
+  id: serial("id").primaryKey(),
+  assessmentId: integer("assessment_id").notNull().references(() => assessments.id),
+  quoteNumber: varchar("quote_number").notNull().unique(),
   
   // Pricing breakdown
   surveyCost: decimal("survey_cost", { precision: 10, scale: 2 }),
@@ -143,25 +152,17 @@ export const quotes = pgTable("quotes", {
   laborHoldCost: decimal("labor_hold_cost", { precision: 10, scale: 2 }),
   hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
   
-  // Additional fields
-  additionalNotes: text("additional_notes"),
-  
   status: varchar("status").default("pending"), // pending, approved, rejected
   pdfUrl: text("pdf_url"),
   emailSent: boolean("email_sent").default(false),
-  customerShareUrl: varchar("customer_share_url"),
-  expiresAt: timestamp("expires_at"),
-  acceptedAt: timestamp("accepted_at"),
-  rejectedAt: timestamp("rejected_at"),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Files now reference quotes directly instead of assessments
 export const uploadedFiles = pgTable("uploaded_files", {
   id: serial("id").primaryKey(),
-  quoteId: integer("quote_id").notNull().references(() => quotes.id),
+  assessmentId: integer("assessment_id").notNull().references(() => assessments.id),
   fileName: text("file_name").notNull(),
   originalName: text("original_name").notNull(),
   fileType: varchar("file_type").notNull(), // photo, document
@@ -174,7 +175,7 @@ export const uploadedFiles = pgTable("uploaded_files", {
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   organizations: many(organizations),
-  quotes: many(quotes),
+  assessments: many(assessments),
 }));
 
 export const organizationsRelations = relations(organizations, ({ one, many }) => ({
@@ -182,25 +183,33 @@ export const organizationsRelations = relations(organizations, ({ one, many }) =
     fields: [organizations.userId],
     references: [users.id],
   }),
-  quotes: many(quotes),
+  assessments: many(assessments),
 }));
 
-export const quotesRelations = relations(quotes, ({ one, many }) => ({
+export const assessmentsRelations = relations(assessments, ({ one, many }) => ({
   user: one(users, {
-    fields: [quotes.userId],
+    fields: [assessments.userId],
     references: [users.id],
   }),
   organization: one(organizations, {
-    fields: [quotes.organizationId],
+    fields: [assessments.organizationId],
     references: [organizations.id],
   }),
+  quotes: many(quotes),
   files: many(uploadedFiles),
 }));
 
+export const quotesRelations = relations(quotes, ({ one }) => ({
+  assessment: one(assessments, {
+    fields: [quotes.assessmentId],
+    references: [assessments.id],
+  }),
+}));
+
 export const uploadedFilesRelations = relations(uploadedFiles, ({ one }) => ({
-  quote: one(quotes, {
-    fields: [uploadedFiles.quoteId],
-    references: [quotes.id],
+  assessment: one(assessments, {
+    fields: [uploadedFiles.assessmentId],
+    references: [assessments.id],
   }),
 }));
 
@@ -247,19 +256,22 @@ export const signupAnalyticsRelations = relations(signupAnalytics, ({ one }) => 
   }),
 }));
 
-// Schema validation
+// Insert schemas
 export const insertUserSchema = createInsertSchema(users);
 export const insertOrganizationSchema = createInsertSchema(organizations).omit({ id: true, createdAt: true });
+export const insertAssessmentSchema = createInsertSchema(assessments).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertQuoteSchema = createInsertSchema(quotes).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertUploadedFileSchema = createInsertSchema(uploadedFiles).omit({ id: true, createdAt: true });
 export const insertPartnerInvitationSchema = createInsertSchema(partnerInvitations).omit({ id: true, createdAt: true });
 export const insertSignupAnalyticsSchema = createInsertSchema(signupAnalytics).omit({ id: true, timestamp: true });
 
-// Type exports
+// Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type Organization = typeof organizations.$inferSelect;
 export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
+export type Assessment = typeof assessments.$inferSelect;
+export type InsertAssessment = z.infer<typeof insertAssessmentSchema>;
 export type Quote = typeof quotes.$inferSelect;
 export type InsertQuote = z.infer<typeof insertQuoteSchema>;
 export type UploadedFile = typeof uploadedFiles.$inferSelect;
@@ -268,7 +280,3 @@ export type PartnerInvitation = typeof partnerInvitations.$inferSelect;
 export type InsertPartnerInvitation = z.infer<typeof insertPartnerInvitationSchema>;
 export type SignupAnalytics = typeof signupAnalytics.$inferSelect;
 export type InsertSignupAnalytics = z.infer<typeof insertSignupAnalyticsSchema>;
-
-// Legacy Assessment type for compatibility - now just points to Quote
-export type Assessment = Quote;
-export type InsertAssessment = InsertQuote;
