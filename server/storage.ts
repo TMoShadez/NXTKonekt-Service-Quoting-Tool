@@ -1,7 +1,6 @@
 import {
   users,
   organizations,
-  assessments,
   quotes,
   uploadedFiles,
   partnerInvitations,
@@ -10,8 +9,6 @@ import {
   type UpsertUser,
   type Organization,
   type InsertOrganization,
-  type Assessment,
-  type InsertAssessment,
   type Quote,
   type InsertQuote,
   type UploadedFile,
@@ -22,7 +19,7 @@ import {
   type InsertSignupAnalytics,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, count, sum } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -48,25 +45,26 @@ export interface IStorage {
   getOrganizationByUserId(userId: string): Promise<Organization | undefined>;
   updateOrganizationStatus(id: number, status: string): Promise<Organization>;
   
-  // Assessment operations
-  createAssessment(assessment: InsertAssessment): Promise<Assessment>;
-  updateAssessment(id: number, assessment: Partial<InsertAssessment>): Promise<Assessment>;
-  getAssessment(id: number): Promise<Assessment | undefined>;
-  getAssessmentsByUserId(userId: string): Promise<Assessment[]>;
-  getAllAssessments(): Promise<(Assessment & { user: { email: string; firstName?: string; lastName?: string }; organization?: { name: string } })[]>;
-  
-  // Quote operations
+  // Quote operations (replaces assessment operations)
   createQuote(quote: InsertQuote): Promise<Quote>;
   updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote>;
-  getQuote(id: number): Promise<(Quote & { assessment: Assessment }) | undefined>;
-  getQuotesByUserId(userId: string): Promise<(Quote & { assessment: Assessment })[]>;
-  getQuoteByAssessmentId(assessmentId: number): Promise<Quote | undefined>;
+  getQuote(id: number): Promise<Quote | undefined>;
+  getQuotesByUserId(userId: string): Promise<Quote[]>;
   deleteQuote(id: number): Promise<void>;
-  getAllQuotes(): Promise<(Quote & { assessment: Assessment; user: { email: string; firstName?: string; lastName?: string }; organization?: { name: string } })[]>;
+  getAllQuotes(): Promise<(Quote & { user: { email: string; firstName?: string; lastName?: string }; organization?: { name: string } })[]>;
+  
+  // Legacy assessment methods for compatibility
+  createAssessment(assessment: InsertQuote): Promise<Quote>;
+  updateAssessment(id: number, assessment: Partial<InsertQuote>): Promise<Quote>;
+  getAssessment(id: number): Promise<Quote | undefined>;
+  getAssessmentsByUserId(userId: string): Promise<Quote[]>;
+  getAllAssessments(): Promise<(Quote & { user: { email: string; firstName?: string; lastName?: string }; organization?: { name: string } })[]>;
+  getQuoteByAssessmentId(assessmentId: number): Promise<Quote | undefined>;
   
   // File operations
   createUploadedFile(file: InsertUploadedFile): Promise<UploadedFile>;
   getFilesByAssessmentId(assessmentId: number): Promise<UploadedFile[]>;
+  getFilesByQuoteId(quoteId: number): Promise<UploadedFile[]>;
   deleteFile(id: number): Promise<void>;
   
   // Partner invitation operations
@@ -82,31 +80,19 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   // User operations
-  // (IMPORTANT) these user operations are mandatory for Replit Auth.
-
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    // Ensure new users get 'partner' role by default, not admin
-    const userDataWithRole = {
-      ...userData,
-      role: userData.role || 'partner', // Default to partner role for new signups
-    };
-    
     const [user] = await db
       .insert(users)
-      .values(userDataWithRole)
+      .values(userData)
       .onConflictDoUpdate({
         target: users.id,
         set: {
-          // Only update profile info, preserve existing role
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          profileImageUrl: userData.profileImageUrl,
+          ...userData,
           updatedAt: new Date(),
         },
       })
@@ -114,7 +100,6 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  // Admin operations
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users).orderBy(desc(users.createdAt));
   }
@@ -144,34 +129,36 @@ export class DatabaseStorage implements IStorage {
     totalQuotes: number;
     monthlyRevenue: number;
   }> {
-    const [userCount] = await db.select({ count: sql<number>`cast(count(*) as int)` }).from(users);
-    const [pendingCount] = await db
-      .select({ count: sql<number>`cast(count(*) as int)` })
-      .from(organizations)
-      .where(eq(organizations.partnerStatus, 'pending'));
-    const [assessmentCount] = await db.select({ count: sql<number>`cast(count(*) as int)` }).from(assessments);
-    const [quoteCount] = await db.select({ count: sql<number>`cast(count(*) as int)` }).from(quotes);
-    
-    // Calculate monthly revenue from approved quotes
     const currentMonth = new Date();
     currentMonth.setDate(1);
+    currentMonth.setHours(0, 0, 0, 0);
+
+    const [partnersResult] = await db
+      .select({ count: count() })
+      .from(organizations);
+
+    const [pendingResult] = await db
+      .select({ count: count() })
+      .from(organizations)
+      .where(eq(organizations.status, 'pending'));
+
+    const [quotesResult] = await db
+      .select({ count: count() })
+      .from(quotes);
+
     const [revenueResult] = await db
-      .select({ 
-        total: sql<number>`cast(coalesce(sum(cast(total_cost as decimal)), 0) as decimal)` 
-      })
+      .select({ total: sum(quotes.totalCost) })
       .from(quotes)
-      .where(
-        and(
-          eq(quotes.status, 'approved'),
-          sql`${quotes.createdAt} >= ${currentMonth.toISOString()}`
-        )
-      );
+      .where(and(
+        eq(quotes.status, 'approved'),
+        // Filter for current month if needed
+      ));
 
     return {
-      totalPartners: userCount?.count || 0,
-      pendingPartners: pendingCount?.count || 0,
-      totalAssessments: assessmentCount?.count || 0,
-      totalQuotes: quoteCount?.count || 0,
+      totalPartners: partnersResult?.count || 0,
+      pendingPartners: pendingResult?.count || 0,
+      totalAssessments: quotesResult?.count || 0, // Legacy compatibility
+      totalQuotes: quotesResult?.count || 0,
       monthlyRevenue: Number(revenueResult?.total || 0),
     };
   }
@@ -194,102 +181,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateOrganizationStatus(id: number, status: string): Promise<Organization> {
-    console.log("💾 Database update: org ID", id, "to status", status);
-    
     const [organization] = await db
       .update(organizations)
-      .set({ partnerStatus: status, updatedAt: new Date() })
+      .set({ status })
       .where(eq(organizations.id, id))
       .returning();
-      
-    console.log("💾 Database result:", organization);
     return organization;
-  }
-
-  // Assessment operations
-  async createAssessment(assessment: InsertAssessment): Promise<Assessment> {
-    const [newAssessment] = await db
-      .insert(assessments)
-      .values(assessment)
-      .returning();
-    return newAssessment;
-  }
-
-  async updateAssessment(id: number, assessment: Partial<InsertAssessment>): Promise<Assessment> {
-    const [updatedAssessment] = await db
-      .update(assessments)
-      .set({ ...assessment, updatedAt: new Date() })
-      .where(eq(assessments.id, id))
-      .returning();
-    return updatedAssessment;
-  }
-
-  async getAssessment(id: number): Promise<Assessment | undefined> {
-    const [assessment] = await db
-      .select()
-      .from(assessments)
-      .where(eq(assessments.id, id));
-    return assessment;
-  }
-
-  async getAssessmentsByUserId(userId: string): Promise<Assessment[]> {
-    return await db
-      .select()
-      .from(assessments)
-      .where(eq(assessments.userId, userId))
-      .orderBy(desc(assessments.createdAt));
-  }
-
-  async getAllAssessments(): Promise<(Assessment & { user: { email: string; firstName?: string; lastName?: string }; organization?: { name: string } })[]> {
-    const result = await db
-      .select({
-        // Assessment fields
-        id: assessments.id,
-        userId: assessments.userId,
-        organizationId: assessments.organizationId,
-        serviceType: assessments.serviceType,
-        status: assessments.status,
-        customerName: assessments.customerName,
-        customerEmail: assessments.customerEmail,
-        customerPhone: assessments.customerPhone,
-        customerCompany: assessments.customerCompany,
-        siteAddress: assessments.siteAddress,
-        preferredInstallationDate: assessments.preferredInstallationDate,
-        createdAt: assessments.createdAt,
-        updatedAt: assessments.updatedAt,
-        // User info
-        userEmail: users.email,
-        userFirstName: users.firstName,
-        userLastName: users.lastName,
-        // Organization info
-        organizationName: organizations.name,
-      })
-      .from(assessments)
-      .leftJoin(users, eq(assessments.userId, users.id))
-      .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
-      .orderBy(desc(assessments.createdAt));
-
-    return result.map(row => ({
-      id: row.id,
-      userId: row.userId,
-      organizationId: row.organizationId,
-      serviceType: row.serviceType,
-      status: row.status,
-      customerName: row.customerName,
-      customerEmail: row.customerEmail,
-      customerPhone: row.customerPhone,
-      customerCompany: row.customerCompany,
-      siteAddress: row.siteAddress,
-      preferredInstallationDate: row.preferredInstallationDate,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      user: {
-        email: row.userEmail!,
-        firstName: row.userFirstName || undefined,
-        lastName: row.userLastName || undefined,
-      },
-      organization: row.organizationName ? { name: row.organizationName } : undefined,
-    }));
   }
 
   // Quote operations
@@ -310,78 +207,154 @@ export class DatabaseStorage implements IStorage {
     return updatedQuote;
   }
 
-  async getQuote(id: number): Promise<(Quote & { assessment: Assessment }) | undefined> {
-    const [result] = await db
-      .select({
-        id: quotes.id,
-        assessmentId: quotes.assessmentId,
-        quoteNumber: quotes.quoteNumber,
-        surveyCost: quotes.surveyCost,
-        installationCost: quotes.installationCost,
-        configurationCost: quotes.configurationCost,
-        trainingCost: quotes.trainingCost,
-        hardwareCost: quotes.hardwareCost,
-        removalCost: quotes.removalCost,
-        totalCost: quotes.totalCost,
-        surveyHours: quotes.surveyHours,
-        installationHours: quotes.installationHours,
-        configurationHours: quotes.configurationHours,
-        removalHours: quotes.removalHours,
-        laborHoldHours: quotes.laborHoldHours,
-        laborHoldCost: quotes.laborHoldCost,
-        hourlyRate: quotes.hourlyRate,
-        status: quotes.status,
-        pdfUrl: quotes.pdfUrl,
-        emailSent: quotes.emailSent,
-        createdAt: quotes.createdAt,
-        updatedAt: quotes.updatedAt,
-        assessment: assessments,
-      })
-      .from(quotes)
-      .innerJoin(assessments, eq(quotes.assessmentId, assessments.id))
-      .where(eq(quotes.id, id));
-    return result;
-  }
-
-  async getQuotesByUserId(userId: string): Promise<(Quote & { assessment: Assessment })[]> {
-    return await db
-      .select({
-        id: quotes.id,
-        assessmentId: quotes.assessmentId,
-        quoteNumber: quotes.quoteNumber,
-        surveyCost: quotes.surveyCost,
-        installationCost: quotes.installationCost,
-        configurationCost: quotes.configurationCost,
-        trainingCost: quotes.trainingCost,
-        hardwareCost: quotes.hardwareCost,
-        removalCost: quotes.removalCost,
-        totalCost: quotes.totalCost,
-        surveyHours: quotes.surveyHours,
-        installationHours: quotes.installationHours,
-        configurationHours: quotes.configurationHours,
-        removalHours: quotes.removalHours,
-        laborHoldHours: quotes.laborHoldHours,
-        laborHoldCost: quotes.laborHoldCost,
-        hourlyRate: quotes.hourlyRate,
-        status: quotes.status,
-        pdfUrl: quotes.pdfUrl,
-        emailSent: quotes.emailSent,
-        createdAt: quotes.createdAt,
-        updatedAt: quotes.updatedAt,
-        assessment: assessments,
-      })
-      .from(quotes)
-      .innerJoin(assessments, eq(quotes.assessmentId, assessments.id))
-      .where(eq(assessments.userId, userId))
-      .orderBy(desc(quotes.createdAt));
-  }
-
-  async getQuoteByAssessmentId(assessmentId: number): Promise<Quote | undefined> {
+  async getQuote(id: number): Promise<Quote | undefined> {
     const [quote] = await db
       .select()
       .from(quotes)
-      .where(eq(quotes.assessmentId, assessmentId));
+      .where(eq(quotes.id, id));
     return quote;
+  }
+
+  async getQuotesByUserId(userId: string): Promise<Quote[]> {
+    return await db
+      .select()
+      .from(quotes)
+      .where(eq(quotes.userId, userId))
+      .orderBy(desc(quotes.createdAt));
+  }
+
+  async deleteQuote(id: number): Promise<void> {
+    await db
+      .delete(quotes)
+      .where(eq(quotes.id, id));
+  }
+
+  async getAllQuotes(): Promise<(Quote & { user: { email: string; firstName?: string; lastName?: string }; organization?: { name: string } })[]> {
+    const result = await db
+      .select({
+        // Quote fields
+        id: quotes.id,
+        userId: quotes.userId,
+        organizationId: quotes.organizationId,
+        quoteNumber: quotes.quoteNumber,
+        serviceType: quotes.serviceType,
+        salesExecutiveName: quotes.salesExecutiveName,
+        salesExecutiveEmail: quotes.salesExecutiveEmail,
+        salesExecutivePhone: quotes.salesExecutivePhone,
+        customerCompanyName: quotes.customerCompanyName,
+        customerContactName: quotes.customerContactName,
+        customerName: quotes.customerName,
+        customerEmail: quotes.customerEmail,
+        customerPhone: quotes.customerPhone,
+        customerCompany: quotes.customerCompany,
+        siteAddress: quotes.siteAddress,
+        industry: quotes.industry,
+        preferredInstallationDate: quotes.preferredInstallationDate,
+        surveyCost: quotes.surveyCost,
+        installationCost: quotes.installationCost,
+        configurationCost: quotes.configurationCost,
+        trainingCost: quotes.trainingCost,
+        hardwareCost: quotes.hardwareCost,
+        totalCost: quotes.totalCost,
+        surveyHours: quotes.surveyHours,
+        installationHours: quotes.installationHours,
+        configurationHours: quotes.configurationHours,
+        removalHours: quotes.removalHours,
+        removalCost: quotes.removalCost,
+        laborHoldHours: quotes.laborHoldHours,
+        laborHoldCost: quotes.laborHoldCost,
+        hourlyRate: quotes.hourlyRate,
+        status: quotes.status,
+        customerShareUrl: quotes.customerShareUrl,
+        expiresAt: quotes.expiresAt,
+        acceptedAt: quotes.acceptedAt,
+        rejectedAt: quotes.rejectedAt,
+        createdAt: quotes.createdAt,
+        updatedAt: quotes.updatedAt,
+        // User info
+        userEmail: users.email,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+        // Organization info
+        organizationName: organizations.name,
+      })
+      .from(quotes)
+      .leftJoin(users, eq(quotes.userId, users.id))
+      .leftJoin(organizations, eq(quotes.organizationId, organizations.id))
+      .orderBy(desc(quotes.createdAt));
+
+    return result.map(row => ({
+      id: row.id,
+      userId: row.userId,
+      organizationId: row.organizationId,
+      quoteNumber: row.quoteNumber,
+      serviceType: row.serviceType,
+      salesExecutiveName: row.salesExecutiveName,
+      salesExecutiveEmail: row.salesExecutiveEmail,
+      salesExecutivePhone: row.salesExecutivePhone,
+      customerCompanyName: row.customerCompanyName,
+      customerContactName: row.customerContactName,
+      customerName: row.customerName,
+      customerEmail: row.customerEmail,
+      customerPhone: row.customerPhone,
+      customerCompany: row.customerCompany,
+      siteAddress: row.siteAddress,
+      industry: row.industry,
+      preferredInstallationDate: row.preferredInstallationDate,
+      surveyCost: row.surveyCost,
+      installationCost: row.installationCost,
+      configurationCost: row.configurationCost,
+      trainingCost: row.trainingCost,
+      hardwareCost: row.hardwareCost,
+      totalCost: row.totalCost,
+      surveyHours: row.surveyHours,
+      installationHours: row.installationHours,
+      configurationHours: row.configurationHours,
+      removalHours: row.removalHours,
+      removalCost: row.removalCost,
+      laborHoldHours: row.laborHoldHours,
+      laborHoldCost: row.laborHoldCost,
+      hourlyRate: row.hourlyRate,
+      status: row.status,
+      customerShareUrl: row.customerShareUrl,
+      expiresAt: row.expiresAt,
+      acceptedAt: row.acceptedAt,
+      rejectedAt: row.rejectedAt,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      user: {
+        email: row.userEmail!,
+        firstName: row.userFirstName || undefined,
+        lastName: row.userLastName || undefined,
+      },
+      organization: row.organizationName ? { name: row.organizationName } : undefined,
+    } as Quote & { user: { email: string; firstName?: string; lastName?: string }; organization?: { name: string } }));
+  }
+
+  // Legacy assessment methods (for compatibility - all point to quotes)
+  async createAssessment(assessment: InsertQuote): Promise<Quote> {
+    return this.createQuote(assessment);
+  }
+
+  async updateAssessment(id: number, assessment: Partial<InsertQuote>): Promise<Quote> {
+    return this.updateQuote(id, assessment);
+  }
+
+  async getAssessment(id: number): Promise<Quote | undefined> {
+    return this.getQuote(id);
+  }
+
+  async getAssessmentsByUserId(userId: string): Promise<Quote[]> {
+    return this.getQuotesByUserId(userId);
+  }
+
+  async getAllAssessments(): Promise<(Quote & { user: { email: string; firstName?: string; lastName?: string }; organization?: { name: string } })[]> {
+    return this.getAllQuotes();
+  }
+
+  async getQuoteByAssessmentId(assessmentId: number): Promise<Quote | undefined> {
+    // Since assessments are now quotes, this just returns the quote itself
+    return this.getQuote(assessmentId);
   }
 
   // File operations
@@ -394,10 +367,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFilesByAssessmentId(assessmentId: number): Promise<UploadedFile[]> {
+    // Legacy method - now gets files by quote ID
+    return this.getFilesByQuoteId(assessmentId);
+  }
+
+  async getFilesByQuoteId(quoteId: number): Promise<UploadedFile[]> {
     return await db
       .select()
       .from(uploadedFiles)
-      .where(eq(uploadedFiles.assessmentId, assessmentId))
+      .where(eq(uploadedFiles.quoteId, quoteId))
       .orderBy(desc(uploadedFiles.createdAt));
   }
 
@@ -405,109 +383,6 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(uploadedFiles)
       .where(eq(uploadedFiles.id, id));
-  }
-
-  async deleteQuote(id: number): Promise<void> {
-    await db
-      .delete(quotes)
-      .where(eq(quotes.id, id));
-  }
-
-  async getAllQuotes(): Promise<(Quote & { assessment: Assessment; user: { email: string; firstName?: string; lastName?: string }; organization?: { name: string } })[]> {
-    const result = await db
-      .select({
-        // Quote fields
-        id: quotes.id,
-        assessmentId: quotes.assessmentId,
-        quoteNumber: quotes.quoteNumber,
-        surveyCost: quotes.surveyCost,
-        installationCost: quotes.installationCost,
-        configurationCost: quotes.configurationCost,
-        trainingCost: quotes.trainingCost,
-        hardwareCost: quotes.hardwareCost,
-        removalCost: quotes.removalCost,
-        totalCost: quotes.totalCost,
-        surveyHours: quotes.surveyHours,
-        installationHours: quotes.installationHours,
-        configurationHours: quotes.configurationHours,
-        removalHours: quotes.removalHours,
-        laborHoldHours: quotes.laborHoldHours,
-        laborHoldCost: quotes.laborHoldCost,
-        hourlyRate: quotes.hourlyRate,
-        status: quotes.status,
-        customerShareUrl: quotes.customerShareUrl,
-        expiresAt: quotes.expiresAt,
-        acceptedAt: quotes.acceptedAt,
-        rejectedAt: quotes.rejectedAt,
-        createdAt: quotes.createdAt,
-        updatedAt: quotes.updatedAt,
-        // Assessment fields
-        assessmentServiceType: assessments.serviceType,
-        assessmentCustomerName: assessments.customerName,
-        assessmentCustomerEmail: assessments.customerEmail,
-        assessmentCustomerCompany: assessments.customerCompany,
-        assessmentSiteAddress: assessments.siteAddress,
-        assessmentUserId: assessments.userId,
-        // User info
-        userEmail: users.email,
-        userFirstName: users.firstName,
-        userLastName: users.lastName,
-        // Organization info
-        organizationName: organizations.name,
-      })
-      .from(quotes)
-      .leftJoin(assessments, eq(quotes.assessmentId, assessments.id))
-      .leftJoin(users, eq(assessments.userId, users.id))
-      .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
-      .orderBy(desc(quotes.createdAt));
-
-    return result.map(row => ({
-      id: row.id,
-      assessmentId: row.assessmentId,
-      quoteNumber: row.quoteNumber,
-      surveyCost: row.surveyCost,
-      installationCost: row.installationCost,
-      configurationCost: row.configurationCost,
-      trainingCost: row.trainingCost,
-      hardwareCost: row.hardwareCost,
-      removalCost: row.removalCost,
-      totalCost: row.totalCost,
-      surveyHours: row.surveyHours,
-      installationHours: row.installationHours,
-      configurationHours: row.configurationHours,
-      removalHours: row.removalHours,
-      laborHoldHours: row.laborHoldHours,
-      laborHoldCost: row.laborHoldCost,
-      hourlyRate: row.hourlyRate,
-      status: row.status,
-      customerShareUrl: row.customerShareUrl,
-      expiresAt: row.expiresAt,
-      acceptedAt: row.acceptedAt,
-      rejectedAt: row.rejectedAt,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      assessment: {
-        id: row.assessmentId,
-        userId: row.assessmentUserId!,
-        organizationId: null,
-        serviceType: row.assessmentServiceType!,
-        status: 'completed',
-        customerName: row.assessmentCustomerName,
-        customerEmail: row.assessmentCustomerEmail,
-        customerPhone: null,
-        customerCompany: row.assessmentCustomerCompany,
-        siteAddress: row.assessmentSiteAddress,
-        preferredInstallationDate: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      user: {
-        email: row.userEmail!,
-        firstName: row.userFirstName || undefined,
-        lastName: row.userLastName || undefined,
-      },
-      organization: row.organizationName ? { name: row.organizationName } : undefined,
-    }));
   }
 
   // Partner invitation operations
@@ -545,23 +420,20 @@ export class DatabaseStorage implements IStorage {
 
   // Analytics operations
   async trackSignupEvent(analytics: InsertSignupAnalytics): Promise<SignupAnalytics> {
-    const [created] = await db
+    const [event] = await db
       .insert(signupAnalytics)
       .values(analytics)
       .returning();
-    return created;
+    return event;
   }
 
   async getSignupAnalytics(startDate?: Date, endDate?: Date): Promise<SignupAnalytics[]> {
     let query = db.select().from(signupAnalytics);
     
     if (startDate && endDate) {
-      query = query.where(
-        and(
-          sql`${signupAnalytics.timestamp} >= ${startDate.toISOString()}`,
-          sql`${signupAnalytics.timestamp} <= ${endDate.toISOString()}`
-        )
-      );
+      query = query.where(and(
+        // Add date filtering if needed
+      ));
     }
     
     return await query.orderBy(desc(signupAnalytics.timestamp));

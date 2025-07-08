@@ -6,7 +6,7 @@ import { upload, saveFileToDatabase, deleteFileFromDisk } from "./services/fileU
 import { calculatePricing } from "./services/pricingEngine";
 import { generateQuotePDF } from "./services/pdfGenerator";
 import { hubspotService } from "./services/hubspotService";
-import { insertAssessmentSchema, insertOrganizationSchema } from "@shared/schema";
+import { insertQuoteSchema, insertOrganizationSchema } from "@shared/schema";
 import { emailService } from "./services/emailService";
 import { randomBytes } from "crypto";
 import path from "path";
