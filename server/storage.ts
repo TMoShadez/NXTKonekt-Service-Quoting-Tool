@@ -88,13 +88,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
+    // Ensure new users get 'partner' role by default, not admin
+    const userDataWithRole = {
+      ...userData,
+      role: userData.role || 'partner', // Default to partner role for new signups
+    };
+    
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values(userDataWithRole)
       .onConflictDoUpdate({
         target: users.id,
         set: {
-          ...userData,
+          // Only update profile info, preserve existing role
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          profileImageUrl: userData.profileImageUrl,
           updatedAt: new Date(),
         },
       })

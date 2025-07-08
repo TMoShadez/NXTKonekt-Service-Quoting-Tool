@@ -14,7 +14,7 @@ import CustomerPortal from "@/pages/customer-portal";
 import AdminDashboard from "@/pages/admin-dashboard";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   return (
     <Switch>
@@ -27,7 +27,10 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Dashboard} />
-          <Route path="/admin" component={AdminDashboard} />
+          {/* Admin route - only accessible to admin users */}
+          {user?.role === 'admin' && (
+            <Route path="/admin" component={AdminDashboard} />
+          )}
           <Route path="/assessment/:id?" component={Assessment} />
           <Route path="/fleet-tracking/:id?" component={FleetTrackingForm} />
           <Route path="/fleet-camera/:id?" component={FleetCameraForm} />
