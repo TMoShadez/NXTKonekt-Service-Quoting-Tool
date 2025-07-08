@@ -84,6 +84,70 @@ export default function Dashboard() {
     }
   };
 
+  const handleExportReports = () => {
+    // Create CSV content with quotes and assessments data
+    const csvHeaders = [
+      'Quote Number',
+      'Customer Name', 
+      'Customer Company',
+      'Customer Email',
+      'Customer Phone',
+      'Service Type',
+      'Total Cost',
+      'Status',
+      'Site Address',
+      'Industry',
+      'Building Type',
+      'Created Date',
+      'Survey Hours',
+      'Installation Hours',
+      'Configuration Hours',
+      'Labor Hold Cost',
+      'Hardware Cost'
+    ];
+
+    const csvRows = quotes.map((quote: any) => [
+      quote.quoteNumber,
+      quote.assessment?.customerContactName || '',
+      quote.assessment?.customerCompanyName || '',
+      quote.assessment?.customerEmail || '',
+      quote.assessment?.customerPhone || '',
+      quote.assessment?.serviceType?.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) || '',
+      parseFloat(quote.totalCost).toFixed(2),
+      quote.status,
+      quote.assessment?.siteAddress || '',
+      quote.assessment?.industry || '',
+      quote.assessment?.buildingType || '',
+      new Date(quote.createdAt).toLocaleDateString(),
+      quote.surveyHours || '0',
+      quote.installationHours || '0',
+      quote.configurationHours || '0',
+      parseFloat(quote.laborHoldCost || 0).toFixed(2),
+      parseFloat(quote.hardwareCost || 0).toFixed(2)
+    ]);
+
+    const csvContent = [
+      csvHeaders.join(','),
+      ...csvRows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    // Create and download the file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `nxtkonekt-quotes-report-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({
+      title: "Report Exported",
+      description: `Downloaded quotes report with ${quotes.length} records`,
+    });
+  };
+
   const handleShareCustomerPortal = async (quoteId: number, customerName: string) => {
     const customerPortalUrl = `${window.location.origin}/customer/${quoteId}`;
     
@@ -358,6 +422,8 @@ export default function Dashboard() {
           <Button 
             variant="outline"
             className="flex-1 sm:flex-none px-6 py-4 rounded-xl font-medium border-gray-200 hover:bg-gray-50 transition-colors"
+            onClick={handleExportReports}
+            disabled={quotes.length === 0}
           >
             <Download className="mr-2" size={20} />
             Export Reports
