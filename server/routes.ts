@@ -614,13 +614,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: quotes.id,
         assessmentId: quotes.assessmentId,
         quoteNumber: quotes.quoteNumber,
+        surveyCost: quotes.surveyCost,
+        installationCost: quotes.installationCost,
+        configurationCost: quotes.configurationCost,
+        trainingCost: quotes.trainingCost,
+        hardwareCost: quotes.hardwareCost,
+        removalCost: quotes.removalCost,
         totalCost: quotes.totalCost,
+        surveyHours: quotes.surveyHours,
+        installationHours: quotes.installationHours,
+        configurationHours: quotes.configurationHours,
+        removalHours: quotes.removalHours,
+        laborHoldHours: quotes.laborHoldHours,
+        laborHoldCost: quotes.laborHoldCost,
+        hourlyRate: quotes.hourlyRate,
         status: quotes.status,
+        pdfUrl: quotes.pdfUrl,
+        emailSent: quotes.emailSent,
         createdAt: quotes.createdAt,
         updatedAt: quotes.updatedAt,
-        assessmentServiceType: assessments.serviceType,
-        customerContactName: assessments.customerContactName,
-        customerCompanyName: assessments.customerCompanyName,
+        serviceType: assessments.serviceType,
+        customerName: assessments.customerContactName,
+        customerCompany: assessments.customerCompanyName,
         customerEmail: assessments.customerEmail,
         customerPhone: assessments.customerPhone,
         userEmail: users.email,
@@ -635,6 +650,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .where(or(eq(users.isSystemAdmin, false), isNull(users.isSystemAdmin))) // Include non-system admin users
       .orderBy(desc(quotes.createdAt));
       
+      console.log('Admin quotes result sample:', allQuotes[0]);
       res.json(allQuotes);
     } catch (error) {
       console.error("Error fetching quotes:", error);

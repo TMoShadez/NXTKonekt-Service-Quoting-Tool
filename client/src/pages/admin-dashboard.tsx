@@ -845,7 +845,7 @@ export default function AdminDashboard() {
                 <div>
                   <h3 className="font-semibold mb-2">Quote Summary</h3>
                   <p><strong>Quote Number:</strong> {selectedQuote.quoteNumber || 'N/A'}</p>
-                  <p><strong>Service Type:</strong> {selectedQuote.serviceType?.replace('-', ' ') || 'N/A'}</p>
+                  <p><strong>Service Type:</strong> <Badge variant="outline">{selectedQuote.serviceType?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'N/A'}</Badge></p>
                   <p><strong>Total Cost:</strong> ${selectedQuote.totalCost || 0}</p>
                   <p><strong>Status:</strong> <Badge variant={selectedQuote.status === 'approved' ? 'default' : 'secondary'}>{selectedQuote.status || 'N/A'}</Badge></p>
                   <p><strong>Created:</strong> {new Date(selectedQuote.createdAt || Date.now()).toLocaleString()}</p>
