@@ -270,7 +270,7 @@ export default function Dashboard() {
                     <User className="text-white" size={16} />
                   )}
                 </div>
-                {user?.role === 'admin' && (
+                {(user?.isSystemAdmin || user?.role === 'admin') && (
                   <Button 
                     variant="ghost" 
                     size="sm" 

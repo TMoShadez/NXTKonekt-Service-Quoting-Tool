@@ -31,12 +31,12 @@ export default function AdminDashboard() {
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
-  // Redirect if not admin
+  // Redirect if not system admin
   useEffect(() => {
-    if (!authLoading && (!isAuthenticated || user?.role !== 'admin')) {
+    if (!authLoading && (!isAuthenticated || (!user?.isSystemAdmin && user?.role !== 'admin'))) {
       toast({
         title: "Access Denied",
-        description: "You don't have permission to access the admin dashboard.",
+        description: "System administrator access required.",
         variant: "destructive",
       });
       window.location.href = "/";
@@ -46,37 +46,37 @@ export default function AdminDashboard() {
   // Admin stats query
   const { data: stats } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
-    enabled: user?.role === 'admin',
+    enabled: user?.isSystemAdmin || user?.role === 'admin',
   });
 
   // Partners query
   const { data: partners, isLoading: partnersLoading } = useQuery<PartnerWithOrg[]>({
     queryKey: ["/api/admin/partners"],
-    enabled: user?.role === 'admin',
+    enabled: user?.isSystemAdmin || user?.role === 'admin',
   });
 
   // Assessments query
   const { data: assessments, isLoading: assessmentsLoading } = useQuery<Assessment[]>({
     queryKey: ["/api/admin/assessments"],
-    enabled: user?.role === 'admin',
+    enabled: user?.isSystemAdmin || user?.role === 'admin',
   });
 
   // Quotes query
   const { data: quotes, isLoading: quotesLoading } = useQuery<Quote[]>({
     queryKey: ["/api/admin/quotes"],
-    enabled: user?.role === 'admin',
+    enabled: user?.isSystemAdmin || user?.role === 'admin',
   });
 
   // Invitations query
   const { data: invitations } = useQuery({
     queryKey: ["/api/admin/invitations"],
-    enabled: user?.role === 'admin',
+    enabled: user?.isSystemAdmin || user?.role === 'admin',
   });
 
   // Analytics query
   const { data: analytics } = useQuery({
     queryKey: ["/api/admin/analytics"],
-    enabled: user?.role === 'admin',
+    enabled: user?.isSystemAdmin || user?.role === 'admin',
   });
 
   // Test email connection mutation
@@ -191,7 +191,7 @@ export default function AdminDashboard() {
     }
   };
 
-  if (authLoading || user?.role !== 'admin') {
+  if (authLoading || (!user?.isSystemAdmin && user?.role !== 'admin')) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">

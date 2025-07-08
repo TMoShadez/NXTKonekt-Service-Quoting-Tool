@@ -33,6 +33,7 @@ export interface IStorage {
   
   // Admin operations
   getAllUsers(): Promise<User[]>;
+  getAllSystemAdmins(): Promise<User[]>;
   updateUserRole(id: string, role: string): Promise<User>;
   toggleUserActive(id: string, isActive: boolean): Promise<User>;
   getAdminStats(): Promise<{
@@ -104,7 +105,13 @@ export class DatabaseStorage implements IStorage {
 
   // Admin operations
   async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users).orderBy(desc(users.createdAt));
+    // Only return non-system admin users for partner management
+    return await db.select().from(users).where(eq(users.isSystemAdmin, false)).orderBy(desc(users.createdAt));
+  }
+
+  async getAllSystemAdmins(): Promise<User[]> {
+    // Get all system administrators
+    return await db.select().from(users).where(eq(users.isSystemAdmin, true));
   }
 
   async updateUserRole(id: string, role: string): Promise<User> {

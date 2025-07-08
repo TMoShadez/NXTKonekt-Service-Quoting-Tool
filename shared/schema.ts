@@ -36,6 +36,7 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   role: varchar("role").default("partner").notNull(), // admin, partner, sales_executive
   isActive: boolean("is_active").default(true),
+  isSystemAdmin: boolean("is_system_admin").default(false).notNull(), // True admins separate from partners
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

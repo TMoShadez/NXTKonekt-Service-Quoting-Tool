@@ -539,8 +539,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     const user = await storage.getUser(req.user.claims.sub);
-    if (!user || user.role !== 'admin') {
-      return res.status(403).json({ message: "Admin access required" });
+    if (!user || (!user.isSystemAdmin && user.role !== 'admin')) {
+      return res.status(403).json({ message: "System admin access required" });
     }
     
     next();
@@ -574,7 +574,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/assessments', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const allAssessments = await db.select().from(assessments).orderBy(desc(assessments.createdAt));
+      // Get all assessments with user and organization information
+      const allAssessments = await db.select({
+        id: assessments.id,
+        userId: assessments.userId,
+        organizationId: assessments.organizationId,
+        serviceType: assessments.serviceType,
+        createdAt: assessments.createdAt,
+        updatedAt: assessments.updatedAt,
+        userEmail: users.email,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+        organizationName: organizations.name,
+      })
+      .from(assessments)
+      .leftJoin(users, eq(assessments.userId, users.id))
+      .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
+      .where(eq(users.isSystemAdmin, false)) // Exclude system admin assessments
+      .orderBy(desc(assessments.createdAt));
+      
       res.json(allAssessments);
     } catch (error) {
       console.error("Error fetching assessments:", error);
@@ -584,7 +602,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/quotes', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const allQuotes = await db.select().from(quotes).orderBy(desc(quotes.createdAt));
+      // Get all quotes with assessment, user, and organization information
+      const allQuotes = await db.select({
+        id: quotes.id,
+        assessmentId: quotes.assessmentId,
+        quoteNumber: quotes.quoteNumber,
+        totalCost: quotes.totalCost,
+        status: quotes.status,
+        createdAt: quotes.createdAt,
+        updatedAt: quotes.updatedAt,
+        assessmentServiceType: assessments.serviceType,
+        userEmail: users.email,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+        organizationName: organizations.name,
+      })
+      .from(quotes)
+      .leftJoin(assessments, eq(quotes.assessmentId, assessments.id))
+      .leftJoin(users, eq(assessments.userId, users.id))
+      .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
+      .where(eq(users.isSystemAdmin, false)) // Exclude system admin quotes
+      .orderBy(desc(quotes.createdAt));
+      
       res.json(allQuotes);
     } catch (error) {
       console.error("Error fetching quotes:", error);
