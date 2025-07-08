@@ -432,7 +432,7 @@ export default function Dashboard() {
                           #{quote.quoteNumber}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm nxt-gray-800">
-                          {quote.assessment.customerCompanyName}
+                          {quote.customerCompanyName || quote.customerCompany}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm nxt-gray-800">
                           ${parseFloat(quote.totalCost).toFixed(2)}
@@ -456,7 +456,7 @@ export default function Dashboard() {
                           <Button 
                             variant="link" 
                             className="text-nxt-blue hover:text-blue-700 p-0 mr-3"
-                            onClick={() => navigate(`/assessment/${quote.assessmentId}`)}
+                            onClick={() => navigate(`/assessment/${quote.id}`)}
                           >
                             View
                           </Button>
@@ -472,7 +472,7 @@ export default function Dashboard() {
                           <Button 
                             variant="link" 
                             className="text-nxt-blue hover:text-blue-700 p-0 mr-3"
-                            onClick={() => handleShareCustomerPortal(quote.id, quote.assessment.customerCompanyName)}
+                            onClick={() => handleShareCustomerPortal(quote.id, quote.customerCompanyName || quote.customerCompany)}
                             title="Share customer portal link"
                           >
                             <Share className="h-4 w-4" />

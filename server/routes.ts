@@ -69,13 +69,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cleanedBody.preferredInstallationDate = new Date(cleanedBody.preferredInstallationDate);
       }
       
-      const assessmentData = insertAssessmentSchema.parse({ 
+      const quoteData = insertQuoteSchema.parse({ 
         ...cleanedBody, 
         userId,
-        status: 'draft'
+        status: 'pending'
       });
       
-      const assessment = await storage.createAssessment(assessmentData);
+      const assessment = await storage.createQuote(quoteData);
       res.json(assessment);
     } catch (error) {
       console.error("Error creating assessment:", error);
@@ -89,7 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       
       // Verify ownership
-      const existingAssessment = await storage.getAssessment(assessmentId);
+      const existingAssessment = await storage.getQuote(assessmentId);
       if (!existingAssessment || existingAssessment.userId !== userId) {
         return res.status(404).json({ message: "Assessment not found" });
       }
@@ -105,8 +105,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cleanedData.preferredInstallationDate = new Date(cleanedData.preferredInstallationDate);
       }
       
-      const assessmentData = insertAssessmentSchema.partial().parse(cleanedData);
-      const updatedAssessment = await storage.updateAssessment(assessmentId, assessmentData);
+      const quoteData = insertQuoteSchema.partial().parse(cleanedData);
+      const updatedAssessment = await storage.updateQuote(assessmentId, quoteData);
       res.json(updatedAssessment);
     } catch (error) {
       console.error("Error updating assessment:", error);
@@ -119,7 +119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const assessmentId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
       
-      const assessment = await storage.getAssessment(assessmentId);
+      const assessment = await storage.getQuote(assessmentId);
       if (!assessment || assessment.userId !== userId) {
         return res.status(404).json({ message: "Assessment not found" });
       }
@@ -134,7 +134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/assessments', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const assessments = await storage.getAssessmentsByUserId(userId);
+      const assessments = await storage.getQuotesByUserId(userId);
       res.json(assessments);
     } catch (error) {
       console.error("Error fetching assessments:", error);
@@ -145,21 +145,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // File upload routes
   app.post('/api/assessments/:id/files', isAuthenticated, upload.array('files', 10), async (req: any, res) => {
     try {
-      const assessmentId = parseInt(req.params.id);
+      const quoteId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
       const fileType = req.body.fileType as 'photo' | 'document';
 
-      // Verify assessment ownership
-      const assessment = await storage.getAssessment(assessmentId);
-      if (!assessment || assessment.userId !== userId) {
-        return res.status(404).json({ message: "Assessment not found" });
+      // Verify quote ownership
+      const quote = await storage.getQuote(quoteId);
+      if (!quote || quote.userId !== userId) {
+        return res.status(404).json({ message: "Quote not found" });
       }
 
       const files = req.files as Express.Multer.File[];
       const savedFiles = [];
 
       for (const file of files) {
-        const savedFile = await saveFileToDatabase(assessmentId, file, fileType);
+        const savedFile = await saveFileToDatabase(quoteId, file, fileType);
         savedFiles.push(savedFile);
       }
 
@@ -172,16 +172,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/assessments/:id/files', isAuthenticated, async (req: any, res) => {
     try {
-      const assessmentId = parseInt(req.params.id);
+      const quoteId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
 
-      // Verify assessment ownership
-      const assessment = await storage.getAssessment(assessmentId);
-      if (!assessment || assessment.userId !== userId) {
-        return res.status(404).json({ message: "Assessment not found" });
+      // Verify quote ownership
+      const quote = await storage.getQuote(quoteId);
+      if (!quote || quote.userId !== userId) {
+        return res.status(404).json({ message: "Quote not found" });
       }
 
-      const files = await storage.getFilesByAssessmentId(assessmentId);
+      const files = await storage.getFilesByQuoteId(quoteId);
       res.json(files);
     } catch (error) {
       console.error("Error fetching files:", error);
