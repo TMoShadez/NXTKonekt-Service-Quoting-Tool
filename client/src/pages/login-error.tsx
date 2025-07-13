@@ -36,12 +36,22 @@ export default function LoginError() {
             
             <div className="text-left bg-gray-50 p-4 rounded-lg mb-6">
               <ul className="text-sm nxt-gray-600 space-y-2">
+                <li>• You're accessing via localhost (use the live domain instead)</li>
                 <li>• Your browser has cookies disabled</li>
                 <li>• You denied account access permissions</li>
                 <li>• There was a temporary connection issue</li>
                 <li>• Your session expired during login</li>
               </ul>
             </div>
+            
+            {window.location.hostname.includes('localhost') && (
+              <div className="text-left bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
+                <p className="text-sm text-blue-800 font-medium mb-2">⚠️ Development Access Detected</p>
+                <p className="text-sm text-blue-700">
+                  You're accessing via localhost. For authentication to work, please use the live application URL instead.
+                </p>
+              </div>
+            )}
             
             <div className="space-y-3">
               <Button 

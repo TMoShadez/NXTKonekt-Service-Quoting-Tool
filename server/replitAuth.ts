@@ -93,32 +93,81 @@ export async function setupAuth(app: Express) {
     }
   };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
+  const domains = process.env.REPLIT_DOMAINS!.split(",");
+  
+  // Add localhost for development
+  if (process.env.NODE_ENV === 'development') {
+    domains.push('localhost:5000', 'localhost');
+  }
+  
+  for (const domain of domains) {
+    // Use HTTPS for production domains, HTTP for localhost development
+    const protocol = domain.includes('localhost') ? 'http' : 'https';
     const strategy = new Strategy(
       {
         name: `replitauth:${domain}`,
         config,
         scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
+        callbackURL: `${protocol}://${domain}/api/callback`,
       },
       verify,
     );
     passport.use(strategy);
+    console.log(`Registered auth strategy for domain: ${domain} (${protocol})`);
   }
 
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const hostname = req.get('host') || req.hostname;
+    const strategyName = `replitauth:${hostname}`;
+    
+    console.log(`Login attempt for hostname: ${hostname}, strategy: ${strategyName}`);
+    console.log('Available strategies:', Object.keys(passport._strategies || {}));
+    
+    // Check if strategy exists, try fallback strategies
+    let strategy = passport._strategy(strategyName);
+    if (!strategy) {
+      // Try without port for localhost
+      const fallbackStrategy = `replitauth:${hostname.split(':')[0]}`;
+      strategy = passport._strategy(fallbackStrategy);
+      if (strategy) {
+        console.log(`Using fallback strategy: ${fallbackStrategy}`);
+        return passport.authenticate(fallbackStrategy, {
+          prompt: "select_account",
+          scope: ["openid", "email", "profile", "offline_access"],
+        })(req, res, next);
+      }
+    }
+    
+    if (!strategy) {
+      console.error(`No authentication strategy found for ${strategyName} or fallbacks`);
+      return res.redirect('/login-error?reason=no_strategy');
+    }
+    
+    passport.authenticate(strategyName, {
       prompt: "select_account",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, (err, user, info) => {
+    const hostname = req.get('host') || req.hostname;
+    let strategyName = `replitauth:${hostname}`;
+    
+    console.log(`Callback for hostname: ${hostname}, strategy: ${strategyName}`);
+    
+    // Try fallback strategy if primary doesn't exist
+    if (!passport._strategy(strategyName)) {
+      const fallbackStrategy = `replitauth:${hostname.split(':')[0]}`;
+      if (passport._strategy(fallbackStrategy)) {
+        strategyName = fallbackStrategy;
+        console.log(`Using fallback strategy for callback: ${fallbackStrategy}`);
+      }
+    }
+    
+    passport.authenticate(strategyName, (err, user, info) => {
       if (err) {
         console.error('Authentication error:', err);
         return res.redirect('/login-error?reason=auth_error');
