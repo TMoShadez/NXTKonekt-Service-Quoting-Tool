@@ -36,9 +36,11 @@ export function getSession() {
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    rolling: true, // Extend session on activity
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax', // Help with cross-site issues
       maxAge: sessionTtl,
     },
   });
@@ -78,10 +80,17 @@ export async function setupAuth(app: Express) {
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
     verified: passport.AuthenticateCallback
   ) => {
-    const user = {};
-    updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
-    verified(null, user);
+    try {
+      const user = {};
+      updateUserSession(user, tokens);
+      const claims = tokens.claims();
+      console.log('Authentication successful for user:', claims?.email);
+      await upsertUser(claims);
+      verified(null, user);
+    } catch (error) {
+      console.error('Verification error:', error);
+      verified(error, null);
+    }
   };
 
   for (const domain of process.env
@@ -103,15 +112,32 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/login", (req, res, next) => {
     passport.authenticate(`replitauth:${req.hostname}`, {
-      prompt: "login consent",
+      prompt: "select_account",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
+    passport.authenticate(`replitauth:${req.hostname}`, (err, user, info) => {
+      if (err) {
+        console.error('Authentication error:', err);
+        return res.redirect('/login-error?reason=auth_error');
+      }
+      
+      if (!user) {
+        console.error('Authentication failed - no user returned:', info);
+        return res.redirect('/login-error?reason=no_user');
+      }
+      
+      req.logIn(user, (err) => {
+        if (err) {
+          console.error('Login session error:', err);
+          return res.redirect('/login-error?reason=session_error');
+        }
+        
+        console.log('User successfully authenticated:', user.claims?.email);
+        return res.redirect('/');
+      });
     })(req, res, next);
   });
 
