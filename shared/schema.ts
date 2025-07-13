@@ -117,6 +117,8 @@ export const assessments = pgTable("assessments", {
   vehicleYear: integer("vehicle_year"),
   vehicleMake: varchar("vehicle_make"),
   vehicleModel: varchar("vehicle_model"),
+  // Vehicle details arrays for multiple vehicles
+  vehicleDetails: text("vehicle_details"), // JSON array of {year, make, model}
   trackerType: varchar("tracker_type"),
   iotTrackingPartner: varchar("iot_tracking_partner"),
   carrierSim: varchar("carrier_sim"),

@@ -489,10 +489,34 @@ export class HubSpotService {
       lines.push(`- IoT Tracking Partner: ${assessment.iotTrackingPartner || 'N/A'}`);
       lines.push(`- Carrier SIM: ${assessment.carrierSim || 'N/A'}`);
       lines.push('');
+      
+      // Try to parse vehicle details from JSON field or fallback to individual fields
       lines.push('Vehicle Details:');
-      lines.push(`- Vehicle Year: ${assessment.vehicleYear || 'N/A'}`);
-      lines.push(`- Vehicle Make: ${assessment.vehicleMake || 'N/A'}`);
-      lines.push(`- Vehicle Model: ${assessment.vehicleModel || 'N/A'}`);
+      try {
+        if ((assessment as any).vehicleDetails) {
+          const vehicleDetails = JSON.parse((assessment as any).vehicleDetails);
+          if (Array.isArray(vehicleDetails) && vehicleDetails.length > 0) {
+            vehicleDetails.forEach((vehicle, index) => {
+              lines.push(`Vehicle ${index + 1}:`);
+              lines.push(`  - Year: ${vehicle.year || 'N/A'}`);
+              lines.push(`  - Make: ${vehicle.make || 'N/A'}`);
+              lines.push(`  - Model: ${vehicle.model || 'N/A'}`);
+            });
+          } else {
+            lines.push('- No vehicle details available');
+          }
+        } else {
+          // Fallback to individual fields
+          lines.push(`- Vehicle Year: ${assessment.vehicleYear || 'N/A'}`);
+          lines.push(`- Vehicle Make: ${assessment.vehicleMake || 'N/A'}`);
+          lines.push(`- Vehicle Model: ${assessment.vehicleModel || 'N/A'}`);
+        }
+      } catch (error) {
+        // Fallback to individual fields if JSON parsing fails
+        lines.push(`- Vehicle Year: ${assessment.vehicleYear || 'N/A'}`);
+        lines.push(`- Vehicle Make: ${assessment.vehicleMake || 'N/A'}`);
+        lines.push(`- Vehicle Model: ${assessment.vehicleModel || 'N/A'}`);
+      }
     }
     
     if (assessment.serviceType === 'fleet-camera') {
@@ -513,10 +537,33 @@ export class HubSpotService {
         lines.push('');
       }
       
+      // Try to parse vehicle details from JSON field or fallback to individual fields
       lines.push('Vehicle Details:');
-      lines.push(`- Vehicle Year: ${assessment.vehicleYear || 'N/A'}`);
-      lines.push(`- Vehicle Make: ${assessment.vehicleMake || 'N/A'}`);
-      lines.push(`- Vehicle Model: ${assessment.vehicleModel || 'N/A'}`);
+      try {
+        if ((assessment as any).vehicleDetails) {
+          const vehicleDetails = JSON.parse((assessment as any).vehicleDetails);
+          if (Array.isArray(vehicleDetails) && vehicleDetails.length > 0) {
+            vehicleDetails.forEach((vehicle, index) => {
+              lines.push(`Vehicle ${index + 1}:`);
+              lines.push(`  - Year: ${vehicle.year || 'N/A'}`);
+              lines.push(`  - Make: ${vehicle.make || 'N/A'}`);
+              lines.push(`  - Model: ${vehicle.model || 'N/A'}`);
+            });
+          } else {
+            lines.push('- No vehicle details available');
+          }
+        } else {
+          // Fallback to individual fields
+          lines.push(`- Vehicle Year: ${assessment.vehicleYear || 'N/A'}`);
+          lines.push(`- Vehicle Make: ${assessment.vehicleMake || 'N/A'}`);
+          lines.push(`- Vehicle Model: ${assessment.vehicleModel || 'N/A'}`);
+        }
+      } catch (error) {
+        // Fallback to individual fields if JSON parsing fails
+        lines.push(`- Vehicle Year: ${assessment.vehicleYear || 'N/A'}`);
+        lines.push(`- Vehicle Make: ${assessment.vehicleMake || 'N/A'}`);
+        lines.push(`- Vehicle Model: ${assessment.vehicleModel || 'N/A'}`);
+      }
     }
     
     // Additional Notes

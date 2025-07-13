@@ -98,14 +98,34 @@ export default function FleetCameraForm() {
       setLocalSiteAddress(assessment.siteAddress || '');
       setLocalSpecialRequirements(assessment.specialRequirements || '');
       
-      // Initialize vehicle details based on device count
-      const deviceCount = assessment.deviceCount;
-      if (deviceCount && deviceCount > 0) {
-        const details = [];
-        for (let i = 0; i < deviceCount; i++) {
-          details.push({ year: '', make: '', model: '' });
+      // Initialize vehicle details from database or based on device count
+      try {
+        if ((assessment as any).vehicleDetails) {
+          const savedDetails = JSON.parse((assessment as any).vehicleDetails);
+          if (Array.isArray(savedDetails)) {
+            setVehicleDetails(savedDetails);
+          }
+        } else {
+          // Fallback: Initialize based on device count
+          const deviceCount = assessment.deviceCount;
+          if (deviceCount && deviceCount > 0) {
+            const details = [];
+            for (let i = 0; i < deviceCount; i++) {
+              details.push({ year: '', make: '', model: '' });
+            }
+            setVehicleDetails(details);
+          }
         }
-        setVehicleDetails(details);
+      } catch (error) {
+        console.warn('Failed to parse vehicle details, using device count fallback');
+        const deviceCount = assessment.deviceCount;
+        if (deviceCount && deviceCount > 0) {
+          const details = [];
+          for (let i = 0; i < deviceCount; i++) {
+            details.push({ year: '', make: '', model: '' });
+          }
+          setVehicleDetails(details);
+        }
       }
       
       setIsInitialized(true);
@@ -186,9 +206,18 @@ export default function FleetCameraForm() {
       if (updated[index]) {
         updated[index] = { ...updated[index], [field]: value };
       }
+      
+      // Save vehicle details to database
+      const updatedData = { 
+        ...formData, 
+        vehicleDetails: JSON.stringify(updated.filter(v => v.year || v.make || v.model)) // Only save non-empty entries
+      };
+      setFormData(updatedData);
+      debouncedSave(updatedData);
+      
       return updated;
     });
-  }, []);
+  }, [formData, debouncedSave]);
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
