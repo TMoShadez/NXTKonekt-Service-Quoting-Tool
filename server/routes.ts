@@ -726,7 +726,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin assessment download with complete details
+  // Admin assessment download as PDF
   app.get('/api/admin/assessments/:id/download', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { id } = req.params;
@@ -755,131 +755,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const quote = quoteData.length > 0 ? quoteData[0] : null;
       
-      // Prepare comprehensive data export
-      const exportData = {
-        assessment: {
-          id: assessment.id,
-          serviceType: assessment.serviceType,
-          status: assessment.status,
-          createdAt: assessment.createdAt,
-          updatedAt: assessment.updatedAt,
-          totalCost: assessment.totalCost,
-          additionalNotes: assessment.additionalNotes,
-        },
-        
-        salesExecutive: {
-          name: assessment.salesExecutiveName,
-          email: assessment.salesExecutiveEmail,
-          phone: assessment.salesExecutivePhone,
-          userId: user?.id,
-          userFirstName: user?.firstName,
-          userLastName: user?.lastName,
-          userEmail: user?.email,
-        },
-        
-        organization: {
-          id: organization?.id,
-          name: organization?.name,
-          contactEmail: organization?.contactEmail,
-          contactPhone: organization?.contactPhone,
-          website: organization?.website,
-          status: organization?.status,
-        },
-        
-        customer: {
-          contactName: assessment.customerContactName,
-          companyName: assessment.customerCompanyName,
-          email: assessment.customerEmail,
-          phone: assessment.customerPhone,
-          siteAddress: assessment.siteAddress,
-          industry: assessment.industry,
-          preferredInstallationDate: assessment.preferredInstallationDate,
-        },
-        
-        technicalDetails: {
-          // Fixed Wireless specific fields
-          buildingType: assessment.buildingType,
-          coverageArea: assessment.coverageArea,
-          floors: assessment.floors,
-          deviceCount: assessment.deviceCount,
-          powerAvailable: assessment.powerAvailable,
-          ethernetRequired: assessment.ethernetRequired,
-          ceilingMount: assessment.ceilingMount,
-          outdoorCoverage: assessment.outdoorCoverage,
-          networkSignal: assessment.networkSignal,
-          signalStrength: assessment.signalStrength,
-          connectionUsage: assessment.connectionUsage,
-          routerLocation: assessment.routerLocation,
-          antennaCable: assessment.antennaCable,
-          deviceConnectionAssistance: assessment.deviceConnectionAssistance,
-          lowSignalAntennaCable: assessment.lowSignalAntennaCable,
-          antennaType: assessment.antennaType,
-          antennaInstallationLocation: assessment.antennaInstallationLocation,
-          routerMounting: assessment.routerMounting,
-          dualWanSupport: assessment.dualWanSupport,
-          ceilingHeight: assessment.ceilingHeight,
-          ceilingType: assessment.ceilingType,
-          routerMake: assessment.routerMake,
-          routerModel: assessment.routerModel,
-          routerCount: assessment.routerCount,
-          cableFootage: assessment.cableFootage,
-          interferenceSources: assessment.interferenceSources,
-          specialRequirements: assessment.specialRequirements,
-          
-          // Fleet Camera specific fields
-          cameraSolutionType: assessment.cameraSolutionType,
-          numberOfCameras: assessment.numberOfCameras,
-          removalNeeded: assessment.removalNeeded,
-          removalVehicleCount: assessment.removalVehicleCount,
-          existingCameraSolution: assessment.existingCameraSolution,
-          otherSolutionDetails: assessment.otherSolutionDetails,
-          
-          // Fleet Tracking specific fields
-          totalFleetSize: assessment.totalFleetSize,
-          vehicleYear: assessment.vehicleYear,
-          vehicleMake: assessment.vehicleMake,
-          vehicleModel: assessment.vehicleModel,
-          trackerType: assessment.trackerType,
-          iotTrackingPartner: assessment.iotTrackingPartner,
-          carrierSim: assessment.carrierSim,
-        },
-        
-        pricing: quote ? {
-          quoteNumber: quote.quoteNumber,
-          surveyCost: quote.surveyCost,
-          installationCost: quote.installationCost,
-          configurationCost: quote.configurationCost,
-          trainingCost: quote.trainingCost,
-          hardwareCost: quote.hardwareCost,
-          removalCost: quote.removalCost,
-          totalCost: quote.totalCost,
-          surveyHours: quote.surveyHours,
-          installationHours: quote.installationHours,
-          configurationHours: quote.configurationHours,
-          removalHours: quote.removalHours,
-          laborHoldHours: quote.laborHoldHours,
-          laborHoldCost: quote.laborHoldCost,
-          hourlyRate: quote.hourlyRate,
-          status: quote.status,
-          pdfUrl: quote.pdfUrl,
-          emailSent: quote.emailSent,
-          createdAt: quote.createdAt,
-          updatedAt: quote.updatedAt,
-        } : null,
-        
-        metadata: {
-          exportedAt: new Date().toISOString(),
-          exportedBy: req.user.claims.email,
-        }
-      };
+      // Generate PDF
+      const { generateAssessmentPDF } = await import('./services/assessmentPdfGenerator');
+      const filename = await generateAssessmentPDF({
+        assessment,
+        user,
+        organization,
+        quote
+      });
       
-      res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Content-Disposition', `attachment; filename="assessment-${id}-${new Date().toISOString().split('T')[0]}.json"`);
-      res.json(exportData);
+      const filepath = path.join(process.cwd(), 'uploads', 'pdfs', filename);
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.sendFile(filepath);
       
     } catch (error) {
-      console.error("Error downloading assessment:", error);
-      res.status(500).json({ message: "Failed to download assessment" });
+      console.error("Error downloading assessment PDF:", error);
+      res.status(500).json({ message: "Failed to download assessment PDF" });
     }
   });
 

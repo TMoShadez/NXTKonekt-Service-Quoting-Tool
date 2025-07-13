@@ -169,6 +169,7 @@ Changelog:
 - July 8, 2025. Implemented export reports functionality: added CSV export capability for partner dashboard, generates comprehensive reports with quote data including customer information, service types, pricing breakdowns, and assessment details, downloads as timestamped CSV file with proper formatting and user feedback notifications
 - July 13, 2025. Fixed Google login authentication loop issues: changed prompt from "login consent" to "select_account" to reduce consent loops, improved session configuration with rolling sessions and better cookie settings, added comprehensive error handling with detailed logging and user-friendly error page for authentication failures, implemented proper callback error handling to diagnose login issues
 - July 13, 2025. Resolved invited user login redirect issues: identified invalid_redirect_uri error when accessing via localhost, added localhost strategy registration for development, created helpful landing page guidance directing users to live domain for proper authentication, added production URL detection and redirect functionality for invited users
+- July 13, 2025. Implemented comprehensive admin assessment PDF download system: replaced JSON format with professional PDF reports containing complete assessment details, customer information, technical specifications, sales executive data, organization details, and pricing breakdowns with proper formatting and NXTKonekt branding, enhanced admin dashboard with individual PDF downloads and bulk CSV export capabilities
 
 ## User Preferences
 

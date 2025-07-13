@@ -256,31 +256,31 @@ export default function AdminDashboard() {
     },
   });
 
-  // Individual assessment download mutation
+  // Individual assessment download mutation (PDF)
   const downloadAssessmentMutation = useMutation({
     mutationFn: async (assessmentId: number) => {
       const response = await fetch(`/api/admin/assessments/${assessmentId}/download`);
       if (!response.ok) {
-        throw new Error('Failed to download assessment');
+        throw new Error('Failed to download assessment PDF');
       }
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `assessment-${assessmentId}-${new Date().toISOString().split('T')[0]}.json`;
+      link.download = `assessment-${assessmentId}-${new Date().toISOString().split('T')[0]}.pdf`;
       link.click();
       window.URL.revokeObjectURL(url);
     },
     onSuccess: () => {
       toast({
         title: "Assessment Downloaded",
-        description: "Complete assessment data has been downloaded successfully.",
+        description: "Complete assessment report has been downloaded as PDF.",
       });
     },
     onError: () => {
       toast({
         title: "Download Failed",
-        description: "Failed to download assessment data.",
+        description: "Failed to download assessment PDF.",
         variant: "destructive",
       });
     },
@@ -759,7 +759,7 @@ export default function AdminDashboard() {
                   <div>
                     <CardTitle>Assessment Management</CardTitle>
                     <CardDescription>
-                      View and download complete assessment details from all partners
+                      View assessment details and download comprehensive PDF reports with complete technical specifications
                     </CardDescription>
                   </div>
                   <Button
@@ -768,7 +768,7 @@ export default function AdminDashboard() {
                     className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
                   >
                     <Download className="h-4 w-4" />
-                    {bulkExportMutation.isPending ? "Exporting..." : "Export All Assessments"}
+                    {bulkExportMutation.isPending ? "Exporting..." : "Export All to CSV"}
                   </Button>
                 </div>
               </CardHeader>
@@ -822,7 +822,7 @@ export default function AdminDashboard() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleDownloadAssessment(assessment.id)}
-                                title="Download Complete Assessment Data"
+                                title="Download Complete Assessment Report (PDF)"
                                 className="text-green-600 hover:text-green-700"
                               >
                                 <Download className="h-4 w-4" />
