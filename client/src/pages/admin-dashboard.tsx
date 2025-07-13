@@ -529,6 +529,7 @@ export default function AdminDashboard() {
         <Tabs defaultValue="partners" className="space-y-4">
           <TabsList>
             <TabsTrigger value="partners">Partners</TabsTrigger>
+            <TabsTrigger value="users">User Roles</TabsTrigger>
             <TabsTrigger value="invitations">Invitations</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="assessments">Assessments</TabsTrigger>
@@ -629,6 +630,111 @@ export default function AdminDashboard() {
                       ))}
                     </TableBody>
                   </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="users" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Role Management</CardTitle>
+                <CardDescription>
+                  Manage user roles and admin permissions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {partners ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Current Role</TableHead>
+                        <TableHead>System Admin</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {partners.map((user: any) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">
+                            {user.firstName} {user.lastName}
+                          </TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>
+                            <Badge variant={user.role === 'admin' ? 'destructive' : 'default'}>
+                              {user.role}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={user.isSystemAdmin ? 'destructive' : 'secondary'}>
+                              {user.isSystemAdmin ? 'Yes' : 'No'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={user.isActive ? "default" : "secondary"}>
+                              {user.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Select
+                                value={user.role}
+                                onValueChange={(role) => {
+                                  // Update user role
+                                  fetch(`/api/admin/users/${user.id}/role`, {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ role })
+                                  }).then(() => {
+                                    queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
+                                    toast({
+                                      title: "Role Updated",
+                                      description: `User role changed to ${role}`,
+                                    });
+                                  });
+                                }}
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="partner">Partner</SelectItem>
+                                  <SelectItem value="sales_executive">Sales Executive</SelectItem>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              
+                              <Button
+                                variant={user.isSystemAdmin ? "destructive" : "outline"}
+                                size="sm"
+                                onClick={() => {
+                                  // Toggle system admin status
+                                  fetch(`/api/admin/users/${user.id}/role`, {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ isSystemAdmin: !user.isSystemAdmin })
+                                  }).then(() => {
+                                    queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
+                                    toast({
+                                      title: "System Admin Updated",
+                                      description: `User ${user.isSystemAdmin ? 'removed from' : 'added to'} system admin`,
+                                    });
+                                  });
+                                }}
+                              >
+                                {user.isSystemAdmin ? "Remove Admin" : "Make Admin"}
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="text-center py-4">Loading users...</div>
                 )}
               </CardContent>
             </Card>

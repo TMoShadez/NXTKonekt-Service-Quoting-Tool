@@ -1027,6 +1027,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user role endpoint
+  app.patch('/api/admin/users/:id/role', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { role, isSystemAdmin } = req.body;
+      
+      // Update role
+      if (role) {
+        await storage.updateUserRole(id, role);
+      }
+      
+      // Update system admin status if provided
+      if (typeof isSystemAdmin === 'boolean') {
+        await db.update(users).set({ isSystemAdmin }).where(eq(users.id, id));
+      }
+      
+      const updatedUser = await storage.getUser(id);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      res.status(500).json({ message: "Failed to update user role" });
+    }
+  });
+
   // Email invitation routes
   app.post('/api/admin/send-invitation', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
