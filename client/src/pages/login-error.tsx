@@ -48,7 +48,8 @@ export default function LoginError() {
               <div className="text-left bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
                 <p className="text-sm text-blue-800 font-medium mb-2">⚠️ Development Access Detected</p>
                 <p className="text-sm text-blue-700">
-                  You're accessing via localhost. For authentication to work, please use the live application URL instead.
+                  You're accessing via localhost. For authentication to work, please use the live application URL. 
+                  The app will automatically redirect you to the correct domain when you try to sign in.
                 </p>
               </div>
             )}

@@ -121,10 +121,20 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/login", (req, res, next) => {
     const hostname = req.get('host') || req.hostname;
-    const strategyName = `replitauth:${hostname}`;
     
-    console.log(`Login attempt for hostname: ${hostname}, strategy: ${strategyName}`);
+    console.log(`Login attempt for hostname: ${hostname}`);
     console.log('Available strategies:', Object.keys(passport._strategies || {}));
+    
+    // Redirect localhost users to production domain for authentication
+    if (hostname.includes('localhost')) {
+      const productionDomain = domains.find(d => !d.includes('localhost'));
+      if (productionDomain) {
+        console.log(`Redirecting localhost user to production domain: ${productionDomain}`);
+        return res.redirect(`https://${productionDomain}/api/login`);
+      }
+    }
+    
+    const strategyName = `replitauth:${hostname}`;
     
     // Check if strategy exists, try fallback strategies
     let strategy = passport._strategy(strategyName);
