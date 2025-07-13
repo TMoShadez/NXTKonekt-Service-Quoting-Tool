@@ -726,6 +726,323 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin assessment download with complete details
+  app.get('/api/admin/assessments/:id/download', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Get complete assessment details with all relationships
+      const assessmentData = await db.select()
+        .from(assessments)
+        .leftJoin(users, eq(assessments.userId, users.id))
+        .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
+        .where(eq(assessments.id, parseInt(id)))
+        .limit(1);
+      
+      if (!assessmentData.length) {
+        return res.status(404).json({ message: "Assessment not found" });
+      }
+      
+      const assessment = assessmentData[0].assessments;
+      const user = assessmentData[0].users;
+      const organization = assessmentData[0].organizations;
+      
+      // Get associated quote if exists
+      const quoteData = await db.select()
+        .from(quotes)
+        .where(eq(quotes.assessmentId, parseInt(id)))
+        .limit(1);
+      
+      const quote = quoteData.length > 0 ? quoteData[0] : null;
+      
+      // Prepare comprehensive data export
+      const exportData = {
+        assessment: {
+          id: assessment.id,
+          serviceType: assessment.serviceType,
+          status: assessment.status,
+          createdAt: assessment.createdAt,
+          updatedAt: assessment.updatedAt,
+          totalCost: assessment.totalCost,
+          additionalNotes: assessment.additionalNotes,
+        },
+        
+        salesExecutive: {
+          name: assessment.salesExecutiveName,
+          email: assessment.salesExecutiveEmail,
+          phone: assessment.salesExecutivePhone,
+          userId: user?.id,
+          userFirstName: user?.firstName,
+          userLastName: user?.lastName,
+          userEmail: user?.email,
+        },
+        
+        organization: {
+          id: organization?.id,
+          name: organization?.name,
+          contactEmail: organization?.contactEmail,
+          contactPhone: organization?.contactPhone,
+          website: organization?.website,
+          status: organization?.status,
+        },
+        
+        customer: {
+          contactName: assessment.customerContactName,
+          companyName: assessment.customerCompanyName,
+          email: assessment.customerEmail,
+          phone: assessment.customerPhone,
+          siteAddress: assessment.siteAddress,
+          industry: assessment.industry,
+          preferredInstallationDate: assessment.preferredInstallationDate,
+        },
+        
+        technicalDetails: {
+          // Fixed Wireless specific fields
+          buildingType: assessment.buildingType,
+          coverageArea: assessment.coverageArea,
+          floors: assessment.floors,
+          deviceCount: assessment.deviceCount,
+          powerAvailable: assessment.powerAvailable,
+          ethernetRequired: assessment.ethernetRequired,
+          ceilingMount: assessment.ceilingMount,
+          outdoorCoverage: assessment.outdoorCoverage,
+          networkSignal: assessment.networkSignal,
+          signalStrength: assessment.signalStrength,
+          connectionUsage: assessment.connectionUsage,
+          routerLocation: assessment.routerLocation,
+          antennaCable: assessment.antennaCable,
+          deviceConnectionAssistance: assessment.deviceConnectionAssistance,
+          lowSignalAntennaCable: assessment.lowSignalAntennaCable,
+          antennaType: assessment.antennaType,
+          antennaInstallationLocation: assessment.antennaInstallationLocation,
+          routerMounting: assessment.routerMounting,
+          dualWanSupport: assessment.dualWanSupport,
+          ceilingHeight: assessment.ceilingHeight,
+          ceilingType: assessment.ceilingType,
+          routerMake: assessment.routerMake,
+          routerModel: assessment.routerModel,
+          routerCount: assessment.routerCount,
+          cableFootage: assessment.cableFootage,
+          interferenceSources: assessment.interferenceSources,
+          specialRequirements: assessment.specialRequirements,
+          
+          // Fleet Camera specific fields
+          cameraSolutionType: assessment.cameraSolutionType,
+          numberOfCameras: assessment.numberOfCameras,
+          removalNeeded: assessment.removalNeeded,
+          removalVehicleCount: assessment.removalVehicleCount,
+          existingCameraSolution: assessment.existingCameraSolution,
+          otherSolutionDetails: assessment.otherSolutionDetails,
+          
+          // Fleet Tracking specific fields
+          totalFleetSize: assessment.totalFleetSize,
+          vehicleYear: assessment.vehicleYear,
+          vehicleMake: assessment.vehicleMake,
+          vehicleModel: assessment.vehicleModel,
+          trackerType: assessment.trackerType,
+          iotTrackingPartner: assessment.iotTrackingPartner,
+          carrierSim: assessment.carrierSim,
+        },
+        
+        pricing: quote ? {
+          quoteNumber: quote.quoteNumber,
+          surveyCost: quote.surveyCost,
+          installationCost: quote.installationCost,
+          configurationCost: quote.configurationCost,
+          trainingCost: quote.trainingCost,
+          hardwareCost: quote.hardwareCost,
+          removalCost: quote.removalCost,
+          totalCost: quote.totalCost,
+          surveyHours: quote.surveyHours,
+          installationHours: quote.installationHours,
+          configurationHours: quote.configurationHours,
+          removalHours: quote.removalHours,
+          laborHoldHours: quote.laborHoldHours,
+          laborHoldCost: quote.laborHoldCost,
+          hourlyRate: quote.hourlyRate,
+          status: quote.status,
+          pdfUrl: quote.pdfUrl,
+          emailSent: quote.emailSent,
+          createdAt: quote.createdAt,
+          updatedAt: quote.updatedAt,
+        } : null,
+        
+        metadata: {
+          exportedAt: new Date().toISOString(),
+          exportedBy: req.user.claims.email,
+        }
+      };
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="assessment-${id}-${new Date().toISOString().split('T')[0]}.json"`);
+      res.json(exportData);
+      
+    } catch (error) {
+      console.error("Error downloading assessment:", error);
+      res.status(500).json({ message: "Failed to download assessment" });
+    }
+  });
+
+  // Bulk assessment export for administrators
+  app.get('/api/admin/assessments/export', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      // Get all assessments with complete data
+      const allAssessments = await db.select()
+        .from(assessments)
+        .leftJoin(users, eq(assessments.userId, users.id))
+        .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
+        .where(or(eq(users.isSystemAdmin, false), isNull(users.isSystemAdmin)))
+        .orderBy(desc(assessments.createdAt));
+      
+      // Get all quotes for mapping
+      const allQuotes = await db.select().from(quotes);
+      const quotesMap = new Map(allQuotes.map(q => [q.assessmentId, q]));
+      
+      // Transform data for CSV export
+      const csvData = allAssessments.map(row => {
+        const assessment = row.assessments;
+        const user = row.users;
+        const organization = row.organizations;
+        const quote = quotesMap.get(assessment.id);
+        
+        return {
+          // Assessment Info
+          'Assessment ID': assessment.id,
+          'Service Type': assessment.serviceType,
+          'Status': assessment.status,
+          'Created Date': assessment.createdAt,
+          'Updated Date': assessment.updatedAt,
+          'Total Cost': assessment.totalCost,
+          
+          // Sales Executive
+          'Sales Executive Name': assessment.salesExecutiveName,
+          'Sales Executive Email': assessment.salesExecutiveEmail,
+          'Sales Executive Phone': assessment.salesExecutivePhone,
+          'User First Name': user?.firstName,
+          'User Last Name': user?.lastName,
+          'User Email': user?.email,
+          
+          // Organization
+          'Organization Name': organization?.name,
+          'Organization Contact Email': organization?.contactEmail,
+          'Organization Contact Phone': organization?.contactPhone,
+          'Organization Website': organization?.website,
+          'Organization Status': organization?.status,
+          
+          // Customer
+          'Customer Name': assessment.customerContactName,
+          'Customer Company': assessment.customerCompanyName,
+          'Customer Email': assessment.customerEmail,
+          'Customer Phone': assessment.customerPhone,
+          'Site Address': assessment.siteAddress,
+          'Industry': assessment.industry,
+          'Preferred Installation Date': assessment.preferredInstallationDate,
+          
+          // Technical Details (Fixed Wireless)
+          'Building Type': assessment.buildingType,
+          'Coverage Area': assessment.coverageArea,
+          'Floors': assessment.floors,
+          'Device Count': assessment.deviceCount,
+          'Power Available': assessment.powerAvailable,
+          'Ethernet Required': assessment.ethernetRequired,
+          'Ceiling Mount': assessment.ceilingMount,
+          'Outdoor Coverage': assessment.outdoorCoverage,
+          'Network Signal': assessment.networkSignal,
+          'Signal Strength': assessment.signalStrength,
+          'Connection Usage': assessment.connectionUsage,
+          'Router Location': assessment.routerLocation,
+          'Antenna Cable': assessment.antennaCable,
+          'Device Connection Assistance': assessment.deviceConnectionAssistance,
+          'Low Signal Antenna Cable': assessment.lowSignalAntennaCable,
+          'Antenna Type': assessment.antennaType,
+          'Antenna Installation Location': assessment.antennaInstallationLocation,
+          'Router Mounting': assessment.routerMounting,
+          'Dual WAN Support': assessment.dualWanSupport,
+          'Ceiling Height': assessment.ceilingHeight,
+          'Ceiling Type': assessment.ceilingType,
+          'Router Make': assessment.routerMake,
+          'Router Model': assessment.routerModel,
+          'Router Count': assessment.routerCount,
+          'Cable Footage': assessment.cableFootage,
+          'Interference Sources': assessment.interferenceSources,
+          'Special Requirements': assessment.specialRequirements,
+          
+          // Fleet Camera
+          'Camera Solution Type': assessment.cameraSolutionType,
+          'Number of Cameras': assessment.numberOfCameras,
+          'Removal Needed': assessment.removalNeeded,
+          'Removal Vehicle Count': assessment.removalVehicleCount,
+          'Existing Camera Solution': assessment.existingCameraSolution,
+          'Other Solution Details': assessment.otherSolutionDetails,
+          
+          // Fleet Tracking
+          'Total Fleet Size': assessment.totalFleetSize,
+          'Vehicle Year': assessment.vehicleYear,
+          'Vehicle Make': assessment.vehicleMake,
+          'Vehicle Model': assessment.vehicleModel,
+          'Tracker Type': assessment.trackerType,
+          'IoT Tracking Partner': assessment.iotTrackingPartner,
+          'Carrier SIM': assessment.carrierSim,
+          
+          // Quote Information
+          'Quote Number': quote?.quoteNumber,
+          'Survey Cost': quote?.surveyCost,
+          'Installation Cost': quote?.installationCost,
+          'Configuration Cost': quote?.configurationCost,
+          'Training Cost': quote?.trainingCost,
+          'Hardware Cost': quote?.hardwareCost,
+          'Removal Cost': quote?.removalCost,
+          'Quote Total Cost': quote?.totalCost,
+          'Survey Hours': quote?.surveyHours,
+          'Installation Hours': quote?.installationHours,
+          'Configuration Hours': quote?.configurationHours,
+          'Removal Hours': quote?.removalHours,
+          'Labor Hold Hours': quote?.laborHoldHours,
+          'Labor Hold Cost': quote?.laborHoldCost,
+          'Hourly Rate': quote?.hourlyRate,
+          'Quote Status': quote?.status,
+          'PDF URL': quote?.pdfUrl,
+          'Email Sent': quote?.emailSent,
+          'Quote Created': quote?.createdAt,
+          'Quote Updated': quote?.updatedAt,
+          
+          // Notes
+          'Additional Notes': assessment.additionalNotes,
+        };
+      });
+      
+      // Convert to CSV
+      if (csvData.length === 0) {
+        return res.json({ message: "No assessments found" });
+      }
+      
+      const headers = Object.keys(csvData[0]);
+      const csvContent = [
+        headers.join(','),
+        ...csvData.map(row => 
+          headers.map(header => {
+            const value = row[header as keyof typeof row];
+            // Escape commas and quotes in CSV
+            if (value === null || value === undefined) return '';
+            const stringValue = String(value);
+            if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+              return `"${stringValue.replace(/"/g, '""')}"`;
+            }
+            return stringValue;
+          }).join(',')
+        )
+      ].join('\n');
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="all-assessments-${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+      
+    } catch (error) {
+      console.error("Error exporting assessments:", error);
+      res.status(500).json({ message: "Failed to export assessments" });
+    }
+  });
+
   // Admin get single assessment route
   app.get('/api/admin/assessments/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {

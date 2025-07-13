@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Shield, Users, FileText, BarChart3, CheckCircle, XCircle, Clock, Settings, Link, Copy, Mail, Send, TrendingUp, Eye, Trash2 } from "lucide-react";
+import { Shield, Users, FileText, BarChart3, CheckCircle, XCircle, Clock, Settings, Link, Copy, Mail, Send, TrendingUp, Eye, Trash2, Download } from "lucide-react";
 import type { User, Organization, Assessment, Quote } from "@shared/schema";
 
 interface AdminStats {
@@ -196,6 +196,15 @@ export default function AdminDashboard() {
     }
   };
 
+  // Handler functions for assessment downloads
+  const handleDownloadAssessment = (assessmentId: number) => {
+    downloadAssessmentMutation.mutate(assessmentId);
+  };
+
+  const handleBulkExport = () => {
+    bulkExportMutation.mutate();
+  };
+
   // Close quote mutation
   const closeQuoteMutation = useMutation({
     mutationFn: async (quoteId: number) => {
@@ -242,6 +251,66 @@ export default function AdminDashboard() {
       toast({
         title: "Error",
         description: "Failed to delete quote. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Individual assessment download mutation
+  const downloadAssessmentMutation = useMutation({
+    mutationFn: async (assessmentId: number) => {
+      const response = await fetch(`/api/admin/assessments/${assessmentId}/download`);
+      if (!response.ok) {
+        throw new Error('Failed to download assessment');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `assessment-${assessmentId}-${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Assessment Downloaded",
+        description: "Complete assessment data has been downloaded successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Download Failed",
+        description: "Failed to download assessment data.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Bulk assessment export mutation
+  const bulkExportMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/admin/assessments/export');
+      if (!response.ok) {
+        throw new Error('Failed to export assessments');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `all-assessments-${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Assessments Exported",
+        description: "All assessment data has been exported to CSV successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export assessment data.",
         variant: "destructive",
       });
     },
@@ -686,10 +755,22 @@ export default function AdminDashboard() {
           <TabsContent value="assessments" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Recent Assessments</CardTitle>
-                <CardDescription>
-                  Overview of all partner assessments
-                </CardDescription>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>Assessment Management</CardTitle>
+                    <CardDescription>
+                      View and download complete assessment details from all partners
+                    </CardDescription>
+                  </div>
+                  <Button
+                    onClick={handleBulkExport}
+                    disabled={bulkExportMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    {bulkExportMutation.isPending ? "Exporting..." : "Export All Assessments"}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 {assessmentsLoading ? (
@@ -708,7 +789,7 @@ export default function AdminDashboard() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {assessments?.slice(0, 10).map((assessment) => (
+                      {assessments?.slice(0, 20).map((assessment) => (
                         <TableRow key={assessment.id}>
                           <TableCell>{assessment.id}</TableCell>
                           <TableCell className="capitalize">
@@ -728,13 +809,25 @@ export default function AdminDashboard() {
                             {new Date(assessment.createdAt!).toLocaleDateString()}
                           </TableCell>
                           <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSelectedAssessment(assessment)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setSelectedAssessment(assessment)}
+                                title="View Details"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDownloadAssessment(assessment.id)}
+                                title="Download Complete Assessment Data"
+                                className="text-green-600 hover:text-green-700"
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
