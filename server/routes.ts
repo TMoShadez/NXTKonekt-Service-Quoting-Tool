@@ -1152,6 +1152,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Simple email test endpoint (for debugging)
+  app.get('/api/test-email-simple', async (req, res) => {
+    try {
+      console.log("Testing email connection...");
+      const testResult = await emailService.testConnection();
+      console.log("Test result:", testResult);
+      res.json(testResult);
+    } catch (error) {
+      console.error("Error testing email connection:", error);
+      res.status(500).json({ message: "Failed to test email connection", error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
