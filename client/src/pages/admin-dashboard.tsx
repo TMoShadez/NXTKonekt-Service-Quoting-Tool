@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Shield, Users, FileText, BarChart3, CheckCircle, XCircle, Clock, Settings, Link, Copy, Mail, Send, TrendingUp, Eye, Trash2, Download } from "lucide-react";
+import { Shield, Users, FileText, BarChart3, CheckCircle, XCircle, Clock, Settings, Link, Copy, Mail, Send, TrendingUp, Eye, Trash2, Download, ExternalLink } from "lucide-react";
 import type { User, Organization, Assessment, Quote } from "@shared/schema";
 
 interface AdminStats {
@@ -530,6 +530,7 @@ export default function AdminDashboard() {
           <TabsList>
             <TabsTrigger value="partners">Partners</TabsTrigger>
             <TabsTrigger value="users">User Roles</TabsTrigger>
+            <TabsTrigger value="hubspot">HubSpot</TabsTrigger>
             <TabsTrigger value="invitations">Invitations</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="assessments">Assessments</TabsTrigger>
@@ -736,6 +737,82 @@ export default function AdminDashboard() {
                 ) : (
                   <div className="text-center py-4">Loading users...</div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="hubspot" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-lg font-semibold">
+                  <Settings className="mr-2" size={20} />
+                  HubSpot CRM Integration
+                </CardTitle>
+                <CardDescription>
+                  Test and manage HubSpot CRM connection for automated quote synchronization
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        // Test HubSpot connection
+                        fetch('/api/hubspot/test')
+                          .then(res => res.json())
+                          .then(data => {
+                            toast({
+                              title: data.connected ? "HubSpot Connected" : "HubSpot Connection Failed",
+                              description: data.message,
+                              variant: data.connected ? "default" : "destructive",
+                            });
+                          })
+                          .catch(() => {
+                            toast({
+                              title: "HubSpot Test Failed",
+                              description: "Failed to test HubSpot connection",
+                              variant: "destructive",
+                            });
+                          });
+                      }}
+                      className="flex items-center"
+                    >
+                      <ExternalLink className="mr-2" size={16} />
+                      Test HubSpot Connection
+                    </Button>
+                  </div>
+                  
+                  <div className="text-sm text-gray-600">
+                    <div className="flex items-center mb-2">
+                      <div className="h-2 w-2 bg-green-500 rounded-full mr-2"></div>
+                      Quotes automatically sync to HubSpot when created. Quote approvals/rejections update deal status.
+                    </div>
+                    <div className="text-xs text-green-600 bg-green-50 p-3 rounded border">
+                      <strong>✅ Working:</strong> Contacts, Deals, and Tickets create successfully.
+                      <br/>
+                      <strong>⚠️ Limited:</strong> Contact-Deal-Ticket associations may be skipped (missing associations scope), but individual records sync perfectly to HubSpot.
+                    </div>
+                  </div>
+                  
+                  <div className="border-t pt-4">
+                    <h4 className="font-medium mb-2">Integration Status</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <div className="text-sm font-medium text-blue-800">Contacts</div>
+                        <div className="text-xs text-blue-600">Auto-created from assessments</div>
+                      </div>
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <div className="text-sm font-medium text-green-800">Deals</div>
+                        <div className="text-xs text-green-600">Created with quotes</div>
+                      </div>
+                      <div className="bg-purple-50 p-3 rounded-lg">
+                        <div className="text-sm font-medium text-purple-800">Tickets</div>
+                        <div className="text-xs text-purple-600">Follow-up tracking</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

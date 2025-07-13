@@ -175,36 +175,7 @@ export default function Dashboard() {
   };
 
   // HubSpot integration mutations
-  const hubspotTestMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest("GET", "/api/hubspot/test", {});
-    },
-    onSuccess: (data: any) => {
-      toast({
-        title: data.connected ? "HubSpot Connected" : "HubSpot Connection Failed",
-        description: data.message,
-        variant: data.connected ? "default" : "destructive",
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "HubSpot Test Failed",
-        description: "Failed to test HubSpot connection",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   const hubspotSyncMutation = useMutation({
     mutationFn: async (quoteId: number) => {
@@ -430,40 +401,7 @@ export default function Dashboard() {
           </Button>
         </div>
 
-        {/* HubSpot Integration Section */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center text-lg font-semibold nxt-gray-800">
-              <Settings className="mr-2" size={20} />
-              HubSpot CRM Integration
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
-                variant="outline"
-                onClick={() => hubspotTestMutation.mutate()}
-                disabled={hubspotTestMutation.isPending}
-                className="flex items-center"
-              >
-                <ExternalLink className="mr-2" size={16} />
-                {hubspotTestMutation.isPending ? "Testing..." : "Test HubSpot Connection"}
-              </Button>
-              
-              <div className="text-sm text-gray-600">
-                <div className="flex items-center mb-2">
-                  <div className="h-2 w-2 bg-green-500 rounded-full mr-2"></div>
-                  Quotes automatically sync to HubSpot when created. Quote approvals/rejections update deal status.
-                </div>
-                <div className="text-xs text-green-600 bg-green-50 p-2 rounded">
-                  <strong>✅ Working:</strong> Contacts, Deals, and Tickets create successfully.
-                  <br/>
-                  <strong>⚠️ Limited:</strong> Contact-Deal-Ticket associations may be skipped (missing associations scope), but individual records sync perfectly to HubSpot.
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+
 
         {/* Recent Quotes Table */}
         <Card>
