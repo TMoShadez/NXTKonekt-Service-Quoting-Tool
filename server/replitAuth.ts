@@ -39,8 +39,8 @@ export function getSession() {
     rolling: true, // Extend session on activity
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', // Help with cross-site issues
+      secure: false, // Disable secure for now to fix auth issues
+      sameSite: 'lax',
       maxAge: sessionTtl,
     },
   });
@@ -125,41 +125,23 @@ export async function setupAuth(app: Express) {
     console.log(`Login attempt for hostname: ${hostname}`);
     console.log('Available strategies:', Object.keys(passport._strategies || {}));
     
-    // Redirect localhost users to production domain for authentication
-    if (hostname.includes('localhost')) {
-      const productionDomain = domains.find(d => !d.includes('localhost'));
-      if (productionDomain) {
-        console.log(`Redirecting localhost user to production domain: ${productionDomain}`);
-        return res.redirect(`https://${productionDomain}/api/login`);
-      }
-    }
-    
     const strategyName = `replitauth:${hostname}`;
     
     // Check if strategy exists, try fallback strategies
-    let strategy = passport._strategy(strategyName);
-    if (!strategy) {
+    let finalStrategy = strategyName;
+    if (!passport._strategy(strategyName)) {
       // Try without port for localhost
       const fallbackStrategy = `replitauth:${hostname.split(':')[0]}`;
-      strategy = passport._strategy(fallbackStrategy);
-      if (strategy) {
+      if (passport._strategy(fallbackStrategy)) {
+        finalStrategy = fallbackStrategy;
         console.log(`Using fallback strategy: ${fallbackStrategy}`);
-        return passport.authenticate(fallbackStrategy, {
-          prompt: "select_account",
-          scope: ["openid", "email", "profile", "offline_access"],
-        })(req, res, next);
+      } else {
+        console.error(`No authentication strategy found for ${strategyName} or ${fallbackStrategy}`);
+        return res.redirect('/login-error?reason=no_strategy');
       }
     }
     
-    if (!strategy) {
-      console.error(`No authentication strategy found for ${strategyName} or fallbacks`);
-      return res.redirect('/login-error?reason=no_strategy');
-    }
-    
-    passport.authenticate(strategyName, {
-      prompt: "select_account",
-      scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
+    passport.authenticate(finalStrategy)(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
