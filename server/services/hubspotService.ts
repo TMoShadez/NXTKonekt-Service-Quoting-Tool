@@ -56,6 +56,7 @@ export class HubSpotService {
       // Generate comprehensive assessment notes
       const assessmentNotes = this.generateAssessmentNotes(assessment);
       
+      // Use only standard HubSpot properties to avoid validation errors
       const contactData = {
         email: assessment.customerEmail,
         firstname: assessment.customerContactName?.split(' ')[0] || '',
@@ -63,58 +64,28 @@ export class HubSpotService {
         company: assessment.customerCompanyName || '',
         phone: assessment.customerPhone || '',
         lifecyclestage: 'lead',
-        hs_lead_status: 'NEW',
-        service_type: assessment.serviceType || '',
-        site_address: assessment.siteAddress || '',
-        industry: assessment.industry || '',
-        preferred_installation_date: assessment.preferredInstallationDate?.toISOString() || '',
-        nxtkonekt_assessment_id: assessment.id?.toString() || '',
-        // Additional assessment fields as custom properties
-        assessment_status: assessment.status || 'active',
-        assessment_total_cost: assessment.totalCost?.toString() || '',
-        assessment_created_date: assessment.createdAt?.toISOString() || '',
-        sales_executive_name: assessment.salesExecutiveName || '',
-        sales_executive_email: assessment.salesExecutiveEmail || '',
-        sales_executive_phone: assessment.salesExecutivePhone || '',
-        // Service-specific fields
-        ...(assessment.serviceType === 'fixed-wireless' && {
-          fw_building_type: assessment.buildingType || '',
-          fw_device_count: assessment.deviceCount?.toString() || '',
-          fw_network_signal: assessment.networkSignal || '',
-          fw_signal_strength: assessment.signalStrength || '',
-          fw_connection_usage: assessment.connectionUsage || '',
-          fw_router_location: assessment.routerLocation || '',
-          fw_router_count: assessment.routerCount?.toString() || '',
-          fw_router_make: assessment.routerMake || '',
-          fw_router_model: assessment.routerModel || '',
-          fw_antenna_cable: assessment.antennaCable || '',
-          fw_cable_footage: assessment.cableFootage?.toString() || '',
-        }),
-        ...(assessment.serviceType === 'fleet-tracking' && {
-          ft_total_fleet_size: assessment.totalFleetSize?.toString() || '',
-          ft_vehicles_for_install: assessment.deviceCount?.toString() || '',
-          ft_tracker_type: assessment.trackerType || '',
-          ft_iot_partner: assessment.iotTrackingPartner || '',
-          ft_carrier_sim: assessment.carrierSim || '',
-          ft_vehicle_year: assessment.vehicleYear || '',
-          ft_vehicle_make: assessment.vehicleMake || '',
-          ft_vehicle_model: assessment.vehicleModel || '',
-        }),
-        ...(assessment.serviceType === 'fleet-camera' && {
-          fc_camera_solution_type: assessment.cameraSolutionType || '',
-          fc_number_of_cameras: assessment.numberOfCameras?.toString() || '',
-          fc_vehicles_for_install: assessment.deviceCount?.toString() || '',
-          fc_removal_needed: assessment.removalNeeded || '',
-          fc_existing_solution: assessment.existingCameraSolution || '',
-          fc_carrier_sim: assessment.carrierSim || '',
-        })
+        hs_lead_status: 'NEW'
       };
+
+      // Add only the custom properties that exist in HubSpot (based on previous successful syncs)
+      const customProperties: any = {};
+      
+      // Only add these if they exist in your HubSpot account
+      if (assessment.serviceType) customProperties.service_type = assessment.serviceType;
+      if (assessment.siteAddress) customProperties.site_address = assessment.siteAddress;
+      if (assessment.industry) customProperties.industry = assessment.industry;
+      if (assessment.preferredInstallationDate) customProperties.preferred_installation_date = assessment.preferredInstallationDate.toISOString();
+      if (assessment.id) customProperties.nxtkonekt_assessment_id = assessment.id.toString();
+
+      // Merge standard and custom properties
+      const finalContactData = { ...contactData, ...customProperties };
 
       // Try to find existing contact by email first
       let contact;
+      let searchResponse;
       try {
         console.log('🔍 Searching for existing contact with email:', assessment.customerEmail);
-        const searchResponse = await this.client.crm.contacts.searchApi.doSearch({
+        searchResponse = await this.client.crm.contacts.searchApi.doSearch({
           filterGroups: [
             {
               filters: [
@@ -135,7 +106,7 @@ export class HubSpotService {
           console.log('✅ Found existing contact, updating:', searchResponse.results[0].id);
           contact = await this.client.crm.contacts.basicApi.update(
             searchResponse.results[0].id,
-            { properties: contactData }
+            { properties: finalContactData }
           );
           console.log('✅ Contact updated successfully');
           
@@ -145,7 +116,7 @@ export class HubSpotService {
           // Create new contact
           console.log('📝 No existing contact found, creating new contact');
           contact = await this.client.crm.contacts.basicApi.create({
-            properties: contactData
+            properties: finalContactData
           });
           console.log('✅ New contact created:', contact.id);
           
@@ -156,7 +127,7 @@ export class HubSpotService {
         console.log('⚠️ Search failed, creating new contact');
         // If search fails, try to create new contact
         contact = await this.client.crm.contacts.basicApi.create({
-          properties: contactData
+          properties: finalContactData
         });
         
         // Add assessment notes to new contact
@@ -171,8 +142,51 @@ export class HubSpotService {
         company: contact.properties.company,
         phone: contact.properties.phone
       };
-    } catch (error) {
-      console.error('Error creating/updating HubSpot contact:', error);
+    } catch (error: any) {
+      console.error('❌ Error creating/updating HubSpot contact:');
+      console.error('Error type:', error.constructor.name);
+      console.error('Error message:', error.message);
+      
+      // Handle property validation errors specifically
+      if (error.message && error.message.includes('does not exist')) {
+        console.error('🔧 Property validation error - some custom properties may not exist in HubSpot');
+        console.error('Contact data sent:', JSON.stringify(finalContactData, null, 2));
+        
+        // Try with minimal data (standard properties only)
+        try {
+          console.log('🔄 Retrying with standard properties only...');
+          let contact;
+          
+          if (searchResponse?.results && searchResponse.results.length > 0) {
+            contact = await this.client.crm.contacts.basicApi.update(
+              searchResponse.results[0].id,
+              { properties: contactData }
+            );
+          } else {
+            contact = await this.client.crm.contacts.basicApi.create({
+              properties: contactData
+            });
+          }
+          
+          console.log('✅ Contact created/updated with standard properties only');
+          
+          // Add assessment notes with all the detailed information
+          await this.addNoteToContact(contact.id, assessmentNotes);
+          
+          return {
+            id: contact.id,
+            email: contact.properties.email,
+            firstname: contact.properties.firstname,
+            lastname: contact.properties.lastname,
+            company: contact.properties.company,
+            phone: contact.properties.phone
+          };
+        } catch (retryError) {
+          console.error('❌ Retry with standard properties also failed:', retryError);
+          throw new Error(`Failed to create/update HubSpot contact even with standard properties: ${retryError}`);
+        }
+      }
+      
       throw new Error(`Failed to create/update HubSpot contact: ${error}`);
     }
   }
