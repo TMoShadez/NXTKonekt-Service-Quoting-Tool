@@ -559,6 +559,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test HubSpot notes generation for vehicle details
+  app.post('/api/hubspot/test-notes', async (req, res) => {
+    try {
+      const { assessmentId } = req.body;
+      if (!assessmentId) {
+        return res.status(400).json({ error: 'Assessment ID required' });
+      }
+
+      const assessment = await storage.getAssessment(assessmentId);
+      if (!assessment) {
+        return res.status(404).json({ error: 'Assessment not found' });
+      }
+
+      const notes = await hubspotService.generateAssessmentNotes(assessment);
+      res.json({ 
+        success: true, 
+        assessmentId,
+        serviceType: assessment.serviceType,
+        vehicleDetails: (assessment as any).vehicleDetails,
+        notes 
+      });
+    } catch (error) {
+      console.error('HubSpot notes test error:', error);
+      res.status(500).json({ success: false, message: 'Notes generation failed', error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
   // Admin Routes
   const isAdmin: RequestHandler = async (req: any, res, next) => {
     if (!req.isAuthenticated() || !req.user?.claims?.sub) {
