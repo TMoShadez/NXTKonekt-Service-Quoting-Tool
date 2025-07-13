@@ -53,6 +53,9 @@ export class HubSpotService {
    */
   async createOrUpdateContact(assessment: Assessment): Promise<HubSpotContact> {
     try {
+      // Generate comprehensive assessment notes
+      const assessmentNotes = this.generateAssessmentNotes(assessment);
+      
       const contactData = {
         email: assessment.customerEmail,
         firstname: assessment.customerContactName?.split(' ')[0] || '',
@@ -65,14 +68,52 @@ export class HubSpotService {
         site_address: assessment.siteAddress || '',
         industry: assessment.industry || '',
         preferred_installation_date: assessment.preferredInstallationDate?.toISOString() || '',
-        nxtkonekt_assessment_id: assessment.id?.toString() || ''
+        nxtkonekt_assessment_id: assessment.id?.toString() || '',
+        // Additional assessment fields as custom properties
+        assessment_status: assessment.status || 'active',
+        assessment_total_cost: assessment.totalCost?.toString() || '',
+        assessment_created_date: assessment.createdAt?.toISOString() || '',
+        sales_executive_name: assessment.salesExecutiveName || '',
+        sales_executive_email: assessment.salesExecutiveEmail || '',
+        sales_executive_phone: assessment.salesExecutivePhone || '',
+        // Service-specific fields
+        ...(assessment.serviceType === 'fixed-wireless' && {
+          fw_building_type: assessment.buildingType || '',
+          fw_device_count: assessment.deviceCount?.toString() || '',
+          fw_network_signal: assessment.networkSignal || '',
+          fw_signal_strength: assessment.signalStrength || '',
+          fw_connection_usage: assessment.connectionUsage || '',
+          fw_router_location: assessment.routerLocation || '',
+          fw_router_count: assessment.routerCount?.toString() || '',
+          fw_router_make: assessment.routerMake || '',
+          fw_router_model: assessment.routerModel || '',
+          fw_antenna_cable: assessment.antennaCable || '',
+          fw_cable_footage: assessment.cableFootage?.toString() || '',
+        }),
+        ...(assessment.serviceType === 'fleet-tracking' && {
+          ft_total_fleet_size: assessment.totalFleetSize?.toString() || '',
+          ft_vehicles_for_install: assessment.deviceCount?.toString() || '',
+          ft_tracker_type: assessment.trackerType || '',
+          ft_iot_partner: assessment.iotTrackingPartner || '',
+          ft_carrier_sim: assessment.carrierSim || '',
+          ft_vehicle_year: assessment.vehicleYear || '',
+          ft_vehicle_make: assessment.vehicleMake || '',
+          ft_vehicle_model: assessment.vehicleModel || '',
+        }),
+        ...(assessment.serviceType === 'fleet-camera' && {
+          fc_camera_solution_type: assessment.cameraSolutionType || '',
+          fc_number_of_cameras: assessment.numberOfCameras?.toString() || '',
+          fc_vehicles_for_install: assessment.deviceCount?.toString() || '',
+          fc_removal_needed: assessment.removalNeeded || '',
+          fc_existing_solution: assessment.existingCameraSolution || '',
+          fc_carrier_sim: assessment.carrierSim || '',
+        })
       };
 
       // Try to find existing contact by email first
       let contact;
       try {
         console.log('🔍 Searching for existing contact with email:', assessment.customerEmail);
-        console.log('📝 Contact data to send:', JSON.stringify(contactData, null, 2));
         const searchResponse = await this.client.crm.contacts.searchApi.doSearch({
           filterGroups: [
             {
@@ -97,6 +138,9 @@ export class HubSpotService {
             { properties: contactData }
           );
           console.log('✅ Contact updated successfully');
+          
+          // Add assessment notes to existing contact
+          await this.addNoteToContact(searchResponse.results[0].id, assessmentNotes);
         } else {
           // Create new contact
           console.log('📝 No existing contact found, creating new contact');
@@ -104,12 +148,19 @@ export class HubSpotService {
             properties: contactData
           });
           console.log('✅ New contact created:', contact.id);
+          
+          // Add assessment notes to new contact
+          await this.addNoteToContact(contact.id, assessmentNotes);
         }
       } catch (searchError) {
+        console.log('⚠️ Search failed, creating new contact');
         // If search fails, try to create new contact
         contact = await this.client.crm.contacts.basicApi.create({
           properties: contactData
         });
+        
+        // Add assessment notes to new contact
+        await this.addNoteToContact(contact.id, assessmentNotes);
       }
 
       return {
@@ -341,6 +392,163 @@ export class HubSpotService {
       console.error('Error stack:', error.stack);
       console.error('Full error object:', JSON.stringify(error, null, 2));
       throw error;
+    }
+  }
+
+  /**
+   * Generate comprehensive assessment notes in plain text format
+   */
+  private generateAssessmentNotes(assessment: Assessment): string {
+    const lines = [];
+    
+    // Header
+    lines.push('=== NXTKONEKT ASSESSMENT DETAILS ===');
+    lines.push(`Assessment ID: ${assessment.id}`);
+    lines.push(`Service Type: ${assessment.serviceType?.toUpperCase().replace('-', ' ')}`);
+    lines.push(`Created: ${new Date(assessment.createdAt!).toLocaleDateString()}`);
+    lines.push(`Status: ${assessment.status || 'Active'}`);
+    if (assessment.totalCost) {
+      lines.push(`Total Cost: $${assessment.totalCost}`);
+    }
+    lines.push('');
+    
+    // Sales Executive Information
+    lines.push('SALES EXECUTIVE:');
+    lines.push(`Name: ${assessment.salesExecutiveName || 'N/A'}`);
+    lines.push(`Email: ${assessment.salesExecutiveEmail || 'N/A'}`);
+    lines.push(`Phone: ${assessment.salesExecutivePhone || 'N/A'}`);
+    lines.push('');
+    
+    // Customer Information
+    lines.push('CUSTOMER INFORMATION:');
+    lines.push(`Contact: ${assessment.customerContactName || 'N/A'}`);
+    lines.push(`Company: ${assessment.customerCompanyName || 'N/A'}`);
+    lines.push(`Email: ${assessment.customerEmail || 'N/A'}`);
+    lines.push(`Phone: ${assessment.customerPhone || 'N/A'}`);
+    lines.push(`Site Address: ${assessment.siteAddress || 'N/A'}`);
+    lines.push(`Industry: ${assessment.industry || 'N/A'}`);
+    lines.push(`Preferred Install Date: ${assessment.preferredInstallationDate || 'N/A'}`);
+    lines.push('');
+    
+    // Service-specific technical details
+    if (assessment.serviceType === 'fixed-wireless') {
+      lines.push('FIXED WIRELESS TECHNICAL DETAILS:');
+      lines.push('Infrastructure Requirements:');
+      lines.push(`- Network Signal: ${assessment.networkSignal || 'N/A'}`);
+      lines.push(`- Signal Strength: ${assessment.signalStrength || 'N/A'}`);
+      lines.push(`- Connection Usage: ${assessment.connectionUsage || 'N/A'}`);
+      lines.push(`- Router Location: ${assessment.routerLocation || 'N/A'}`);
+      lines.push(`- Router Count: ${assessment.routerCount || 'N/A'}`);
+      lines.push(`- Router Make: ${assessment.routerMake || 'N/A'}`);
+      lines.push(`- Router Model: ${assessment.routerModel || 'N/A'}`);
+      lines.push(`- Antenna Cable Required: ${assessment.antennaCable || 'N/A'}`);
+      lines.push(`- Cable Footage: ${assessment.cableFootage || 'N/A'} ft`);
+      lines.push(`- Device Connection Assistance: ${assessment.deviceConnectionAssistance || 'N/A'}`);
+      lines.push('');
+      lines.push('Site Characteristics:');
+      lines.push(`- Building Type: ${assessment.buildingType || 'N/A'}`);
+      lines.push(`- Coverage Area: ${assessment.coverageArea || 'N/A'}`);
+      lines.push(`- Floors: ${assessment.floors || 'N/A'}`);
+      lines.push(`- Device Count: ${assessment.deviceCount || 'N/A'}`);
+      lines.push(`- Ceiling Height: ${assessment.ceilingHeight || 'N/A'}`);
+      lines.push(`- Ceiling Type: ${assessment.ceilingType || 'N/A'}`);
+      lines.push('');
+      lines.push('Environmental Factors:');
+      lines.push(`- Interference Sources: ${assessment.interferenceSources || 'N/A'}`);
+      lines.push(`- Special Requirements: ${assessment.specialRequirements || 'N/A'}`);
+      
+      if (assessment.antennaType || assessment.routerMounting || assessment.dualWanSupport) {
+        lines.push('');
+        lines.push('Advanced Configuration:');
+        if (assessment.antennaType) lines.push(`- Antenna Type: ${assessment.antennaType}`);
+        if (assessment.antennaInstallationLocation) lines.push(`- Antenna Location: ${assessment.antennaInstallationLocation}`);
+        if (assessment.routerMounting) lines.push(`- Router Mounting: ${assessment.routerMounting}`);
+        if (assessment.dualWanSupport) lines.push(`- Dual WAN Support: ${assessment.dualWanSupport}`);
+      }
+    }
+    
+    if (assessment.serviceType === 'fleet-tracking') {
+      lines.push('FLEET TRACKING TECHNICAL DETAILS:');
+      lines.push(`- Total Fleet Size: ${assessment.totalFleetSize || 'N/A'}`);
+      lines.push(`- Vehicles for Installation: ${assessment.deviceCount || 'N/A'}`);
+      lines.push(`- Tracker Type: ${assessment.trackerType || 'N/A'}`);
+      lines.push(`- IoT Tracking Partner: ${assessment.iotTrackingPartner || 'N/A'}`);
+      lines.push(`- Carrier SIM: ${assessment.carrierSim || 'N/A'}`);
+      lines.push('');
+      lines.push('Vehicle Details:');
+      lines.push(`- Vehicle Year: ${assessment.vehicleYear || 'N/A'}`);
+      lines.push(`- Vehicle Make: ${assessment.vehicleMake || 'N/A'}`);
+      lines.push(`- Vehicle Model: ${assessment.vehicleModel || 'N/A'}`);
+    }
+    
+    if (assessment.serviceType === 'fleet-camera') {
+      lines.push('FLEET CAMERA TECHNICAL DETAILS:');
+      lines.push(`- Camera Solution Type: ${assessment.cameraSolutionType || 'N/A'}`);
+      lines.push(`- Number of Cameras: ${assessment.numberOfCameras || 'N/A'}`);
+      lines.push(`- Vehicles for Installation: ${assessment.deviceCount || 'N/A'}`);
+      lines.push(`- Carrier SIM: ${assessment.carrierSim || 'N/A'}`);
+      lines.push('');
+      
+      if (assessment.removalNeeded === 'yes') {
+        lines.push('Existing System Removal:');
+        lines.push(`- Removal Required: Yes`);
+        lines.push(`- Existing Camera Solution: ${assessment.existingCameraSolution || 'N/A'}`);
+        if (assessment.otherSolutionDetails) {
+          lines.push(`- Other Solution Details: ${assessment.otherSolutionDetails}`);
+        }
+        lines.push('');
+      }
+      
+      lines.push('Vehicle Details:');
+      lines.push(`- Vehicle Year: ${assessment.vehicleYear || 'N/A'}`);
+      lines.push(`- Vehicle Make: ${assessment.vehicleMake || 'N/A'}`);
+      lines.push(`- Vehicle Model: ${assessment.vehicleModel || 'N/A'}`);
+    }
+    
+    // Additional Notes
+    if (assessment.additionalNotes) {
+      lines.push('');
+      lines.push('ADDITIONAL NOTES:');
+      lines.push(assessment.additionalNotes);
+    }
+    
+    lines.push('');
+    lines.push(`Generated by NXTKonekt Admin System on ${new Date().toLocaleDateString()}`);
+    
+    return lines.join('\n');
+  }
+
+  /**
+   * Add a note to a HubSpot contact
+   */
+  private async addNoteToContact(contactId: string, noteContent: string): Promise<void> {
+    try {
+      const noteData = {
+        properties: {
+          hs_note_body: noteContent,
+          hs_timestamp: new Date().getTime().toString(),
+          hubspot_owner_id: '' // Optional: set owner if needed
+        },
+        associations: [
+          {
+            to: {
+              id: contactId
+            },
+            types: [
+              {
+                associationCategory: 'HUBSPOT_DEFINED',
+                associationTypeId: 202 // Note to Contact association
+              }
+            ]
+          }
+        ]
+      };
+
+      await this.client.crm.objects.notes.basicApi.create(noteData);
+      console.log(`✅ Assessment note added to contact ${contactId}`);
+    } catch (error) {
+      console.error('⚠️ Failed to add note to contact:', error);
+      // Don't throw error to prevent contact creation from failing
     }
   }
 
