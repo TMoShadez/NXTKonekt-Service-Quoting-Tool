@@ -31,6 +31,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint for authentication debugging
+  app.get('/api/auth/test', (req, res) => {
+    const hostname = req.get('host') || req.hostname;
+    const isAuthenticatedBool = req.isAuthenticated();
+    const hasUser = !!req.user;
+    
+    console.log('🔍 Authentication Test Request:');
+    console.log('  Hostname:', hostname);
+    console.log('  Is Authenticated:', isAuthenticatedBool);
+    console.log('  Has User:', hasUser);
+    console.log('  User Email:', req.user?.claims?.email || 'N/A');
+    console.log('  Available Strategies:', Object.keys(req.app._passport?.strategies || {}));
+    
+    res.json({
+      hostname,
+      isAuthenticated: isAuthenticatedBool,
+      hasUser,
+      userEmail: req.user?.claims?.email || null,
+      strategies: Object.keys(req.app._passport?.strategies || {}),
+      environment: process.env.NODE_ENV,
+      timestamp: new Date().toISOString()
+    });
+  });
+
   // Organization routes
   app.post('/api/organizations', isAuthenticated, async (req: any, res) => {
     try {
