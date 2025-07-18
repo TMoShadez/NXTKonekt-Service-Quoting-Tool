@@ -628,30 +628,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/assessments', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      // Get all assessments with user and organization information
-      const allAssessments = await db.select({
-        id: assessments.id,
-        userId: assessments.userId,
-        organizationId: assessments.organizationId,
-        serviceType: assessments.serviceType,
-        customerContactName: assessments.customerContactName,
-        customerCompanyName: assessments.customerCompanyName,
-        customerEmail: assessments.customerEmail,
-        customerPhone: assessments.customerPhone,
-        createdAt: assessments.createdAt,
-        updatedAt: assessments.updatedAt,
-        userEmail: users.email,
-        userFirstName: users.firstName,
-        userLastName: users.lastName,
-        organizationName: organizations.name,
-      })
+      // Get all assessments with complete details and user/organization information
+      const allAssessments = await db.select()
       .from(assessments)
       .leftJoin(users, eq(assessments.userId, users.id))
       .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
       .where(or(eq(users.isSystemAdmin, false), isNull(users.isSystemAdmin))) // Include non-system admin users
       .orderBy(desc(assessments.createdAt));
       
-      res.json(allAssessments);
+      // Transform the data to include all assessment fields with user/org info
+      const transformedAssessments = allAssessments.map(row => ({
+        ...row.assessments, // Include all assessment fields
+        userEmail: row.users?.email,
+        userFirstName: row.users?.firstName,
+        userLastName: row.users?.lastName,
+        organizationName: row.organizations?.name,
+        organizationContactEmail: row.organizations?.contactEmail,
+        organizationContactPhone: row.organizations?.contactPhone,
+        organizationWebsite: row.organizations?.website,
+        organizationPartnerStatus: row.organizations?.partnerStatus,
+        organizationPartnerType: row.organizations?.partnerType,
+      }));
+      
+      res.json(transformedAssessments);
     } catch (error) {
       console.error("Error fetching assessments:", error);
       res.status(500).json({ message: "Failed to fetch assessments" });
@@ -1152,18 +1151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Simple email test endpoint (for debugging)
-  app.get('/api/test-email-simple', async (req, res) => {
-    try {
-      console.log("Testing email connection...");
-      const testResult = await emailService.testConnection();
-      console.log("Test result:", testResult);
-      res.json(testResult);
-    } catch (error) {
-      console.error("Error testing email connection:", error);
-      res.status(500).json({ message: "Failed to test email connection", error: error.message });
-    }
-  });
+
 
   const httpServer = createServer(app);
   return httpServer;
