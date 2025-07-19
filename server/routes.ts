@@ -730,10 +730,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerCompany: assessments.customerCompanyName,
         customerEmail: assessments.customerEmail,
         customerPhone: assessments.customerPhone,
+        salesExecutiveName: assessments.salesExecutiveName,
+        salesExecutiveEmail: assessments.salesExecutiveEmail,
+        salesExecutivePhone: assessments.salesExecutivePhone,
         userEmail: users.email,
         userFirstName: users.firstName,
         userLastName: users.lastName,
         organizationName: organizations.name,
+        assessment: assessments,
       })
       .from(quotes)
       .leftJoin(assessments, eq(quotes.assessmentId, assessments.id))

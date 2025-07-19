@@ -51,24 +51,32 @@ export default function AdminDashboard() {
   const { data: stats } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
     enabled: user?.isSystemAdmin || user?.role === 'admin',
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   // Partners query
   const { data: partners, isLoading: partnersLoading } = useQuery<PartnerWithOrg[]>({
     queryKey: ["/api/admin/partners"],
     enabled: user?.isSystemAdmin || user?.role === 'admin',
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   // Assessments query
   const { data: assessments, isLoading: assessmentsLoading } = useQuery<Assessment[]>({
     queryKey: ["/api/admin/assessments"],
     enabled: user?.isSystemAdmin || user?.role === 'admin',
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   // Quotes query
   const { data: quotes, isLoading: quotesLoading } = useQuery<Quote[]>({
     queryKey: ["/api/admin/quotes"],
     enabled: user?.isSystemAdmin || user?.role === 'admin',
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   // Quote assessment details query
@@ -989,10 +997,7 @@ export default function AdminDashboard() {
                             {assessment.customerContactName || assessment.customerCompanyName || 'N/A'}
                           </TableCell>
                           <TableCell>
-                            {assessment.userFirstName && assessment.userLastName 
-                              ? `${assessment.userFirstName} ${assessment.userLastName}`
-                              : assessment.userEmail || 'N/A'
-                            }
+                            {assessment.salesExecutiveName || assessment.salesExecutiveEmail || 'N/A'}
                           </TableCell>
                           <TableCell>{assessment.organizationName || 'N/A'}</TableCell>
                           <TableCell>
@@ -1058,13 +1063,10 @@ export default function AdminDashboard() {
                         <TableRow key={quote.id}>
                           <TableCell>{quote.quoteNumber}</TableCell>
                           <TableCell>
-                            {quote.customerContactName || quote.customerCompanyName || 'N/A'}
+                            {quote.customerName || quote.customerCompany || 'N/A'}
                           </TableCell>
                           <TableCell>
-                            {quote.userFirstName && quote.userLastName 
-                              ? `${quote.userFirstName} ${quote.userLastName}`
-                              : quote.userEmail || 'N/A'
-                            }
+                            {quote.salesExecutiveName || quote.salesExecutiveEmail || 'N/A'}
                           </TableCell>
                           <TableCell>{quote.organizationName || 'N/A'}</TableCell>
                           <TableCell>${quote.totalCost}</TableCell>
@@ -1152,8 +1154,8 @@ export default function AdminDashboard() {
                 <Card className="p-4">
                   <h3 className="font-semibold mb-3 text-purple-600">Sales Executive</h3>
                   <div className="space-y-2 text-sm">
-                    <p><strong>Name:</strong> {quoteAssessmentData?.assessment?.salesExecutiveName || (selectedQuote.userFirstName && selectedQuote.userLastName ? `${selectedQuote.userFirstName} ${selectedQuote.userLastName}` : 'N/A')}</p>
-                    <p><strong>Email:</strong> {quoteAssessmentData?.assessment?.salesExecutiveEmail || selectedQuote.userEmail || 'N/A'}</p>
+                    <p><strong>Name:</strong> {quoteAssessmentData?.assessment?.salesExecutiveName || 'N/A'}</p>
+                    <p><strong>Email:</strong> {quoteAssessmentData?.assessment?.salesExecutiveEmail || 'N/A'}</p>
                     <p><strong>Phone:</strong> {quoteAssessmentData?.assessment?.salesExecutivePhone || 'N/A'}</p>
                     <p><strong>Organization:</strong> {selectedQuote.organizationName || quoteAssessmentData?.organization?.name || 'N/A'}</p>
                   </div>
