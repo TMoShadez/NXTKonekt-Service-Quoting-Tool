@@ -40,6 +40,18 @@ export default function Dashboard() {
     retry: false,
   });
 
+  // Debug: Log the actual data structure received
+  useEffect(() => {
+    if (quotes.length > 0) {
+      console.log("🔍 Frontend Debug - First quote structure:", {
+        quote: quotes[0],
+        assessment: quotes[0].assessment,
+        salesExecutiveName: quotes[0].assessment?.salesExecutiveName,
+        assessmentKeys: quotes[0].assessment ? Object.keys(quotes[0].assessment) : 'No assessment'
+      });
+    }
+  }, [quotes]);
+
   const { data: assessments = [], isLoading: assessmentsLoading } = useQuery({
     queryKey: ["/api/assessments"],
     enabled: isAuthenticated,
