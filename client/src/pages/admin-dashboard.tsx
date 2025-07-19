@@ -1182,12 +1182,13 @@ export default function AdminDashboard() {
                             <p><strong>Router Location:</strong> {quoteAssessmentData.assessment.routerLocation || 'Not specified'}</p>
                             <p><strong>Antenna Cable Required:</strong> {quoteAssessmentData.assessment.antennaCable ? 'Yes' : 'No'}</p>
                             <p><strong>Low Signal Antenna Cable:</strong> {quoteAssessmentData.assessment.lowSignalAntennaCable ? 'Yes' : 'No'}</p>
-                            <p><strong>Device Connection Assistance:</strong> {quoteAssessmentData.assessment.deviceConnectionAssistance ? 'Yes' : 'No'}</p>
+                            <p><strong>Device Connection Assistance:</strong> {quoteAssessmentData.assessment.deviceConnectionAssistance || 'Not specified'}</p>
                             <p><strong>Router Make:</strong> {quoteAssessmentData.assessment.routerMake || 'Not specified'}</p>
                             <p><strong>Router Model:</strong> {quoteAssessmentData.assessment.routerModel || 'Not specified'}</p>
                             <p><strong>Number of Routers:</strong> {quoteAssessmentData.assessment.routerCount || 'Not specified'}</p>
                             <p><strong>Antenna Type:</strong> {quoteAssessmentData.assessment.antennaType || 'Not specified'}</p>
                             <p><strong>Antenna Installation Location:</strong> {quoteAssessmentData.assessment.antennaInstallationLocation || 'Not specified'}</p>
+                            <p><strong>Dual WAN Support:</strong> {quoteAssessmentData.assessment.dualWanSupport || 'Not specified'}</p>
                           </div>
                         </div>
                         <div className="space-y-3">
@@ -1234,14 +1235,17 @@ export default function AdminDashboard() {
                         <div className="space-y-3">
                           <h4 className="font-medium text-gray-700 border-b pb-1">Fleet Information</h4>
                           <div className="space-y-2 text-sm">
-                            <p><strong>Billing Address:</strong> {quoteAssessmentData.assessment.billingAddress || 'Not specified'}</p>
-                            <p><strong>Installation Site Address:</strong> {quoteAssessmentData.assessment.installationSiteAddress || 'Not specified'}</p>
-                            <p><strong>Number of Vehicles for Installation:</strong> {quoteAssessmentData.assessment.vehicleCount || 'Not specified'}</p>
+                            <p><strong>Site Address:</strong> {quoteAssessmentData.assessment.siteAddress || 'Not specified'}</p>
+                            <p><strong>Industry:</strong> {quoteAssessmentData.assessment.industry || 'Not specified'}</p>
+                            <p><strong>Number of Vehicles for Installation:</strong> {quoteAssessmentData.assessment.deviceCount || 'Not specified'}</p>
                             <p><strong>Total Fleet Size:</strong> {quoteAssessmentData.assessment.totalFleetSize || 'Not specified'}</p>
-                            <p><strong>Installation Type:</strong> {quoteAssessmentData.assessment.installationType || 'Not specified'}</p>
+                            <p><strong>Installation Type:</strong> {quoteAssessmentData.assessment.ceilingType || 'Not specified'}</p>
                             <p><strong>Tracker Type:</strong> {quoteAssessmentData.assessment.trackerType || 'Not specified'}</p>
                             <p><strong>IoT Tracking Partner:</strong> {quoteAssessmentData.assessment.iotTrackingPartner || 'Not specified'}</p>
                             <p><strong>Carrier SIM:</strong> {quoteAssessmentData.assessment.carrierSim || 'Not specified'}</p>
+                            {quoteAssessmentData.assessment.specialRequirements && (
+                              <p><strong>Special Requirements:</strong> {quoteAssessmentData.assessment.specialRequirements}</p>
+                            )}
                           </div>
                         </div>
                         <div className="space-y-3">
@@ -1280,15 +1284,19 @@ export default function AdminDashboard() {
                         <div className="space-y-3">
                           <h4 className="font-medium text-gray-700 border-b pb-1">Camera Solution Details</h4>
                           <div className="space-y-2 text-sm">
-                            <p><strong>Billing Address:</strong> {quoteAssessmentData.assessment.billingAddress || 'Not specified'}</p>
-                            <p><strong>Installation Site Address:</strong> {quoteAssessmentData.assessment.installationSiteAddress || 'Not specified'}</p>
-                            <p><strong>Number of Vehicles for Installation:</strong> {quoteAssessmentData.assessment.vehicleCount || 'Not specified'}</p>
+                            <p><strong>Site Address:</strong> {quoteAssessmentData.assessment.siteAddress || 'Not specified'}</p>
+                            <p><strong>Industry:</strong> {quoteAssessmentData.assessment.industry || 'Not specified'}</p>
+                            <p><strong>Number of Vehicles for Installation:</strong> {quoteAssessmentData.assessment.deviceCount || 'Not specified'}</p>
                             <p><strong>Total Fleet Size:</strong> {quoteAssessmentData.assessment.totalFleetSize || 'Not specified'}</p>
                             <p><strong>Camera Solution Type:</strong> {quoteAssessmentData.assessment.cameraSolutionType || 'Not specified'}</p>
                             <p><strong>Number of Cameras:</strong> {quoteAssessmentData.assessment.numberOfCameras || 'Not specified'}</p>
                             <p><strong>Tracking Partner:</strong> {quoteAssessmentData.assessment.iotTrackingPartner || 'Not specified'}</p>
                             <p><strong>Carrier SIM:</strong> {quoteAssessmentData.assessment.carrierSim || 'Not specified'}</p>
-                            <p><strong>Protective Wiring Harness:</strong> {quoteAssessmentData.assessment.protectiveWiringHarness ? 'Yes' : 'No'}</p>
+                            <p><strong>Camera Model:</strong> {quoteAssessmentData.assessment.routerMake || 'Not specified'}</p>
+                            <p><strong>Protective Wiring Harness:</strong> {quoteAssessmentData.assessment.ceilingHeight?.includes('protective_harness_yes') ? 'Yes' : 'No'}</p>
+                            {quoteAssessmentData.assessment.specialRequirements && (
+                              <p><strong>Special Requirements:</strong> {quoteAssessmentData.assessment.specialRequirements}</p>
+                            )}
                           </div>
                         </div>
                         <div className="space-y-3">
@@ -1332,24 +1340,7 @@ export default function AdminDashboard() {
                     </Card>
                   )}
 
-                  {/* HubSpot Integration Helper */}
-                  <Card className="p-4 bg-blue-50 border-blue-200">
-                    <h3 className="font-semibold mb-3 text-blue-700 flex items-center gap-2">
-                      <ExternalLink className="h-4 w-4" />
-                      HubSpot Service Ticket Summary
-                    </h3>
-                    <div className="space-y-2 text-sm text-blue-800">
-                      <p>All assessment questions and answers are displayed above for comprehensive HubSpot service ticket creation.</p>
-                      <div className="bg-blue-100 p-3 rounded mt-2">
-                        <p><strong>Quote ID:</strong> {selectedQuote.quoteNumber}</p>
-                        <p><strong>Assessment ID:</strong> #{quoteAssessmentData.assessment.id}</p>
-                        <p><strong>Service Type:</strong> {quoteAssessmentData.assessment.serviceType?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
-                        <p><strong>Customer:</strong> {quoteAssessmentData.assessment.customerContactName} ({quoteAssessmentData.assessment.customerEmail})</p>
-                        <p><strong>Total Project Value:</strong> ${selectedQuote.totalCost}</p>
-                        <p><strong>Sales Executive:</strong> {quoteAssessmentData.assessment.salesExecutiveName} ({quoteAssessmentData.assessment.salesExecutiveEmail})</p>
-                      </div>
-                    </div>
-                  </Card>
+
                 </>
               ) : (
                 <Card className="p-4">
