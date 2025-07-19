@@ -358,6 +358,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const quotes = await storage.getQuotesByUserId(userId);
+      console.log("📊 Quotes API Debug - User ID:", userId);
+      console.log("📊 Quotes API Debug - Found quotes:", quotes.length);
+      if (quotes.length > 0) {
+        console.log("📊 Sample quote assessment data:", {
+          id: quotes[0].id,
+          assessmentId: quotes[0].assessmentId,
+          salesExecutiveName: quotes[0].assessment?.salesExecutiveName,
+          salesExecutiveEmail: quotes[0].assessment?.salesExecutiveEmail,
+          customerCompanyName: quotes[0].assessment?.customerCompanyName,
+          customerContactName: quotes[0].assessment?.customerContactName,
+        });
+      }
       res.json(quotes);
     } catch (error) {
       console.error("Error fetching quotes:", error);
