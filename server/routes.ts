@@ -642,7 +642,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .from(assessments)
       .leftJoin(users, eq(assessments.userId, users.id))
       .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
-      .where(or(eq(users.isSystemAdmin, false), isNull(users.isSystemAdmin))) // Include non-system admin users
+
       .orderBy(desc(assessments.createdAt));
       
       // Transform the data to include all assessment fields with user/org info
@@ -743,7 +743,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .leftJoin(assessments, eq(quotes.assessmentId, assessments.id))
       .leftJoin(users, eq(assessments.userId, users.id))
       .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
-      .where(or(eq(users.isSystemAdmin, false), isNull(users.isSystemAdmin))) // Include non-system admin users
       .orderBy(desc(quotes.createdAt));
       
 
@@ -856,7 +855,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(assessments)
         .leftJoin(users, eq(assessments.userId, users.id))
         .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
-        .where(or(eq(users.isSystemAdmin, false), isNull(users.isSystemAdmin)))
         .orderBy(desc(assessments.createdAt));
       
       // Get all quotes for mapping
