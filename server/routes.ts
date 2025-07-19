@@ -657,6 +657,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get quote with complete assessment details for admin view
+  app.get('/api/admin/quotes/:id/assessment', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const quoteId = parseInt(req.params.id);
+      
+      // Get quote with full assessment data
+      const quoteData = await db.select()
+        .from(quotes)
+        .leftJoin(assessments, eq(quotes.assessmentId, assessments.id))
+        .leftJoin(users, eq(assessments.userId, users.id))
+        .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
+        .where(eq(quotes.id, quoteId))
+        .limit(1);
+      
+      if (!quoteData.length) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      
+      const result = quoteData[0];
+      const completeData = {
+        quote: result.quotes,
+        assessment: result.assessments,
+        user: result.users,
+        organization: result.organizations
+      };
+      
+      res.json(completeData);
+    } catch (error) {
+      console.error("Error fetching quote assessment details:", error);
+      res.status(500).json({ message: "Failed to fetch quote assessment details" });
+    }
+  });
+
   app.get('/api/admin/quotes', isAuthenticated, isAdmin, async (req, res) => {
     try {
       // Get all quotes with assessment, user, and organization information
