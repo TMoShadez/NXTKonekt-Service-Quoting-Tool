@@ -88,6 +88,8 @@ export default function Dashboard() {
     // Create CSV content with quotes and assessments data
     const csvHeaders = [
       'Quote Number',
+      'Sales Executive Name',
+      'Sales Executive Email', 
       'Customer Name', 
       'Customer Company',
       'Customer Email',
@@ -108,6 +110,8 @@ export default function Dashboard() {
 
     const csvRows = quotes.map((quote: any) => [
       quote.quoteNumber,
+      quote.assessment?.salesExecutiveName || '',
+      quote.assessment?.salesExecutiveEmail || '',
       quote.assessment?.customerContactName || '',
       quote.assessment?.customerCompanyName || '',
       quote.assessment?.customerEmail || '',
@@ -424,6 +428,7 @@ export default function Dashboard() {
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium nxt-gray-500 uppercase tracking-wider">Quote ID</th>
                       <th className="px-6 py-3 text-left text-xs font-medium nxt-gray-500 uppercase tracking-wider">Customer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium nxt-gray-500 uppercase tracking-wider">Sales Executive</th>
                       <th className="px-6 py-3 text-left text-xs font-medium nxt-gray-500 uppercase tracking-wider">Amount</th>
                       <th className="px-6 py-3 text-left text-xs font-medium nxt-gray-500 uppercase tracking-wider">Status</th>
                       <th className="px-6 py-3 text-left text-xs font-medium nxt-gray-500 uppercase tracking-wider">Date</th>
@@ -437,7 +442,10 @@ export default function Dashboard() {
                           #{quote.quoteNumber}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm nxt-gray-800">
-                          {quote.assessment.customerCompanyName}
+                          {quote.assessment?.customerCompanyName || 'N/A'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm nxt-gray-800">
+                          {quote.assessment?.salesExecutiveName || 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm nxt-gray-800">
                           ${parseFloat(quote.totalCost).toFixed(2)}
@@ -520,7 +528,13 @@ export default function Dashboard() {
             </DialogHeader>
             {selectedQuote && (
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <h3 className="font-semibold mb-2">Sales Executive</h3>
+                    <p><strong>Name:</strong> {selectedQuote.assessment?.salesExecutiveName || 'N/A'}</p>
+                    <p><strong>Email:</strong> {selectedQuote.assessment?.salesExecutiveEmail || 'N/A'}</p>
+                    <p><strong>Phone:</strong> {selectedQuote.assessment?.salesExecutivePhone || 'N/A'}</p>
+                  </div>
                   <div>
                     <h3 className="font-semibold mb-2">Customer Information</h3>
                     <p><strong>Name:</strong> {selectedQuote.assessment?.customerContactName || 'N/A'}</p>
