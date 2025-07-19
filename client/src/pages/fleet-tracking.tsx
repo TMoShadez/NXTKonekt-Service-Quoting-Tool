@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ArrowRight, CheckCircle, Truck } from "lucide-react";
+import { StepSalesExecutive } from "@/components/assessment/step-sales-executive";
 import { StepCustomerInfo } from "@/components/assessment/step-customer-info";
 import { StepQuoteGeneration } from "@/components/assessment/step-quote-generation";
 
@@ -23,7 +24,7 @@ export default function FleetTrackingForm() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 5;
+  const totalSteps = 6;
 
   // Completely isolated local state - no useEffect conflicts
   const [localDeviceCount, setLocalDeviceCount] = useState('');
@@ -250,7 +251,7 @@ export default function FleetTrackingForm() {
     switch (currentStep) {
       case 1:
         return (
-          <StepCustomerInfo 
+          <StepSalesExecutive 
             data={formData}
             onChange={(data) => {
               const updatedData = { ...formData, ...data };
@@ -260,6 +261,17 @@ export default function FleetTrackingForm() {
           />
         );
       case 2:
+        return (
+          <StepCustomerInfo 
+            data={formData}
+            onChange={(data) => {
+              const updatedData = { ...formData, ...data };
+              setFormData(updatedData);
+              debouncedSave(updatedData);
+            }}
+          />
+        );
+      case 3:
         return (
           <Card>
             <CardHeader>
@@ -374,7 +386,7 @@ export default function FleetTrackingForm() {
             </CardContent>
           </Card>
         );
-      case 3:
+      case 4:
         return (
           <Card>
             <CardHeader>
@@ -455,7 +467,7 @@ export default function FleetTrackingForm() {
             </CardContent>
           </Card>
         );
-      case 4:
+      case 5:
         return (
           <Card>
             <CardHeader>
@@ -495,7 +507,7 @@ export default function FleetTrackingForm() {
             </CardContent>
           </Card>
         );
-      case 5:
+      case 6:
         return (
           <StepQuoteGeneration
             assessmentId={parseInt(id || '0')}
