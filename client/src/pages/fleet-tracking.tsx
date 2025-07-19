@@ -52,7 +52,7 @@ export default function FleetTrackingForm() {
 
   const { data: assessment, isLoading } = useQuery({
     queryKey: [`/api/assessments/${id}`],
-    enabled: !!id && isAuthenticated,
+    enabled: !!id && id !== 'new' && isAuthenticated,
     retry: false,
   });
 

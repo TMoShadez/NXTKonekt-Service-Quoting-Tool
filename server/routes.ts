@@ -143,7 +143,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/assessments/:id', isAuthenticated, async (req: any, res) => {
     try {
+      // Handle "new" parameter for creating new assessments
+      if (req.params.id === 'new') {
+        return res.status(404).json({ message: "Assessment not found" });
+      }
+      
       const assessmentId = parseInt(req.params.id);
+      if (isNaN(assessmentId)) {
+        return res.status(400).json({ message: "Invalid assessment ID" });
+      }
+      
       const userId = req.user.claims.sub;
       
       const assessment = await storage.getAssessment(assessmentId);

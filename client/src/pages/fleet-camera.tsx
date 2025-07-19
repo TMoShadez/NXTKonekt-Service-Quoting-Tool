@@ -59,7 +59,7 @@ export default function FleetCameraForm() {
 
   const { data: assessment, isLoading } = useQuery({
     queryKey: [`/api/assessments/${id}`],
-    enabled: !!id && isAuthenticated,
+    enabled: !!id && id !== 'new' && isAuthenticated,
     retry: false,
   });
 
