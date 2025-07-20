@@ -1120,7 +1120,7 @@ export default function AdminDashboard() {
               </Badge>
             </DialogTitle>
             <DialogDescription>
-              Complete quote and assessment information for HubSpot service ticket creation
+              Complete quote and assessment information
             </DialogDescription>
           </DialogHeader>
           {selectedQuote && (
@@ -1398,7 +1398,7 @@ export default function AdminDashboard() {
               </Badge>
             </DialogTitle>
             <DialogDescription>
-              Complete assessment questions and answers for HubSpot service ticket creation
+              Complete assessment details and responses to all questions
             </DialogDescription>
           </DialogHeader>
           {selectedAssessment && (
@@ -1600,22 +1600,7 @@ export default function AdminDashboard() {
                 </Card>
               )}
 
-              {/* HubSpot Integration Helper */}
-              <Card className="p-4 bg-blue-50 border-blue-200">
-                <h3 className="font-semibold mb-3 text-blue-700 flex items-center gap-2">
-                  <ExternalLink className="h-4 w-4" />
-                  HubSpot Service Ticket Information
-                </h3>
-                <div className="space-y-2 text-sm text-blue-800">
-                  <p>Use the detailed information above to create comprehensive HubSpot service tickets. All technical specifications and customer requirements are captured in the assessment responses.</p>
-                  <div className="bg-blue-100 p-3 rounded mt-2">
-                    <p><strong>Service Type:</strong> {selectedAssessment.serviceType?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
-                    <p><strong>Assessment ID:</strong> #{selectedAssessment.id} (for reference)</p>
-                    <p><strong>Customer Contact:</strong> {selectedAssessment.customerContactName} ({selectedAssessment.customerEmail})</p>
-                    <p><strong>Total Project Value:</strong> ${selectedAssessment.totalCost}</p>
-                  </div>
-                </div>
-              </Card>
+
             </div>
           )}
           <DialogFooter className="flex justify-between">
