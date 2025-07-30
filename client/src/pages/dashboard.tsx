@@ -40,7 +40,7 @@ export default function Dashboard() {
     retry: false,
     staleTime: 0, // Force fresh data
     refetchOnMount: true,
-  });
+  }) as { data: any[], isLoading: boolean };
 
 
 
@@ -182,38 +182,7 @@ export default function Dashboard() {
     }
   };
 
-  // HubSpot integration mutations
 
-
-  const hubspotSyncMutation = useMutation({
-    mutationFn: async (quoteId: number) => {
-      return apiRequest("POST", `/api/hubspot/sync-quote/${quoteId}`, {});
-    },
-    onSuccess: (data: any) => {
-      toast({
-        title: "HubSpot Sync Successful",
-        description: `Quote synced to HubSpot. Contact ID: ${data.hubspotData.contactId}`,
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "HubSpot Sync Failed",
-        description: "Failed to sync quote to HubSpot",
-        variant: "destructive",
-      });
-    },
-  });
 
   const handleLogout = () => {
     window.location.href = "/api/logout";
@@ -222,8 +191,8 @@ export default function Dashboard() {
   const handleNewAssessment = async (serviceType: string) => {
     try {
       const response = await apiRequest("POST", "/api/assessments", {
-        salesExecutiveName: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : '',
-        salesExecutiveEmail: user?.email || '',
+        salesExecutiveName: (user as any)?.firstName ? `${(user as any).firstName} ${(user as any).lastName || ''}`.trim() : '',
+        salesExecutiveEmail: (user as any)?.email || '',
         salesExecutivePhone: '',
         customerCompanyName: '',
         customerContactName: '',
@@ -302,12 +271,12 @@ export default function Dashboard() {
             <div className="flex items-center space-x-4">
               <div className="hidden lg:flex items-center space-x-4">
                 <span className="text-sm nxt-gray-500">
-                  {user?.firstName} {user?.lastName}
+                  {(user as any)?.firstName} {(user as any)?.lastName}
                 </span>
                 <div className="h-8 w-8 bg-nxt-blue rounded-full flex items-center justify-center">
-                  {user?.profileImageUrl ? (
+                  {(user as any)?.profileImageUrl ? (
                     <img 
-                      src={user.profileImageUrl} 
+                      src={(user as any).profileImageUrl} 
                       alt="Profile" 
                       className="h-8 w-8 rounded-full object-cover"
                     />
@@ -315,7 +284,7 @@ export default function Dashboard() {
                     <User className="text-white" size={16} />
                   )}
                 </div>
-                {(user?.isSystemAdmin || user?.role === 'admin') && (
+                {((user as any)?.isSystemAdmin || (user as any)?.role === 'admin') && (
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -494,15 +463,7 @@ export default function Dashboard() {
                           >
                             <Share className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="link" 
-                            className="text-green-600 hover:text-green-700 p-0 mr-3"
-                            onClick={() => hubspotSyncMutation.mutate(quote.id)}
-                            disabled={hubspotSyncMutation.isPending}
-                            title="Sync to HubSpot"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </Button>
+
                           <Button 
                             variant="link" 
                             className="text-red-500 hover:text-red-700 p-0"
@@ -549,7 +510,7 @@ export default function Dashboard() {
                   <div>
                     <h3 className="font-semibold mb-2">Quote Summary</h3>
                     <p><strong>Quote Number:</strong> {selectedQuote.quoteNumber}</p>
-                    <p><strong>Service Type:</strong> <Badge variant="outline">{selectedQuote.assessment?.serviceType?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'N/A'}</Badge></p>
+                    <p><strong>Service Type:</strong> <Badge variant="outline">{selectedQuote.assessment?.serviceType?.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) || 'N/A'}</Badge></p>
                     <p><strong>Total Cost:</strong> ${parseFloat(selectedQuote.totalCost).toFixed(2)}</p>
                     <p><strong>Status:</strong> <Badge variant={selectedQuote.status === 'approved' ? 'default' : 'secondary'}>{selectedQuote.status}</Badge></p>
                     <p><strong>Created:</strong> {new Date(selectedQuote.createdAt).toLocaleString()}</p>
