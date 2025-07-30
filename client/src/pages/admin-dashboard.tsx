@@ -955,9 +955,9 @@ export default function AdminDashboard() {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <div>
-                    <CardTitle>Assessment Management</CardTitle>
+                    <CardTitle>Assessment Management - Complete Details View</CardTitle>
                     <CardDescription>
-                      View assessment details and download comprehensive PDF reports with complete technical specifications
+                      Full administrative visibility of all assessment information, technical specifications, and customer details for effective work planning and service delivery
                     </CardDescription>
                   </div>
                   <Button
@@ -974,60 +974,143 @@ export default function AdminDashboard() {
                 {assessmentsLoading ? (
                   <div className="text-center py-4">Loading assessments...</div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Service Type</TableHead>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Sales Executive</TableHead>
-                        <TableHead>Partner Org</TableHead>
-                        <TableHead>Created</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {assessments?.slice(0, 20).map((assessment) => (
-                        <TableRow key={assessment.id}>
-                          <TableCell>{assessment.id}</TableCell>
-                          <TableCell className="capitalize">
-                            {assessment.serviceType?.replace('-', ' ')}
-                          </TableCell>
-                          <TableCell>
-                            {assessment.customerContactName || assessment.customerCompanyName || 'N/A'}
-                          </TableCell>
-                          <TableCell>
-                            {assessment.salesExecutiveName || assessment.salesExecutiveEmail || 'N/A'}
-                          </TableCell>
-                          <TableCell>{assessment.organizationName || 'N/A'}</TableCell>
-                          <TableCell>
-                            {new Date(assessment.createdAt!).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setSelectedAssessment(assessment)}
-                                title="View Details"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDownloadAssessment(assessment.id)}
-                                title="Download Complete Assessment Report (PDF)"
-                                className="text-green-600 hover:text-green-700"
-                              >
-                                <Download className="h-4 w-4" />
-                              </Button>
+                  <div className="space-y-4">
+                    {assessments?.slice(0, 10).map((assessment) => (
+                      <Card key={assessment.id} className="p-6 border border-gray-200">
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex items-center gap-3">
+                            <Badge variant="outline" className="text-lg px-3 py-1">
+                              Assessment #{assessment.id}
+                            </Badge>
+                            <Badge variant="secondary" className="capitalize">
+                              {assessment.serviceType?.replace('-', ' ')}
+                            </Badge>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedAssessment(assessment)}
+                              title="View in Modal"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDownloadAssessment(assessment.id)}
+                              title="Download PDF Report"
+                              className="text-green-600 hover:text-green-700"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                          {/* Customer & Basic Info */}
+                          <Card className="p-4 bg-blue-50">
+                            <h4 className="font-semibold text-blue-700 mb-3">Customer Information</h4>
+                            <div className="space-y-2 text-sm">
+                              <p><strong>Name:</strong> {assessment.customerContactName || 'N/A'}</p>
+                              <p><strong>Company:</strong> {assessment.customerCompanyName || 'N/A'}</p>
+                              <p><strong>Email:</strong> {assessment.customerEmail || 'N/A'}</p>
+                              <p><strong>Phone:</strong> {assessment.customerPhone || 'N/A'}</p>
+                              <p><strong>Site Address:</strong> {assessment.siteAddress || 'N/A'}</p>
+                              <p><strong>Industry:</strong> {assessment.industry || 'N/A'}</p>
+                              <p><strong>Preferred Install Date:</strong> {assessment.preferredInstallationDate || 'N/A'}</p>
                             </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                          </Card>
+
+                          {/* Sales Executive Info */}
+                          <Card className="p-4 bg-green-50">
+                            <h4 className="font-semibold text-green-700 mb-3">Sales Executive</h4>
+                            <div className="space-y-2 text-sm">
+                              <p><strong>Name:</strong> {assessment.salesExecutiveName || 'N/A'}</p>
+                              <p><strong>Email:</strong> {assessment.salesExecutiveEmail || 'N/A'}</p>
+                              <p><strong>Phone:</strong> {assessment.salesExecutivePhone || 'N/A'}</p>
+                              <p><strong>Organization:</strong> {assessment.organizationName || 'N/A'}</p>
+                              <p><strong>Created:</strong> {new Date(assessment.createdAt!).toLocaleDateString()}</p>
+                              <p><strong>Total Cost:</strong> ${assessment.totalCost || 0}</p>
+                            </div>
+                          </Card>
+
+                          {/* Service-Specific Technical Details */}
+                          <Card className="p-4 bg-purple-50">
+                            <h4 className="font-semibold text-purple-700 mb-3">Technical Assessment</h4>
+                            <div className="space-y-2 text-sm">
+                              {assessment.serviceType === 'fixed-wireless' && (
+                                <>
+                                  <p><strong>Building Type:</strong> {assessment.buildingType || 'N/A'}</p>
+                                  <p><strong>Network Signal:</strong> {assessment.networkSignal || 'N/A'}</p>
+                                  <p><strong>Signal Strength:</strong> {assessment.signalStrength || 'N/A'}</p>
+                                  <p><strong>Connection Usage:</strong> {assessment.connectionUsage || 'N/A'}</p>
+                                  <p><strong>Router Location:</strong> {assessment.routerLocation || 'N/A'}</p>
+                                  <p><strong>Device Count:</strong> {assessment.deviceCount || 'N/A'}</p>
+                                  <p><strong>Router Count:</strong> {assessment.routerCount || 'N/A'}</p>
+                                  <p><strong>Antenna Cable:</strong> {assessment.antennaCable ? 'Yes' : 'No'}</p>
+                                  <p><strong>Cable Footage:</strong> {assessment.cableFootage || 'N/A'}</p>
+                                  <p><strong>Router Make/Model:</strong> {assessment.routerMake || 'N/A'} {assessment.routerModel || ''}</p>
+                                </>
+                              )}
+                              {assessment.serviceType === 'fleet-tracking' && (
+                                <>
+                                  <p><strong>Fleet Size:</strong> {assessment.fleetSize || 'N/A'}</p>
+                                  <p><strong>Installation Count:</strong> {assessment.deviceCount || 'N/A'}</p>
+                                  <p><strong>Installation Type:</strong> {assessment.installationType || 'N/A'}</p>
+                                  <p><strong>Tracker Type:</strong> {assessment.trackerType || 'N/A'}</p>
+                                  <p><strong>IoT Partner:</strong> {assessment.iotTrackingPartner || 'N/A'}</p>
+                                  <p><strong>Carrier SIM:</strong> {assessment.carrierSim || 'N/A'}</p>
+                                  {assessment.vehicleDetails && (
+                                    <div className="mt-2">
+                                      <strong>Vehicles:</strong>
+                                      <div className="ml-2 text-xs">
+                                        {JSON.parse(assessment.vehicleDetails || '[]').map((vehicle: any, index: number) => (
+                                          <div key={index}>{vehicle.year} {vehicle.make} {vehicle.model}</div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                              {assessment.serviceType === 'fleet-camera' && (
+                                <>
+                                  <p><strong>Installation Count:</strong> {assessment.deviceCount || 'N/A'}</p>
+                                  <p><strong>Camera Solution:</strong> {assessment.cameraSolutionType || 'N/A'}</p>
+                                  <p><strong>Number of Cameras:</strong> {assessment.numberOfCameras || 'N/A'}</p>
+                                  <p><strong>Tracking Partner:</strong> {assessment.trackingPartner || 'N/A'}</p>
+                                  <p><strong>Carrier SIM:</strong> {assessment.carrierSim || 'N/A'}</p>
+                                  <p><strong>Removal Needed:</strong> {assessment.removalNeeded ? 'Yes' : 'No'}</p>
+                                  {assessment.removalNeeded && (
+                                    <p><strong>Existing Solution:</strong> {assessment.existingCameraSolution || 'N/A'}</p>
+                                  )}
+                                  <p><strong>Protective Harness:</strong> {assessment.protectiveWiringHarness ? 'Yes' : 'No'}</p>
+                                </>
+                              )}
+                            </div>
+                          </Card>
+                        </div>
+
+                        {/* Additional Requirements Section */}
+                        {(assessment.interferenceSources || assessment.specialRequirements || assessment.additionalNotes) && (
+                          <Card className="p-4 bg-yellow-50 mt-4">
+                            <h4 className="font-semibold text-yellow-700 mb-3">Additional Requirements & Notes</h4>
+                            <div className="space-y-2 text-sm">
+                              {assessment.interferenceSources && (
+                                <p><strong>Interference Sources:</strong> {assessment.interferenceSources}</p>
+                              )}
+                              {assessment.specialRequirements && (
+                                <p><strong>Special Requirements:</strong> {assessment.specialRequirements}</p>
+                              )}
+                              {assessment.additionalNotes && (
+                                <p><strong>Additional Notes:</strong> {assessment.additionalNotes}</p>
+                              )}
+                            </div>
+                          </Card>
+                        )}
+                      </Card>
+                    ))}
+                  </div>
                 )}
               </CardContent>
             </Card>
