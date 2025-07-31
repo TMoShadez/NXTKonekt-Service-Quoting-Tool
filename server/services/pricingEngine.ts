@@ -33,9 +33,20 @@ export function calculatePricing(assessment: Assessment): PricingBreakdown {
 
   // Fixed Wireless Access pricing - based on router count with +1 labor hold hour
   let surveyHours = 0;
-  let configurationHours = 1;
+  let configurationHours = 0;
   
   const routerCount = assessment.routerCount || 1;
+  const deviceCount = assessment.deviceCount || 1;
+  const connectionUsage = assessment.connectionUsage;
+  
+  // Configuration pricing logic based on connection usage and device count
+  if (connectionUsage === 'failover') {
+    // Failover: $0 for 1 device, billable hours for >1 device
+    configurationHours = deviceCount > 1 ? 1 : 0;
+  } else if (connectionUsage === 'primary') {
+    // Primary: $0 for <5 devices, billable hours for >=5 devices
+    configurationHours = deviceCount >= 5 ? 1 : 0;
+  }
   
   // Installation hours based on number of routers to be installed
   let installationHours = routerCount * 1; // 1 hour per router
