@@ -24,6 +24,7 @@ function Router() {
       {isLoading || !isAuthenticated ? (
         <>
           <Route path="/" component={Landing} />
+          <Route path="/admin" component={Landing} />
           <Route component={NotFound} />
         </>
       ) : (
