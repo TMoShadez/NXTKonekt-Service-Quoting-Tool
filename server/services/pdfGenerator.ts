@@ -337,16 +337,58 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         doc.text('Work will be completed within a typical timeframe, the final charge will accurately reflect the actual time our team spends on-site. This includes the minimum service fee plus any additional time for completion. Any on-site challenges or unexpected extra work or unforeseen delay. A preliminary labor hold of $190.00 in total hold.', 50, currentY, { width: 500 });
       }
 
-      // Statement of Work for Fixed Wireless (Primary + Antenna) - Minimal
+      // Statement of Work for Fixed Wireless (Primary + Antenna) - Properly formatted for 4 pages
       if (assessment.serviceType === 'site-assessment' && 
           assessment.connectionUsage === 'primary' && 
           assessment.lowSignalAntennaCable === 'yes') {
-        currentY += 16;
-        doc.fontSize(8).font('Helvetica-Bold')
-           .text('Scope of Work: Primary Cellular Router + Antenna (up to 200ft cable)', 50, currentY);
+        // Start new page for SOW
+        doc.addPage();
+        currentY = 50;
+        
+        doc.fontSize(12).font('Helvetica-Bold')
+           .text('Scope of Work: Primary Cellular Wireless Router Installation with Antenna Installation', 50, currentY);
+        
+        currentY += 20;
+        doc.fontSize(9).font('Helvetica')
+           .text('This document outlines the scope of work for the installation of a cellular wireless router to serve as your primary internet service provider (ISP) at the designated location. This comprehensive service includes a detailed site survey, preparation and installation of the wireless router, and, if necessary, the running of up to 200 feet of coaxial cable for the installation of an internal antenna to optimize signal strength.', 50, currentY, { width: 500, lineGap: 3 });
+        
+        currentY += 35;
+        doc.text('Hardware for this project will be provided by your Wireless Vendor. All necessary materials will be provided by NXTKonekt/Tekumo.', 50, currentY, { width: 500, lineGap: 3 });
+        
+        currentY += 25;
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Summary of Services', 50, currentY);
+        
+        currentY += 15;
+        doc.fontSize(9).font('Helvetica')
+           .text('Our team will install a cellular wireless router, performing the following key steps:', 50, currentY, { width: 500 });
+        
+        currentY += 15;
+        doc.text('• Site Survey: Assessment of location for optimal router/antenna placement', 50, currentY, { width: 500 });
         currentY += 12;
-        doc.fontSize(6).font('Helvetica')
-           .text('Site survey, router/antenna installation, coaxial cable routing, SIM setup, configuration & testing. Hardware by Wireless Vendor, materials by NXTKonekt.', 50, currentY, { width: 500 });
+        doc.text('• Router Preparation: Unboxing and component verification', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('• Installation: Secure mounting of router/antenna with component connections', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('• Coaxial Cable Installation: Up to 200ft cable run for antenna connection', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('• Configuration: Cellular connection setup and connectivity testing', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Our Process', 50, currentY);
+        
+        currentY += 15;
+        doc.fontSize(9).font('Helvetica')
+           .text('Detailed breakdown of installation steps:', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(9).font('Helvetica-Bold')
+           .text('1. Preparation and Planning', 50, currentY);
+        
+        currentY += 15;
+        doc.fontSize(8).font('Helvetica')
+           .text('• Location Determination: Site contact collaboration to identify optimal router placement', 50, currentY, { width: 500 });
         currentY += 12;
         doc.text('• Wireless Survey: Cellular device assessment for best antenna positioning', 50, currentY, { width: 500 });
         currentY += 14;
@@ -401,16 +443,55 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         doc.text('• Final Testing: Speed test confirmation of primary ISP functionality', 50, currentY, { width: 500 });
       }
 
-      // Statement of Work for Fixed Wireless (Primary Only - No Antenna) - Minimal
+      // Statement of Work for Fixed Wireless (Primary Only - No Antenna) - Properly formatted for 4 pages
       if (assessment.serviceType === 'site-assessment' && 
           assessment.connectionUsage === 'primary' && 
           assessment.lowSignalAntennaCable !== 'yes') {
-        currentY += 16;
-        doc.fontSize(8).font('Helvetica-Bold')
-           .text('Scope of Work: Primary Cellular Router Installation', 50, currentY);
+        // Start new page for SOW
+        doc.addPage();
+        currentY = 50;
+        
+        doc.fontSize(12).font('Helvetica-Bold')
+           .text('Scope of Work: Cellular Wireless Router Installation', 50, currentY);
+        
+        currentY += 20;
+        doc.fontSize(9).font('Helvetica')
+           .text('This document outlines the scope of work for the installation of a cellular wireless router at your designated location. This service includes a comprehensive site survey, preparation and installation of the router, and basic configuration to ensure your devices are connected. Please note that this service does not include network cabling.', 50, currentY, { width: 500, lineGap: 3 });
+        
+        currentY += 30;
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Summary of Services', 50, currentY);
+        
+        currentY += 15;
+        doc.fontSize(9).font('Helvetica')
+           .text('Our team will install a cellular wireless router, performing the following key steps:', 50, currentY, { width: 500 });
+        
+        currentY += 15;
+        doc.text('• Site Survey: Assessment of location for optimal router placement', 50, currentY, { width: 500 });
         currentY += 12;
-        doc.fontSize(6).font('Helvetica')
-           .text('Site survey, router installation, basic configuration, connect up to 5 devices. No network cabling. Hardware by Wireless Vendor, materials by NXTKonekt.', 50, currentY, { width: 500 });
+        doc.text('• Router Preparation: Unboxing and component verification', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('• Mounting and Installation: Secure mounting with component connections', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('• Basic Router Configuration: Cellular connection and Wi-Fi setup', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('• Device Configuration Support: Connect up to 5 devices to wireless network', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Our Process', 50, currentY);
+        
+        currentY += 15;
+        doc.fontSize(9).font('Helvetica')
+           .text('Detailed breakdown of installation steps:', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(9).font('Helvetica-Bold')
+           .text('1. Preparation and Planning', 50, currentY);
+        
+        currentY += 15;
+        doc.fontSize(8).font('Helvetica')
+           .text('• Location Determination: Site contact collaboration for optimal router placement within 5 feet of power outlet', 50, currentY, { width: 500 });
         currentY += 12;
         doc.text('• Hardware Verification: Component check and documentation review', 50, currentY, { width: 500 });
         currentY += 14;
@@ -509,17 +590,57 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
            .text('While we aim for completion within a typical timeframe, the final charge will accurately reflect the actual time our team spends on-site. This includes the minimum service fee plus any additional time (billed at $190 per hour in 15-minute increments) needed for extra work or unforeseen issues. A preliminary Credit Hold of $380.00 in total Hold Amount. This will cover most external penetrations, or ceiling issues.', 50, currentY, { width: 500, lineGap: 3 });
       }
 
-      // Statement of Work for Fixed Wireless (Failover + Antenna) - Minimal
+      // Statement of Work for Fixed Wireless (Failover + Antenna) - Properly formatted for 4 pages
       if (assessment.serviceType === 'site-assessment' && 
           assessment.connectionUsage === 'failover' && 
           assessment.lowSignalAntennaCable === 'yes') {
-        currentY += 16;
-        doc.fontSize(8).font('Helvetica-Bold')
-           .text('Scope of Work: Failover Cellular Router + Antenna (up to 200ft cable)', 50, currentY);
+        // Start new page for SOW
+        doc.addPage();
+        currentY = 50;
+        
+        doc.fontSize(12).font('Helvetica-Bold')
+           .text('Scope of Work: Failover Cellular Router with Antenna Installation', 50, currentY);
+        
+        currentY += 20;
+        doc.fontSize(9).font('Helvetica')
+           .text('Installation of cellular wireless router as failover ISP with antenna and network cabling to server/rack. Hardware provided by Wireless Vendor, materials by NXTKonekt.', 50, currentY, { width: 500, lineGap: 3 });
+        
+        currentY += 25;
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Services Included', 50, currentY);
+        
+        currentY += 15;
+        doc.fontSize(9).font('Helvetica')
+           .text('• Site survey & signal assessment • Router preparation & documentation review', 50, currentY, { width: 500 });
         currentY += 12;
-        doc.fontSize(6).font('Helvetica')
-           .text('Site survey, router/antenna installation, network cabling to server/rack, failover configuration. External permits client responsibility. Hardware by Wireless Vendor, materials by NXTKonekt.', 50, currentY, { width: 500 });
+        doc.text('• Internal/external antenna installation • Coaxial cable routing & termination', 50, currentY, { width: 500 });
         currentY += 12;
+        doc.text('• Network cabling to server/rack • Router mounting & power connection', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('• SIM card installation • Router configuration & testing', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Important Notes', 50, currentY);
+        
+        currentY += 15;
+        doc.fontSize(9).font('Helvetica')
+           .text('• External penetration permits are client responsibility', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('• Up to 200 feet of coaxial cable included', 50, currentY, { width: 500 });
+        
+        currentY += 20;
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Installation Process', 50, currentY);
+        
+        currentY += 15;
+        doc.fontSize(9).font('Helvetica-Bold')
+           .text('1. Site Survey & Planning', 50, currentY);
+        
+        currentY += 12;
+        doc.fontSize(8).font('Helvetica')
+           .text('Signal strength assessment, optimal router/antenna placement, cable path planning with interference avoidance, hardware verification.', 50, currentY, { width: 500 });
+        currentY += 15;
         
         // Step 2
         doc.fontSize(8).font('Helvetica-Bold')
@@ -563,16 +684,43 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
            .text('Comprehensive testing of cellular connection, antenna signal strength, network cable connectivity, and system integration.', 50, currentY, { width: 500, lineGap: 2 });
       }
 
-      // Statement of Work for Fixed Wireless (Failover Only - No Antenna) - Minimal
+      // Statement of Work for Fixed Wireless (Failover Only - No Antenna) - Properly formatted for 4 pages
       if (assessment.serviceType === 'site-assessment' && 
           assessment.connectionUsage === 'failover' && 
           assessment.lowSignalAntennaCable !== 'yes') {
-        currentY += 16;
-        doc.fontSize(8).font('Helvetica-Bold')
-           .text('Scope of Work: Failover Cellular Router Installation', 50, currentY);
+        // Start new page for SOW
+        doc.addPage();
+        currentY = 50;
+        
+        doc.fontSize(12).font('Helvetica-Bold')
+           .text('Scope of Work: Failover Cellular Wireless Router Installation', 50, currentY);
+        
+        currentY += 20;
+        doc.fontSize(9).font('Helvetica')
+           .text('This document outlines the scope of work for the installation of a cellular wireless router to serve as a failover internet service provider (ISP) at your designated location. This service ensures business continuity by providing an alternative internet connection in the event of an outage with your primary ISP.', 50, currentY, { width: 500, lineGap: 3 });
+        
+        currentY += 30;
+        doc.text('The installation includes a site survey, preparation and installation of the wireless router, and basic configuration to integrate it into your existing network for seamless failover operation.', 50, currentY, { width: 500, lineGap: 3 });
+        
+        currentY += 25;
+        doc.text('Hardware for this project will be provided by your Wireless Vendor. All necessary materials will be provided by NXTKonekt/Tekumo.', 50, currentY, { width: 500, lineGap: 3 });
+        
+        currentY += 25;
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Summary of Services', 50, currentY);
+        
+        currentY += 15;
+        doc.fontSize(9).font('Helvetica')
+           .text('Our team will install a cellular wireless router, performing the following key steps:', 50, currentY, { width: 500 });
+        
+        currentY += 15;
+        doc.text('• Site Survey: Assessment of optimal router placement for cellular signal and network proximity.', 50, currentY, { width: 500 });
         currentY += 12;
-        doc.fontSize(6).font('Helvetica')
-           .text('Site survey, router installation, network integration for seamless failover operation. Hardware by Wireless Vendor, materials by NXTKonekt.', 50, currentY, { width: 500 });
+        doc.text('• Router Preparation: Unboxing, verification, and documentation review.', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('• Mounting and Installation: Secure mounting and power connection.', 50, currentY, { width: 500 });
+        currentY += 12;
+        doc.text('• Basic Router Configuration: Cellular connection, Wi-Fi setup, and failover integration.', 50, currentY, { width: 500 });
         currentY += 12;
         
         doc.text('• Failover Testing: Verification of smooth transition during primary ISP outage.', 50, currentY, { width: 500, lineGap: 4 });

@@ -26,11 +26,12 @@ The **Database Schema** includes entities for Users, Sessions, Organizations, As
   - Environmental factors and service-specific details
 - Fixed PDF download functionality in admin dashboard by properly extracting filenames from stored paths
 - Ensured consistent PDF serving through `/api/files/pdf/` endpoint with proper filename extraction
-- Optimized PDF formatting for Fixed Wireless Assessments to fit within 3 pages maximum
-- Reduced font sizes throughout document (headers: 9pt, content: 7pt, details: 6pt)
-- Compacted customer information and pricing sections with minimal spacing
-- Condensed Statement of Work sections to single-line descriptions
-- Eliminated verbose content while maintaining all essential technical details
+- Restored original Statement of Work content for contractual compliance
+- Optimized PDF formatting for Fixed Wireless Assessments to fit within 4 pages maximum
+- Maintained proper font sizes for readability (headers: 12pt, content: 9pt, details: 8pt)
+- Preserved all contractual language and detailed process descriptions in SOW sections
+- Each SOW type starts on a new page for proper organization and formatting
+- Balanced space efficiency with professional presentation and legal requirements
 
 ## Role-Based Access Control
 Comprehensive role-based access control implemented throughout the application:
