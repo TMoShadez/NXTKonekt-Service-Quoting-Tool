@@ -24,6 +24,8 @@ The **Database Schema** includes entities for Users, Sessions, Organizations, As
   - Comprehensive pricing breakdowns
   - Infrastructure requirements and site characteristics
   - Environmental factors and service-specific details
+- Fixed PDF download functionality in admin dashboard by properly extracting filenames from stored paths
+- Ensured consistent PDF serving through `/api/files/pdf/` endpoint with proper filename extraction
 
 ## Role-Based Access Control
 Comprehensive role-based access control implemented throughout the application:
