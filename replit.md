@@ -13,6 +13,27 @@ The **Database Schema** includes entities for Users, Sessions, Organizations, As
 
 **Data Flow** involves user authentication via Replit Auth, organization setup, creation of site assessments with step-by-step data collection (sales info, customer details, technical assessment, file uploads), automated pricing calculation, and PDF quote generation. All data persists in PostgreSQL.
 
+## Role-Based Access Control
+Comprehensive role-based access control implemented throughout the application:
+
+- **System Administrators**: Full access to admin dashboard, partner management, user role management
+- **Administrators**: Access to admin dashboard and partner management functions  
+- **Partners**: Access to assessment creation, quote generation, and personal dashboard
+- **Sales Executives**: Enhanced partner access with additional sales-specific features
+
+**Admin Dashboard Features**:
+- Partner Management: Approve/reject partner applications and manage partner status
+- User Role Management: Modify user roles and system admin privileges
+- HubSpot Integration: Monitor API connectivity and sync status
+- Analytics: System metrics, partner conversion rates, and usage statistics
+- Quote Management: System-wide quote oversight with detailed modal views
+
+**Access Protection**:
+- Frontend routing protects admin routes based on user role
+- Backend middleware validates admin access for all admin endpoints
+- Role indicators displayed in user interface headers
+- Proper authentication flow with role-based redirects
+
 ## External Dependencies
 - **@neondatabase/serverless**: PostgreSQL database connectivity
 - **drizzle-orm**: Type-safe database ORM

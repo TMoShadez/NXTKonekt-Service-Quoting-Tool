@@ -18,7 +18,7 @@ function Router() {
   const { user, isAuthenticated, isLoading } = useAuth();
 
   // Check if user has admin access
-  const isAdmin = user && (user.isSystemAdmin || user.role === 'admin');
+  const isAdmin = user && ((user as any).isSystemAdmin || (user as any).role === 'admin');
 
   return (
     <Switch>
