@@ -29,9 +29,10 @@ The **Database Schema** includes entities for Users, Sessions, Organizations, As
 - Restored original Statement of Work content for contractual compliance
 - Optimized PDF formatting for Fixed Wireless Assessments to fit within 4 pages maximum
 - Maintained proper font sizes for readability (headers: 12pt, content: 9pt, details: 8pt)
-- Fixed line spacing issues to prevent sentence stacking and improve readability
-- Increased lineGap values (3-4pt) for paragraphs and bullet points (2pt) for proper text separation
-- Enhanced currentY spacing between sections (14-18pt increments vs 12pt)
+- Fixed SOW duplication issue by correcting conditional logic for default vs specific SOW sections
+- Optimized line spacing with balanced approach: 3pt lineGap for paragraphs, 11pt spacing for bullet points
+- Enhanced section spacing (12-18pt increments) to maximize space utilization within 4-page limit
+- Restored original detailed SOW content with proper formatting and no line bleeding
 - Preserved all contractual language and detailed process descriptions in SOW sections
 - Each SOW type starts on a new page for proper organization and formatting
 - Balanced space efficiency with professional presentation and legal requirements
