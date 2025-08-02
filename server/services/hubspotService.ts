@@ -614,6 +614,188 @@ export class HubSpotService {
   }
 
   /**
+   * Get a contact by ID from HubSpot
+   */
+  async getContact(contactId: string): Promise<HubSpotContact> {
+    try {
+      const response = await this.client.crm.contacts.basicApi.getById(
+        contactId,
+        ['email', 'firstname', 'lastname', 'company', 'phone']
+      );
+      
+      return {
+        id: response.id,
+        email: response.properties.email || '',
+        firstname: response.properties.firstname || '',
+        lastname: response.properties.lastname || '',
+        company: response.properties.company || '',
+        phone: response.properties.phone || ''
+      };
+    } catch (error: any) {
+      console.error(`❌ Error fetching contact ${contactId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get a deal by ID from HubSpot
+   */
+  async getDeal(dealId: string): Promise<HubSpotDeal> {
+    try {
+      const response = await this.client.crm.deals.basicApi.getById(
+        dealId,
+        ['dealname', 'amount', 'pipeline', 'dealstage']
+      );
+      
+      return {
+        id: response.id,
+        dealname: response.properties.dealname || '',
+        amount: response.properties.amount || '0',
+        pipeline: response.properties.pipeline || '',
+        dealstage: response.properties.dealstage || ''
+      };
+    } catch (error: any) {
+      console.error(`❌ Error fetching deal ${dealId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get a ticket by ID from HubSpot
+   */
+  async getTicket(ticketId: string): Promise<HubSpotTicket> {
+    try {
+      const response = await this.client.crm.tickets.basicApi.getById(
+        ticketId,
+        ['subject', 'content', 'hs_ticket_priority', 'hs_ticket_status']
+      );
+      
+      return {
+        id: response.id,
+        subject: response.properties.subject || '',
+        content: response.properties.content || '',
+        priority: response.properties.hs_ticket_priority || 'MEDIUM',
+        status: response.properties.hs_ticket_status || 'NEW'
+      };
+    } catch (error: any) {
+      console.error(`❌ Error fetching ticket ${ticketId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create or update custom properties in HubSpot
+   */
+  async createCustomProperties(): Promise<void> {
+    const customProperties = [
+      {
+        name: 'nxtkonekt_quote_number',
+        label: 'NXTKonekt Quote Number',
+        description: 'Quote number from NXTKonekt assessment tool',
+        groupName: 'dealinformation',
+        type: 'string',
+        fieldType: 'text',
+        objectType: 'deals'
+      },
+      {
+        name: 'nxtkonekt_quote_id',
+        label: 'NXTKonekt Quote ID',
+        description: 'Internal quote ID from NXTKonekt system',
+        groupName: 'dealinformation',
+        type: 'string',
+        fieldType: 'text',
+        objectType: 'deals'
+      },
+      {
+        name: 'nxtkonekt_assessment_id',
+        label: 'NXTKonekt Assessment ID',
+        description: 'Assessment ID from NXTKonekt system',
+        groupName: 'dealinformation',
+        type: 'string',
+        fieldType: 'text',
+        objectType: 'deals'
+      },
+      {
+        name: 'service_type',
+        label: 'Service Type',
+        description: 'Type of service (Fixed Wireless, Fleet Tracking, Fleet Camera)',
+        groupName: 'dealinformation',
+        type: 'enumeration',
+        fieldType: 'select',
+        objectType: 'deals',
+        options: [
+          { label: 'Fixed Wireless', value: 'fixed_wireless' },
+          { label: 'Fleet Tracking', value: 'fleet_tracking' },
+          { label: 'Fleet Camera', value: 'fleet_camera' }
+        ]
+      },
+      {
+        name: 'quote_status',
+        label: 'Quote Status',
+        description: 'Current status of the quote',
+        groupName: 'dealinformation',
+        type: 'enumeration',
+        fieldType: 'select',
+        objectType: 'deals',
+        options: [
+          { label: 'Pending', value: 'pending' },
+          { label: 'Sent', value: 'sent' },
+          { label: 'In Progress', value: 'in_progress' },
+          { label: 'Approved', value: 'approved' },
+          { label: 'Rejected', value: 'rejected' }
+        ]
+      },
+      {
+        name: 'lead_source',
+        label: 'Lead Source',
+        description: 'Source of the lead',
+        groupName: 'contactinformation',
+        type: 'string',
+        fieldType: 'text',
+        objectType: 'contacts'
+      },
+      {
+        name: 'site_address',
+        label: 'Site Address',
+        description: 'Installation site address',
+        groupName: 'contactinformation',
+        type: 'string',
+        fieldType: 'text',
+        objectType: 'contacts'
+      },
+      {
+        name: 'sales_executive',
+        label: 'Sales Executive',
+        description: 'Assigned sales executive',
+        groupName: 'contactinformation',
+        type: 'string',
+        fieldType: 'text',
+        objectType: 'contacts'
+      }
+    ];
+
+    for (const property of customProperties) {
+      try {
+        console.log(`🔧 Creating custom property: ${property.name} for ${property.objectType}`);
+        
+        if (property.objectType === 'contacts') {
+          await this.client.crm.properties.coreApi.create('contacts', property);
+        } else if (property.objectType === 'deals') {
+          await this.client.crm.properties.coreApi.create('deals', property);
+        }
+        
+        console.log(`✅ Created custom property: ${property.name}`);
+      } catch (error: any) {
+        if (error.message?.includes('already exists') || error.code === 'PROPERTY_ALREADY_EXISTS') {
+          console.log(`ℹ️ Custom property ${property.name} already exists`);
+        } else {
+          console.error(`❌ Error creating custom property ${property.name}:`, error);
+        }
+      }
+    }
+  }
+
+  /**
    * Test HubSpot connection
    */
   async testConnection(): Promise<boolean> {

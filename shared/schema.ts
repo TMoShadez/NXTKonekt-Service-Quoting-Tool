@@ -127,6 +127,9 @@ export const assessments = pgTable("assessments", {
   totalCost: decimal("total_cost", { precision: 10, scale: 2 }),
   additionalNotes: text("additional_notes"),
   
+  // HubSpot integration fields
+  hubspotContactId: varchar("hubspot_contact_id"),
+  
   status: varchar("status").default("draft"), // draft, completed, sent
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -158,6 +161,9 @@ export const quotes = pgTable("quotes", {
   status: varchar("status").default("pending"), // pending, approved, rejected
   pdfUrl: text("pdf_url"),
   emailSent: boolean("email_sent").default(false),
+  
+  // HubSpot integration fields
+  hubspotDealId: varchar("hubspot_deal_id"),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

@@ -6,6 +6,7 @@ import { upload, saveFileToDatabase, deleteFileFromDisk } from "./services/fileU
 import { calculatePricing } from "./services/pricingEngine";
 import { generateQuotePDF } from "./services/pdfGenerator";
 import { hubspotService } from "./services/hubspotService";
+import { webhookService } from "./services/webhookService";
 import { insertAssessmentSchema, insertOrganizationSchema } from "@shared/schema";
 import { emailService } from "./services/emailService";
 import { randomBytes } from "crypto";
@@ -1196,6 +1197,133 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+
+  // ============================================
+  // HubSpot Webhook Endpoints
+  // ============================================
+
+  // HubSpot webhook endpoint for contacts
+  app.post('/api/webhooks/hubspot/contacts', async (req, res) => {
+    try {
+      const signature = req.headers['x-hubspot-signature'] as string;
+      const body = JSON.stringify(req.body);
+      
+      // Verify webhook signature
+      if (!webhookService.verifyWebhookSignature(body, signature)) {
+        console.error('❌ Invalid webhook signature');
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      
+      // Process the webhook payload
+      await webhookService.processContactWebhook(req.body);
+      await webhookService.logWebhookEvent('contact', 'contact', req.body);
+      
+      res.status(200).json({ message: 'Webhook processed successfully' });
+    } catch (error) {
+      console.error('❌ Contact webhook processing failed:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // HubSpot webhook endpoint for deals
+  app.post('/api/webhooks/hubspot/deals', async (req, res) => {
+    try {
+      const signature = req.headers['x-hubspot-signature'] as string;
+      const body = JSON.stringify(req.body);
+      
+      // Verify webhook signature
+      if (!webhookService.verifyWebhookSignature(body, signature)) {
+        console.error('❌ Invalid webhook signature');
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      
+      // Process the webhook payload
+      await webhookService.processDealWebhook(req.body);
+      await webhookService.logWebhookEvent('deal', 'deal', req.body);
+      
+      res.status(200).json({ message: 'Webhook processed successfully' });
+    } catch (error) {
+      console.error('❌ Deal webhook processing failed:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // HubSpot webhook endpoint for tickets
+  app.post('/api/webhooks/hubspot/tickets', async (req, res) => {
+    try {
+      const signature = req.headers['x-hubspot-signature'] as string;
+      const body = JSON.stringify(req.body);
+      
+      // Verify webhook signature
+      if (!webhookService.verifyWebhookSignature(body, signature)) {
+        console.error('❌ Invalid webhook signature');
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      
+      // Process the webhook payload
+      await webhookService.processTicketWebhook(req.body);
+      await webhookService.logWebhookEvent('ticket', 'ticket', req.body);
+      
+      res.status(200).json({ message: 'Webhook processed successfully' });
+    } catch (error) {
+      console.error('❌ Ticket webhook processing failed:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // Admin endpoint to create HubSpot custom properties
+  app.post('/api/admin/hubspot/setup-properties', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      console.log('🔧 Starting HubSpot custom properties setup...');
+      await hubspotService.createCustomProperties();
+      res.json({ 
+        success: true, 
+        message: 'HubSpot custom properties created successfully' 
+      });
+    } catch (error) {
+      console.error('❌ HubSpot properties setup failed:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to setup HubSpot properties',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Admin endpoint to test webhook functionality
+  app.post('/api/admin/webhooks/test', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { webhookType, testData } = req.body;
+      
+      console.log(`🧪 Testing ${webhookType} webhook...`);
+      
+      switch (webhookType) {
+        case 'contact':
+          await webhookService.processContactWebhook(testData || []);
+          break;
+        case 'deal':
+          await webhookService.processDealWebhook(testData || []);
+          break;
+        case 'ticket':
+          await webhookService.processTicketWebhook(testData || []);
+          break;
+        default:
+          return res.status(400).json({ error: 'Invalid webhook type' });
+      }
+      
+      res.json({ 
+        success: true, 
+        message: `${webhookType} webhook test completed successfully` 
+      });
+    } catch (error) {
+      console.error(`❌ ${req.body.webhookType} webhook test failed:`, error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Webhook test failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

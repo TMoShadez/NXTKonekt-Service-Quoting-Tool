@@ -54,6 +54,8 @@ export interface IStorage {
   updateAssessment(id: number, assessment: Partial<InsertAssessment>): Promise<Assessment>;
   getAssessment(id: number): Promise<Assessment | undefined>;
   getAssessmentsByUserId(userId: string): Promise<Assessment[]>;
+  getAssessmentsByEmail(email: string): Promise<Assessment[]>;
+  getAssessmentsByHubSpotContactId(contactId: string): Promise<Assessment[]>;
   
   // Quote operations
   createQuote(quote: InsertQuote): Promise<Quote>;
@@ -61,6 +63,8 @@ export interface IStorage {
   getQuote(id: number): Promise<(Quote & { assessment: Assessment }) | undefined>;
   getQuotesByUserId(userId: string): Promise<(Quote & { assessment: Assessment })[]>;
   getQuoteByAssessmentId(assessmentId: number): Promise<Quote | undefined>;
+  getAllQuotes(): Promise<Quote[]>;
+  getQuotesByHubSpotDealId(dealId: string): Promise<Quote[]>;
   deleteQuote(id: number): Promise<void>;
   
   // File operations
@@ -235,6 +239,22 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(assessments.createdAt));
   }
 
+  async getAssessmentsByEmail(email: string): Promise<Assessment[]> {
+    return await db
+      .select()
+      .from(assessments)
+      .where(eq(assessments.customerEmail, email))
+      .orderBy(desc(assessments.createdAt));
+  }
+
+  async getAssessmentsByHubSpotContactId(contactId: string): Promise<Assessment[]> {
+    return await db
+      .select()
+      .from(assessments)
+      .where(eq(assessments.hubspotContactId, contactId))
+      .orderBy(desc(assessments.createdAt));
+  }
+
   // Quote operations
   async createQuote(quote: InsertQuote): Promise<Quote> {
     const [newQuote] = await db
@@ -325,6 +345,21 @@ export class DatabaseStorage implements IStorage {
       .from(quotes)
       .where(eq(quotes.assessmentId, assessmentId));
     return quote;
+  }
+
+  async getAllQuotes(): Promise<Quote[]> {
+    return await db
+      .select()
+      .from(quotes)
+      .orderBy(desc(quotes.createdAt));
+  }
+
+  async getQuotesByHubSpotDealId(dealId: string): Promise<Quote[]> {
+    return await db
+      .select()
+      .from(quotes)
+      .where(eq(quotes.hubspotDealId, dealId))
+      .orderBy(desc(quotes.createdAt));
   }
 
   // File operations

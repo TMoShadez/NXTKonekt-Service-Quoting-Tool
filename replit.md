@@ -1,72 +1,19 @@
 # NXTKonekt Site Assessment Tool
 
 ## Overview
+NXTKonekt is a full-stack web application for managing Fixed Wireless Access (FWA) installation assessments and generating quotes. It allows sales executives to conduct site assessments, upload supporting documents, and automatically create professional quotes with pricing calculations. The project aims to streamline the sales and assessment process for FWA installations, providing a comprehensive tool for efficient client engagement and quote delivery.
 
-NXTKonekt is a comprehensive full-stack web application designed for managing Fixed Wireless Access (FWA) installation assessments and quote generation. The system enables sales executives to conduct detailed site assessments, upload supporting documents and photos, and automatically generate professional quotes with pricing calculations.
+## User Preferences
+Preferred communication style: Simple, everyday language.
 
 ## System Architecture
+The application uses a modern full-stack architecture. The **Frontend** is a React SPA with TypeScript, built with Vite, using shadcn/ui on Radix UI, Tailwind CSS, TanStack Query for state management, Wouter for routing, and React Hook Form with Zod for forms. The **Backend** is an Express.js server with TypeScript, utilizing PostgreSQL via Neon with Drizzle ORM, Passport.js for Replit Auth (OpenID Connect), Express sessions, Multer for file uploads, and PDFKit for quote generation.
 
-The application follows a modern full-stack architecture with clear separation between frontend and backend concerns:
+The **Database Schema** includes entities for Users, Sessions, Organizations, Assessments, Quotes, and UploadedFiles. File uploads are stored locally with metadata in the database, with validation for type and size.
 
-- **Frontend**: React-based SPA with TypeScript, built using Vite
-- **Backend**: Express.js server with TypeScript
-- **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: Replit Auth with OpenID Connect
-- **Deployment**: Replit platform with autoscale deployment target
-
-## Key Components
-
-### Frontend Architecture
-- **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite for development and production builds
-- **UI Library**: shadcn/ui components built on Radix UI primitives
-- **Styling**: Tailwind CSS with custom NXTKonekt brand colors
-- **State Management**: TanStack Query for server state management
-- **Routing**: Wouter for lightweight client-side routing
-- **Forms**: React Hook Form with Zod validation
-
-### Backend Architecture
-- **Framework**: Express.js with TypeScript
-- **Database**: PostgreSQL via Neon serverless with WebSocket support
-- **ORM**: Drizzle ORM for type-safe database operations
-- **Authentication**: Passport.js with OpenID Connect strategy
-- **Session Management**: Express sessions with PostgreSQL store
-- **File Handling**: Multer for multipart file uploads
-- **PDF Generation**: PDFKit for quote document generation
-
-### Database Schema
-The application uses a PostgreSQL database with the following key entities:
-- **Users**: Mandatory Replit Auth user storage
-- **Sessions**: Mandatory session storage for Replit Auth
-- **Organizations**: Sales organization information
-- **Assessments**: Site assessment data and technical requirements
-- **Quotes**: Generated quotes with pricing breakdown
-- **UploadedFiles**: File metadata for photos and documents
-
-### File Management
-- **Upload Structure**: Organized into `uploads/photos` and `uploads/documents`
-- **File Types**: Images for site photos, documents for supporting materials
-- **Storage**: Local filesystem with database metadata tracking
-- **Security**: File type validation and size limits
-
-## Data Flow
-
-1. **Authentication**: Users authenticate via Replit Auth (OpenID Connect)
-2. **Organization Setup**: First-time users create their sales organization profile
-3. **Assessment Creation**: Sales executives create new site assessments
-4. **Step-by-Step Data Collection**:
-   - Sales executive information
-   - Customer contact details
-   - Technical site assessment
-   - File uploads (photos/documents)
-   - Quote generation and review
-5. **Pricing Calculation**: Automated pricing engine calculates costs based on assessment parameters
-6. **PDF Generation**: Professional quotes generated as downloadable PDFs
-7. **Data Persistence**: All assessment and quote data stored in PostgreSQL
+**Data Flow** involves user authentication via Replit Auth, organization setup, creation of site assessments with step-by-step data collection (sales info, customer details, technical assessment, file uploads), automated pricing calculation, and PDF quote generation. All data persists in PostgreSQL.
 
 ## External Dependencies
-
-### Core Dependencies
 - **@neondatabase/serverless**: PostgreSQL database connectivity
 - **drizzle-orm**: Type-safe database ORM
 - **@tanstack/react-query**: Server state management
@@ -78,108 +25,8 @@ The application uses a PostgreSQL database with the following key entities:
 - **passport**: Authentication middleware
 - **multer**: File upload handling
 - **pdfkit**: PDF document generation
-
-### Development Dependencies
-- **vite**: Frontend build tool and development server
-- **typescript**: Type safety and enhanced developer experience
-- **tsx**: TypeScript execution for server development
-- **esbuild**: Fast JavaScript bundler for production builds
-
-## Deployment Strategy
-
-The application is configured for deployment on the Replit platform with:
-
-- **Environment**: Node.js 20 with PostgreSQL 16
-- **Build Process**: Vite builds the frontend, esbuild bundles the server
-- **Development**: `npm run dev` starts both frontend and backend with hot reload
-- **Production**: `npm run start` serves the built application
-- **Database**: Drizzle migrations handle schema changes
-- **Port Configuration**: Server runs on port 5000, mapped to external port 80
-- **Auto-scaling**: Configured for Replit's autoscale deployment target
-
-The application requires environment variables:
-- `DATABASE_URL`: PostgreSQL connection string
-- `SESSION_SECRET`: Session encryption key
-- `REPLIT_DOMAINS`: Allowed domains for Replit Auth
-- `ISSUER_URL`: OpenID Connect issuer URL (defaults to Replit)
-
-## Changelog
-
-Changelog:
-- June 15, 2025. Initial setup with full assessment workflow
-- June 15, 2025. Fixed database foreign key constraints for organization handling
-- June 15, 2025. Resolved date validation errors in customer information step
-- June 15, 2025. Added 48-hour SLA disclaimer for installation date selection
-- June 15, 2025. Updated branding to "NXTKonekt" (one word) and added astronaut logo to landing page
-- June 15, 2025. Added NXTKonekt astronaut logo to PDF quote templates for consistent branding
-- June 15, 2025. Updated dashboard to use NXTKonekt horizontal logo and pricing to $190/hr with included services
-- June 15, 2025. Completed multi-service assessment system with customer information collection and PDF quote generation for Fleet Tracking and Fleet Camera services
-- June 15, 2025. Updated pricing engine with service-specific calculations: Fleet Tracker OBD installation includes up to 3 vehicles, Fleet Camera pricing per vehicle at $190/hr
-- June 19, 2025. Fixed character input issues in Fleet Tracking and Fleet Camera forms by correcting number and date input parsing
-- June 19, 2025. Reordered Fixed Wireless assessment form sections: Infrastructure Requirements first, Site Characteristics second, Environmental Factors last
-- June 19, 2025. Added network signal assessment fields to Infrastructure Requirements: Network Signal dropdown (4G/5G) and Signal Strength dropdown (5/4/3 bars)
-- June 19, 2025. Enhanced Infrastructure Requirements with additional assessment questions: connection usage (Primary/Failover), router location (In Rack/Server Room/Other), antenna cable requirement, device connection assistance with conditional messaging for device limits
-- June 19, 2025. Implemented advanced conditional logic for Fixed Wireless assessments: 3-bars signal strength triggers antenna recommendations and additional questions, server room selection shows router mounting options, failover connections display dual WAN support questions
-- June 19, 2025. Reorganized Infrastructure Requirements question order: connection usage and router location moved to top, removed duplicate antenna cable question, added conditional ceiling assessment (height/type) to Site Characteristics when internal antenna selected
-- June 19, 2025. Added router specification questions to Site Characteristics: router make dropdown with 11 manufacturer options and router model text field with 20-character limit as final section questions
-- June 19, 2025. Enhanced antenna assessment with cable footage question (10-250 ft range) and streamlined Infrastructure Requirements by removing power, ethernet, ceiling mount, and outdoor coverage checkboxes
-- June 22, 2025. Updated pricing engine with new rate structure: Fixed Wireless base 0/2/1 hours (survey/install/config), device count logic for 1 included + failover adjustments, cable pricing at $7/ft, configuration now billable at $190/hr
-- June 22, 2025. Implemented configuration pricing logic: Failover with 1 device = $0, Failover with >1 devices = billable hours. Primary with <5 devices = $0, Primary with >=5 devices = billable hours
-- June 22, 2025. Updated quote summary page to match PDF format with hours, rates, and hardware line items displayed in 4-column table layout
-- June 22, 2025. Added "Number of Routers to be installed" required field to Site Characteristics section with router count multiplier logic for installation hours when >1 router specified
-- June 22, 2025. Fixed Fleet Tracking and Fleet Camera form input issues by implementing debounced state updates that save on blur instead of every keystroke, preventing cursor jumping and character deletion
-- June 23, 2025. Implemented data isolation between service types to prevent cross-contamination: Fleet Tracking and Fleet Camera forms now maintain independent datasets, customer information properly transfers to PDFs, and quotes are service-specific without Fixed Wireless data bleeding through
-- June 23, 2025. Completely resolved Fleet form input issues: implemented proper debounced state management with onBlur API saves, fixed cursor jumping in text fields, eliminated character deletion during typing, and ensured all form inputs (text, number, select, checkbox, textarea) work smoothly across both Fleet Tracking and Fleet Camera forms
-- June 23, 2025. Enhanced Fleet Camera form with advanced features: added useFormInput custom hook for robust input handling, implemented Carrier Sim dropdown (T-Mobile, Verizon, AT&T, Wholesale), added dynamic vehicle details collection (Year/Make/Model) that scales with vehicle count, replaced Video Quality with Tracking Partner dropdown (Zenduit, Spireon, Geotab, TrackCam, Fleethoster, AirIQ, Other), replaced Storage with Model text field, and replaced Recording Mode with Protective Wiring Harness Yes/No dropdown
-- July 5, 2025. Simplified pricing logic across all service types: reduced to +1 additional hour of labor for all quotes regardless of device count or complexity, updated cable pricing from $7/ft to $14.50/ft for Fixed Wireless installations
-- July 5, 2025. Implemented router-based pricing for Fixed Wireless: installation hours now calculated as (router count × 2 hours) + 1 labor hold hour, added dedicated "Labor hold for possible overage, returned if unused in final billing" line item with proper database schema and display integration
-- July 5, 2025. Updated pricing to 1 base hour for all services: Fixed Wireless (router count × 1 hour), Fleet Tracking (1 hour), Fleet Camera (1 hour), all with +1 labor hold hour, ensured Labor Hold service item displays in both web interface and PDF quotes
-- July 5, 2025. Completely redesigned PDF quote generator for compact 1-2 page layout: reduced margins, smaller fonts, compressed sections, added debug logging for Labor Hold line, renamed to "Labor Hold - Overage Reserve" for clarity
-- July 5, 2025. Fixed critical Fleet form input issues: completely rewrote Fleet Tracking and Fleet Camera forms with simplified state management using onBlur saves instead of real-time updates, eliminated useFormInput hook conflicts, resolved TypeScript errors, and implemented local state management to prevent digit deletion and cursor jumping during data entry
-- July 5, 2025. Enhanced Fleet Tracking form with comprehensive field updates: changed "Site Address" to "Billing Address", added Transportation/Logistics, Finance, Construction to Industry Type, renamed "Fleet Size" to "Number of Vehicles for Installation", added "Total Number of Vehicles in Fleet", replaced Coverage Area with dynamic Year/Make/Model vehicle details, renamed "Primary Service Location" to "Installation Site Address", added Tracker Type dropdown (Vehicle/Asset/Slap & Track), removed Asset Tracker from Installation Type, added IoT Tracking Partner dropdown (GeoTab, Zenduit, Spireon, etc.), added Carrier Sim dropdown (T-Mobile, Verizon, AT&T, Wholesale), removed feature checkboxes and Reporting Frequency field
-- July 5, 2025. Implemented dynamic vehicle detail collection: Fleet Tracking form now creates the same number of Year/Make/Model sets as specified in "Number of Vehicles for Installation" field, with vehicle details preserved when count changes and helpful visual indicators
-- July 5, 2025. Updated Fleet Tracking pricing logic for OBD Port Installation efficiency: 1 base hour covers up to 3 vehicles for OBD installations (1-3 vehicles = 1 hour, 4-6 vehicles = 2 hours), other installation types remain 1 hour per vehicle, maintains +1 labor hold hour for all installations
-- July 6, 2025. Added comprehensive Fleet Tracker Equipment Installation Statement of Work to both web quote display and PDF generation: includes detailed 4-step installation process (Pre-Installation Check, Device Installation, Cable Management, Functionality Verification), estimated 20-minute per vehicle timeframe, and complete scope of work documentation for OBD-II port installations
-- July 6, 2025. Optimized PDF layout for readability and space efficiency: fixed text overlapping issues by adjusting line spacing from 10-12pt to 12-18pt, improved table row spacing, properly separated information sections, and ensured all PDFs fit within 3 pages maximum while maintaining clear readability
-- July 6, 2025. Redesigned Fleet Camera "Camera Features Required" section to "Camera Solution Detail": replaced checkboxes with Camera Solution Type dropdown (Driver Facing, Front Facing, Driver/Front Combo, Rear Facing, Trailer, Aux/Multi camera system), added Number of Cameras numeric field, changed Recording Mode to "Removal of existing solution needed?" Yes/No dropdown, updated Audio Recording to "Existing Camera Solution" with 15 provider options (GeoTab, Zenduit, Fleethoster, Verizon Connect, Samsara, Lytx, Motive, Azuga, Teletrac, Tenna, AirIQ, Smart Witness, GPS Insight, Linxup, Other), added conditional "Other Solution Details" text field, implemented conditional logic to show existing solution fields only when removal is needed
-- July 6, 2025. Updated Fleet Camera pricing calculation: base pricing of 1 hour per vehicle includes 1 camera per vehicle, additional cameras beyond 1 per vehicle add 0.5 hours each (e.g., 3 vehicles with 5 cameras = 4 hours total), added database schema fields for cameraSolutionType, numberOfCameras, removalNeeded, existingCameraSolution, and otherSolutionDetails
-- July 6, 2025. Fixed Fleet Camera removal costs display: added removalHours and removalCost fields to quotes database schema, updated quote creation and data retrieval to include removal costs, fixed storage query to properly retrieve all quote fields for PDF generation, updated labor hold title to "Labor Hold, Final bill Return" in both web interface and PDF quotes, confirmed "Existing System Removal" line item appears correctly in both web quotes and PDF downloads when removal is needed
-- July 6, 2025. Added comprehensive Fleet Camera Statement of Work to both web quote display and PDF generation: includes detailed installation procedures (Pre-Installation Check, Dashcam Installation, External Camera Installation, Fleet Tracker Installation), functionality verification steps, post-installation cleanup, and estimated time per vehicle with component variations, statement appears only on Fleet Camera quotes with optimized PDF spacing to prevent text overlapping while maintaining single-page format
-- July 6, 2025. Implemented quote deletion functionality: added deleteQuote method to storage interface, created DELETE /api/quotes/:id endpoint with ownership verification, added delete quote mutation to dashboard with error handling and confirmation dialog, users can now delete old quotes using red trash icon in actions column with confirmation prompt
-- July 6, 2025. Added conditional Statement of Work for Fixed Wireless assessments: displays when connection usage is "primary" AND signal strength is "3-bars" (triggering lowSignalAntennaCable question) AND antenna cable is selected "yes", includes comprehensive installation procedures for coaxial cable work, router configuration, and testing, appears in both web quote display and PDF generation with proper formatting
-- July 6, 2025. Optimized Fixed Wireless Statement of Work PDF formatting: improved line spacing and readability with condensed bullet points, organized into 4 clear sections (Preparation, Cable Installation, Termination, Configuration), reduced font sizes for better space utilization while maintaining excellent readability, ensures single-page format with proper spacing between sections
-- July 6, 2025. Fixed PDF text overlapping issues in Fixed Wireless Statement of Work: significantly increased line spacing from 10-12pt to 14-20pt between sections and bullet points, added lineGap property for multiline text, expanded major section spacing to 20-25pt, enhanced bullet point separation to 14pt for clear readability without text overlap
-- July 6, 2025. Added second conditional Statement of Work for Fixed Wireless assessments: displays when only "Primary" connection usage is selected (without antenna cable requirements), includes comprehensive cellular router installation procedures with SIM card setup, router configuration, device connection support for up to 5 devices, and $380 labor hold for external penetrations/ceiling issues, appears in both web quote display and PDF generation with proper formatting
-- July 6, 2025. Completed comprehensive three-tier conditional Statement of Work system for Fixed Wireless assessments: added third conditional SOW for "Failover" connection usage + "Yes" antenna cable installation, includes comprehensive installation procedures with external/internal antenna options, network cabling to server/rack, external penetration disclaimers, and detailed step-by-step installation process, all three conditional SOWs now fully functional in both web quote display and PDF generation with optimized spacing and readability
-- July 6, 2025. Completed comprehensive four-tier conditional Statement of Work system for Fixed Wireless assessments: added fourth conditional SOW for "Failover" connection usage without antenna requirements, includes detailed failover cellular router installation procedures with site survey, SIM card installation, mounting options, power connection, network configuration, and failover testing, all four conditional SOWs now fully functional in both web quote display and PDF generation with optimized spacing and readability
-- July 6, 2025. Optimized PDF formatting for fourth conditional SOW to eliminate text overlapping and improve readability: condensed lengthy descriptions into concise bullet points, reduced font sizes (14pt title, 11pt headers, 8-9pt body text), improved line spacing with lineGap properties, combined related sections (mounting/power), and enhanced overall document structure for better space utilization while maintaining professional appearance and clear readability
-- July 6, 2025. Fixed PDF text overlapping in third conditional SOW (Failover with cabling): applied same condensed formatting approach with optimized font sizes (10pt headers, 8pt body text), improved line spacing (lineGap 3pt), consolidated detailed bullet points into concise summaries, combined related sections for better space utilization, ensuring clear readability without text overlap across all antenna installation, cable routing, and configuration sections
-- July 6, 2025. Completely restructured third conditional SOW to ultra-condensed format: reduced from 5+ pages to 2-3 pages maximum, combined multiple bullet points into single lines, reduced font sizes (12pt title, 8pt headers, 7pt body), created 5-step installation process with highly condensed descriptions, eliminated verbose explanations while maintaining all essential technical information, ensuring professional appearance within 3-4 page limit
-- July 6, 2025. Updated application text labels for improved clarity: changed "Site Assessment (Fixed Wireless)" to "Fixed Wireless Access Assessment" across dashboard, assessment header, and step definitions, changed "Create New Assessment" button text to "Generate New Quote" to better reflect the primary purpose of the application workflow
-- July 7, 2025. Implemented comprehensive HubSpot CRM integration: automatic contact creation from customer assessments, deal creation for quotes, ticket generation for follow-ups, quote approval/rejection status updates to deals, complete association between contacts/deals/tickets, dashboard integration section with connection testing and manual sync options, async background processing to prevent request blocking
-- July 7, 2025. Fixed HubSpot integration API connection issues: resolved incorrect API method calls (getAll vs basicApi.getPage), fixed client initialization with proper token configuration, added comprehensive error logging and diagnostics, confirmed working connection with 10 contacts found, server startup test now passes successfully
-- July 7, 2025. Completely resolved HubSpot sync failures: fixed HTTP 400 contact creation errors by identifying invalid custom properties, initially removed non-existent properties and used standard HubSpot fields only, then restored all custom properties (service_type, site_address, industry, preferred_installation_date, nxtkonekt_assessment_id) after user configured them in HubSpot, fixed ticket pipeline stages to use numeric IDs (1,2,3,4) instead of text values, achieved 100% sync success rate with all endpoints working: contacts, deals, and tickets
-- July 7, 2025. Created comprehensive admin dashboard with partner management system: role-based access control (admin, partner, sales_executive), partner status management (pending, approved, suspended), real-time statistics and analytics, user activation/deactivation controls, assessment and quote oversight capabilities, enhanced database schema with partner fields, admin button in main dashboard visible to admin users only
-- July 7, 2025. Fixed partner status update errors in admin dashboard: corrected API request format in admin dashboard mutations, added comprehensive error logging to track update process, enhanced backend validation for organization IDs and status values, improved database update with timestamp tracking, resolved "Update Failed. Failed to update partner status" error
-- July 7, 2025. Implemented email invitation system with branded templates: created comprehensive email service with NXTKonekt branding and professional HTML templates, added partner invitation tracking database schema (partner_invitations, signup_analytics tables), implemented email invitation dialog in admin dashboard with recipient name/company fields, added signup analytics tracking with conversion funnel metrics (invitations sent, clicks, signups, organizations created), created separate tabs for invitations and analytics management in admin portal
-- July 8, 2025. Enhanced admin dashboard with comprehensive tracking and visibility: fixed database connection issues in admin routes, added customer name and sales executive information to all admin views, implemented proper partner assessment and quote tracking with customer details (name, company, email, phone), added sales executive identification (first name, last name, email) and partner organization names to admin dashboard tables, resolved admin access control issues for partner data visibility
-- July 8, 2025. Implemented comprehensive admin quote and assessment management: added detailed view modals for quotes and assessments with complete customer information, pricing breakdowns, and service-specific technical details, implemented admin quote closing and deletion functionality with proper API endpoints, added action buttons (view, close, delete) to admin dashboard tables for complete quote lifecycle management, enhanced admin oversight capabilities with detailed quote and assessment inspection tools
-- July 8, 2025. Fixed admin quote modal data display issues: resolved blank modal problem by updating admin quotes API to include all pricing fields and customer information, added prominent service type badge for admin visibility, corrected customer name and company information mapping, implemented proper data structure for pricing breakdowns with all cost categories (survey, installation, configuration, hardware, removal, labor hold costs), confirmed complete functionality of admin quote management system
-- July 8, 2025. Fixed partner quote view button routing issue: replaced assessment workflow redirect with comprehensive quote details modal, added eye icon for consistent UI design, modal displays complete quote information including service type identification, customer details, pricing breakdown, and site information with direct access to PDF download and customer portal sharing
-- July 8, 2025. Implemented export reports functionality: added CSV export capability for partner dashboard, generates comprehensive reports with quote data including customer information, service types, pricing breakdowns, and assessment details, downloads as timestamped CSV file with proper formatting and user feedback notifications
-- July 13, 2025. Fixed Google login authentication loop issues: changed prompt from "login consent" to "select_account" to reduce consent loops, improved session configuration with rolling sessions and better cookie settings, added comprehensive error handling with detailed logging and user-friendly error page for authentication failures, implemented proper callback error handling to diagnose login issues
-- July 13, 2025. Resolved invited user login redirect issues: identified invalid_redirect_uri error when accessing via localhost, added localhost strategy registration for development, created helpful landing page guidance directing users to live domain for proper authentication, added production URL detection and redirect functionality for invited users
-- July 13, 2025. Implemented comprehensive admin assessment PDF download system: replaced JSON format with professional PDF reports containing complete assessment details, customer information, technical specifications, sales executive data, organization details, and pricing breakdowns with proper formatting and NXTKonekt branding, enhanced admin dashboard with individual PDF downloads and bulk CSV export capabilities
-- July 13, 2025. Enhanced HubSpot integration with comprehensive assessment data sync: added all technical assessment fields as custom properties in HubSpot contacts, implemented detailed assessment notes with complete specifications for Fixed Wireless, Fleet Tracking, and Fleet Camera services, automatic notes creation with sales executive information, customer details, service-specific technical data, and installation requirements for complete CRM integration
-- July 13, 2025. Fixed vehicle data transfer issue in Fleet assessments: resolved "N/A" vehicle fields by adding vehicleDetails JSON array storage to database schema, modified Fleet Tracking and Fleet Camera forms to save vehicle Year/Make/Model data when entered, updated HubSpot notes generation to parse and display complete vehicle information for each vehicle in Fleet assessments, implemented backwards compatibility with existing single vehicle fields, confirmed working vehicle data transfer from frontend forms through database storage to HubSpot CRM synchronization
-- July 13, 2025. Implemented proper role-based access control for HubSpot integration: removed HubSpot CRM Integration Testing section from partner dashboard, added dedicated HubSpot tab to admin management system with comprehensive connection testing and integration status display, enhanced admin user role management interface with system admin controls and role assignment capabilities, updated SMTP email configuration with new credentials for partner invitation system
-- July 18, 2025. Enhanced admin dashboard with comprehensive assessment visibility for HubSpot service ticket creation: completely redesigned quote details modal to display all answered assessment questions organized by service type (Fixed Wireless: Infrastructure Requirements, Site Characteristics, Environmental Factors; Fleet Tracking: Fleet Information, Vehicle Details; Fleet Camera: Camera Solution Details, Installation & Removal), added new API endpoint for complete quote-assessment data retrieval, integrated HubSpot service ticket helper section with customer and project summary, admin users now have complete visibility into all assessment form responses for detailed service ticket creation in HubSpot CRM
-- July 19, 2025. Finalized comprehensive quote details modal for complete assessment visibility: removed HubSpot service ticket information box per user request, enhanced quote details modal to display ALL assessment information entered during quoting process, fixed field mappings for Fleet assessments (siteAddress, deviceCount, ceilingType for Installation Type), added missing Fixed Wireless fields including Dual WAN Support, included comprehensive Camera Solution details with Camera Model and Protective Wiring Harness, organized assessment data by logical sections with special requirements and additional notes for all service types, admin users now have complete visibility into every piece of assessment information for effective quote management and service delivery
-- July 30, 2025. Completed comprehensive HubSpot integration separation: completely removed all HubSpot integration elements from partner and sales executive interfaces including sync buttons, CRM integration sections, and test connection functionality, implemented role-based access control ensuring HubSpot features remain available only in admin dashboard (/admin), partner dashboard (/) now provides clean interface focused on core business functions (quote management, assessment creation, export reports, customer portal sharing), verified successful separation with user confirmation
-- July 31, 2025. Enhanced admin assessment display with comprehensive details cards: replaced table format with detailed card layout showing complete assessment information including customer details, sales executive info, service-specific technical data, and additional requirements directly in admin dashboard without requiring modal clicks, organized information into color-coded sections for effective work planning and service delivery
-- July 31, 2025. Fixed Fixed Wireless Assessment configuration pricing logic: corrected hardcoded 1-hour configuration charge applied to all quotes, implemented proper conditional pricing rules (Failover: 1 device = $0, >1 devices = billable; Primary: <5 devices = $0, >=5 devices = billable), ensuring configuration hours are only charged when assessment parameters meet established pricing criteria
-- July 31, 2025. Fixed admin page 404 routing error: resolved issue where `/admin` route was only accessible to authenticated users causing 404 errors, added `/admin` route to unauthenticated state routing to show Landing page with authentication options, enabling proper login flow for admin access
-
-## User Preferences
-
-Preferred communication style: Simple, everyday language.
+- **vite**: Frontend build tool
+- **typescript**: Type safety
+- **tsx**: TypeScript execution
+- **esbuild**: Fast JavaScript bundler
+- **HubSpot API**: CRM integration for contact, deal, and ticket management.
