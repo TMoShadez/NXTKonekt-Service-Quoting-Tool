@@ -49,58 +49,54 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         }
       }
 
-      // Company name and title
-      doc.fontSize(18)
-         .text('NXTKonekt', 110, 35)
-         .fontSize(12)
-         .text('Professional Installation Services', 110, 55)
-         .fontSize(11)
-         .text(`Quote #${quote.quoteNumber}`, 450, 35)
-         .text(`Date: ${new Date().toLocaleDateString()}`, 450, 50);
+      // Company header - Ultra compact
+      doc.fontSize(16).font('Helvetica-Bold')
+         .text('NXTKonekt', 110, 30)
+         .fontSize(10).font('Helvetica')
+         .text('Professional Installation Services', 110, 48)
+         .fontSize(9).font('Helvetica-Bold')
+         .text(`Quote #${quote.quoteNumber}`, 450, 30)
+         .fontSize(8).font('Helvetica')
+         .text(`Date: ${new Date().toLocaleDateString()}`, 450, 42);
 
-      // Customer Information - Ultra Compact
-      let currentY = 90;
-      doc.fontSize(10).font('Helvetica-Bold')
-         .text('Customer Information', 50, currentY);
-      
-      currentY += 14;
+      // Customer & Service Information - Single line format
+      let currentY = 70;
+      doc.fontSize(9).font('Helvetica-Bold')
+         .text('Customer: ', 50, currentY);
       doc.fontSize(8).font('Helvetica')
-         .text(`${assessment.customerCompanyName || 'Not specified'} | ${assessment.customerContactName || 'Not specified'}`, 50, currentY);
-      currentY += 10;
-      doc.text(`${assessment.customerPhone || 'Not specified'} | ${assessment.customerEmail || 'Not specified'}`, 50, currentY);
-
-      // Service Information - Ultra Compact
-      currentY += 16;
-      doc.fontSize(10).font('Helvetica-Bold')
-         .text('Service Information', 50, currentY);
+         .text(`${assessment.customerCompanyName || 'N/A'} | ${assessment.customerContactName || 'N/A'}`, 100, currentY);
       
-      currentY += 18;
-      const serviceTitle = getServiceTitle(assessment.serviceType ?? undefined);
-      doc.fontSize(9)
-         .text(`Service: ${serviceTitle}`, 50, currentY);
       currentY += 12;
-      doc.text(`Location: ${assessment.siteAddress || 'Not specified'}`, 50, currentY);
+      doc.fontSize(8).font('Helvetica')
+         .text(`${assessment.customerPhone || 'N/A'} | ${assessment.customerEmail || 'N/A'}`, 100, currentY);
 
-      // Pricing breakdown header - Ultra Compact
-      currentY += 16;
-      doc.fontSize(10).font('Helvetica-Bold')
+      currentY += 12;
+      const serviceTitle = getServiceTitle(assessment.serviceType ?? undefined);
+      doc.fontSize(9).font('Helvetica-Bold')
+         .text('Service: ', 50, currentY);
+      doc.fontSize(8).font('Helvetica')
+         .text(`${serviceTitle} | ${assessment.siteAddress || 'N/A'}`, 100, currentY);
+
+      // Pricing breakdown header - Maximum Compact
+      currentY += 14;
+      doc.fontSize(9).font('Helvetica-Bold')
          .text('Pricing Breakdown', 50, currentY);
 
-      const lineY = currentY + 12;
+      const lineY = currentY + 10;
       
-      // Table headers
-      doc.fontSize(8).font('Helvetica')
+      // Table headers - smaller
+      doc.fontSize(7).font('Helvetica')
          .text('Service Item', 50, lineY)
-         .text('Hours', 300, lineY)
+         .text('Hrs', 300, lineY)
          .text('Rate', 350, lineY)
          .text('Cost', 450, lineY);
 
       // Draw line
-      doc.moveTo(50, lineY + 10)
-         .lineTo(550, lineY + 10)
+      doc.moveTo(50, lineY + 8)
+         .lineTo(550, lineY + 8)
          .stroke();
 
-      currentY = lineY + 14;
+      currentY = lineY + 12;
       
       // Parse numeric values from quote (handle string/decimal conversion)
       const surveyHours = parseFloat(quote.surveyHours?.toString() || '0');
@@ -119,99 +115,94 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
       console.log('PDF Labor Hold Debug:', { laborHoldHours, laborHoldCost, quote });
       console.log('PDF Removal Debug:', { removalHours, removalCost, quote: { removalHours: quote.removalHours, removalCost: quote.removalCost } });
       
-      // Survey line (only show if > 0 hours) - Compact
+      // Survey line (only show if > 0 hours) - Maximum Compact
       if (surveyHours > 0) {
-        doc.fontSize(8).font('Helvetica')
+        doc.fontSize(7).font('Helvetica')
            .text('Site Survey & Planning', 50, currentY)
            .text(`${surveyHours}`, 300, currentY)
            .text(`$${hourlyRate}`, 350, currentY)
            .text(`$${surveyCost.toFixed(2)}`, 450, currentY);
-        currentY += 12;
+        currentY += 10;
       }
       
-      // Installation line - Compact
-      doc.fontSize(8).font('Helvetica')
+      // Installation line - Maximum Compact
+      doc.fontSize(7).font('Helvetica')
          .text('Installation & Setup', 50, currentY)
          .text(`${installationHours}`, 300, currentY)
          .text(`$${hourlyRate}`, 350, currentY)
          .text(`$${installationCost.toFixed(2)}`, 450, currentY);
       
-      currentY += 12;
+      currentY += 10;
       
-      // Configuration line (only show if > 0 hours and cost > 0) - Compact
+      // Configuration line (only show if > 0 hours and cost > 0) - Maximum Compact
       if (configurationHours > 0 && configurationCost > 0) {
-        doc.fontSize(8).font('Helvetica')
+        doc.fontSize(7).font('Helvetica')
            .text('Configuration & Testing', 50, currentY)
            .text(`${configurationHours}`, 300, currentY)
            .text(`$${hourlyRate}`, 350, currentY)
            .text(`$${configurationCost.toFixed(2)}`, 450, currentY);
-        currentY += 12;
+        currentY += 10;
       } else if (configurationHours > 0) {
-        doc.fontSize(8).font('Helvetica')
+        doc.fontSize(7).font('Helvetica')
            .text('Configuration & Testing', 50, currentY)
            .text('Included', 450, currentY);
-        currentY += 12;
+        currentY += 10;
       }
       
-      // Existing System Removal line (only for Fleet Camera with removal needed) - Compact
+      // Existing System Removal line (only for Fleet Camera with removal needed) - Maximum Compact
       if (removalHours > 0 && removalCost > 0) {
-        doc.fontSize(8).font('Helvetica')
+        doc.fontSize(7).font('Helvetica')
            .text('Existing System Removal', 50, currentY)
            .text(`${removalHours}`, 300, currentY)
            .text(`$${hourlyRate}`, 350, currentY)
            .text(`$${removalCost.toFixed(2)}`, 450, currentY);
-        currentY += 12;
+        currentY += 10;
       }
       
-      // Labor Hold line - ALWAYS show if we have labor hold data - Compact
+      // Labor Hold line - ALWAYS show if we have labor hold data - Maximum Compact
       if (laborHoldHours > 0 || laborHoldCost > 0) {
-        doc.fontSize(8).font('Helvetica')
+        doc.fontSize(7).font('Helvetica')
            .text('Labor Hold, Final bill Return', 50, currentY)
            .text(`${laborHoldHours}`, 300, currentY)
            .text(`$${hourlyRate}`, 350, currentY)
            .text(`$${laborHoldCost.toFixed(2)}`, 450, currentY);
-        currentY += 12;
+        currentY += 10;
       }
       
-      // Hardware line (cable costs)
+      // Hardware line (cable costs) - Maximum Compact
       if (hardwareCost > 0) {
-        doc.fontSize(9)
+        doc.fontSize(7).font('Helvetica')
            .text('Hardware & Materials', 50, currentY)
            .text('', 300, currentY)
            .text('', 350, currentY)
            .text(`$${hardwareCost.toFixed(2)}`, 450, currentY);
-        currentY += 14;
+        currentY += 10;
       }
       
-      // Training line
-      doc.fontSize(9)
+      // Training line - Maximum Compact
+      doc.fontSize(7).font('Helvetica')
          .text('Documentation & Training', 50, currentY)
          .text('Included', 450, currentY);
 
-      // Total line
-      currentY += 15;
+      // Total line - Maximum Compact
+      currentY += 12;
       doc.moveTo(50, currentY)
          .lineTo(550, currentY)
          .stroke();
 
-      currentY += 8;
+      currentY += 6;
       const totalCost = parseFloat(quote.totalCost?.toString() || '0');
-      doc.fontSize(11)
+      doc.fontSize(9).font('Helvetica-Bold')
          .text('Total Project Cost', 50, currentY)
          .text(`$${totalCost.toFixed(2)}`, 450, currentY);
 
-      // Terms and conditions - compact
-      currentY += 20;
-      doc.fontSize(9)
+      // Terms and conditions - Maximum Compact
+      currentY += 16;
+      doc.fontSize(8).font('Helvetica-Bold')
          .text('Terms & Conditions:', 50, currentY);
-      currentY += 12;
-      doc.text('• Quote valid for 30 days from generation date', 50, currentY);
-      currentY += 12;
-      doc.text('• Labor hold returned if unused in final billing', 50, currentY);
-      currentY += 12;
-      doc.text('• Installation subject to site assessment approval', 50, currentY);
-      currentY += 12;
-      doc.text('• Contact your sales representative for questions', 50, currentY);
+      currentY += 10;
+      doc.fontSize(7).font('Helvetica')
+         .text('• Quote valid for 30 days • Labor hold returned if unused • Installation subject to site assessment approval • Contact sales representative for questions', 50, currentY, { width: 500, lineGap: 1 });
 
       // Statement of Work for Fleet Tracking - optimized for space
       if (assessment.serviceType === 'fleet-tracking') {
@@ -346,33 +337,17 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         doc.text('Work will be completed within a typical timeframe, the final charge will accurately reflect the actual time our team spends on-site. This includes the minimum service fee plus any additional time for completion. Any on-site challenges or unexpected extra work or unforeseen delay. A preliminary labor hold of $190.00 in total hold.', 50, currentY, { width: 500 });
       }
 
-      // Statement of Work for Fixed Wireless (Primary + Antenna) - Ultra Condensed
+      // Statement of Work for Fixed Wireless (Primary + Antenna) - Minimal
       if (assessment.serviceType === 'site-assessment' && 
           assessment.connectionUsage === 'primary' && 
           assessment.lowSignalAntennaCable === 'yes') {
-        // Continue on same page to save space
-        currentY += 20;
-        
-        doc.fontSize(10).font('Helvetica-Bold')
-           .text('Scope of Work: Primary Cellular Router + Antenna Installation', 50, currentY);
-        
-        currentY += 16;
-        doc.fontSize(7).font('Helvetica')
-           .text('Cellular router installation as primary ISP with site survey, router setup, and up to 200ft coaxial cable for antenna installation. Hardware provided by Wireless Vendor, materials by NXTKonekt.', 50, currentY, { width: 500, lineGap: 2 });
-        
-        currentY += 18;
-        doc.fontSize(8).font('Helvetica-Bold')
-           .text('Services: ', 50, currentY);
-        doc.fontSize(7).font('Helvetica')
-           .text('Site survey • Router preparation • Secure mounting • Coaxial cable installation • Configuration & testing', 100, currentY, { width: 400, lineGap: 2 });
-        
         currentY += 16;
         doc.fontSize(8).font('Helvetica-Bold')
-           .text('Process: ', 50, currentY);
-        doc.fontSize(7).font('Helvetica')
-           .text('1) Site planning & location determination 2) Hardware preparation & verification 3) Router & antenna mounting 4) Cable routing & connections 5) SIM installation & configuration 6) Testing & documentation', 100, currentY, { width: 400, lineGap: 2 });
-        
-        currentY += 18;
+           .text('Scope of Work: Primary Cellular Router + Antenna (up to 200ft cable)', 50, currentY);
+        currentY += 12;
+        doc.fontSize(6).font('Helvetica')
+           .text('Site survey, router/antenna installation, coaxial cable routing, SIM setup, configuration & testing. Hardware by Wireless Vendor, materials by NXTKonekt.', 50, currentY, { width: 500 });
+        currentY += 12;
         doc.text('• Wireless Survey: Cellular device assessment for best antenna positioning', 50, currentY, { width: 500 });
         currentY += 14;
         doc.text('• Route Planning: Cable path design minimizing bends and interference sources', 50, currentY, { width: 500 });
@@ -426,33 +401,17 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         doc.text('• Final Testing: Speed test confirmation of primary ISP functionality', 50, currentY, { width: 500 });
       }
 
-      // Statement of Work for Fixed Wireless (Primary Only - No Antenna) - Ultra Condensed  
+      // Statement of Work for Fixed Wireless (Primary Only - No Antenna) - Minimal
       if (assessment.serviceType === 'site-assessment' && 
           assessment.connectionUsage === 'primary' && 
           assessment.lowSignalAntennaCable !== 'yes') {
-        // Continue on same page to save space
-        currentY += 20;
-        
-        doc.fontSize(10).font('Helvetica-Bold')
-           .text('Scope of Work: Cellular Router Installation', 50, currentY);
-        
-        currentY += 16;
-        doc.fontSize(7).font('Helvetica')
-           .text('Cellular router installation as primary ISP with site survey, router setup, and basic configuration. No network cabling included. Hardware provided by Wireless Vendor, materials by NXTKonekt.', 50, currentY, { width: 500, lineGap: 2 });
-        
-        currentY += 18;
-        doc.fontSize(8).font('Helvetica-Bold')
-           .text('Services: ', 50, currentY);
-        doc.fontSize(7).font('Helvetica')
-           .text('Site survey • Router preparation • Secure mounting • Basic configuration • Connect up to 5 devices', 100, currentY, { width: 400, lineGap: 2 });
-        
         currentY += 16;
         doc.fontSize(8).font('Helvetica-Bold')
-           .text('Process: ', 50, currentY);
-        doc.fontSize(7).font('Helvetica')
-           .text('1) Site planning & router placement 2) Hardware preparation 3) Router mounting & power 4) SIM installation 5) Configuration & Wi-Fi setup 6) Device connection & testing', 100, currentY, { width: 400, lineGap: 2 });
-        
-        currentY += 18;
+           .text('Scope of Work: Primary Cellular Router Installation', 50, currentY);
+        currentY += 12;
+        doc.fontSize(6).font('Helvetica')
+           .text('Site survey, router installation, basic configuration, connect up to 5 devices. No network cabling. Hardware by Wireless Vendor, materials by NXTKonekt.', 50, currentY, { width: 500 });
+        currentY += 12;
         doc.text('• Hardware Verification: Component check and documentation review', 50, currentY, { width: 500 });
         currentY += 14;
         doc.text('• Documentation Review: Manufacturer installation guide review', 50, currentY, { width: 500 });
@@ -550,33 +509,17 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
            .text('While we aim for completion within a typical timeframe, the final charge will accurately reflect the actual time our team spends on-site. This includes the minimum service fee plus any additional time (billed at $190 per hour in 15-minute increments) needed for extra work or unforeseen issues. A preliminary Credit Hold of $380.00 in total Hold Amount. This will cover most external penetrations, or ceiling issues.', 50, currentY, { width: 500, lineGap: 3 });
       }
 
-      // Statement of Work for Fixed Wireless (Failover + Antenna) - Ultra Condensed
+      // Statement of Work for Fixed Wireless (Failover + Antenna) - Minimal
       if (assessment.serviceType === 'site-assessment' && 
           assessment.connectionUsage === 'failover' && 
           assessment.lowSignalAntennaCable === 'yes') {
-        // Continue on same page to save space
-        currentY += 20;
-        
-        doc.fontSize(10).font('Helvetica-Bold')
-           .text('Scope of Work: Failover Cellular Router + Antenna Installation', 50, currentY);
-        
-        currentY += 16;
-        doc.fontSize(7).font('Helvetica')
-           .text('Cellular router installation as failover ISP with antenna, network cabling to server/rack. Up to 200ft coaxial cable included. External penetration permits are client responsibility. Hardware provided by Wireless Vendor, materials by NXTKonekt.', 50, currentY, { width: 500, lineGap: 2 });
-        
-        currentY += 18;
-        doc.fontSize(8).font('Helvetica-Bold')
-           .text('Services: ', 50, currentY);
-        doc.fontSize(7).font('Helvetica')
-           .text('Site survey • Router preparation • Antenna installation • Network cabling • Router configuration & testing', 100, currentY, { width: 400, lineGap: 2 });
-        
         currentY += 16;
         doc.fontSize(8).font('Helvetica-Bold')
-           .text('Process: ', 50, currentY);
-        doc.fontSize(7).font('Helvetica')
-           .text('1) Site survey & planning 2) Hardware preparation 3) Antenna & router mounting 4) Cable routing & termination 5) Network integration 6) SIM installation & configuration 7) Failover testing', 100, currentY, { width: 400, lineGap: 2 });
-        
-        currentY += 18;
+           .text('Scope of Work: Failover Cellular Router + Antenna (up to 200ft cable)', 50, currentY);
+        currentY += 12;
+        doc.fontSize(6).font('Helvetica')
+           .text('Site survey, router/antenna installation, network cabling to server/rack, failover configuration. External permits client responsibility. Hardware by Wireless Vendor, materials by NXTKonekt.', 50, currentY, { width: 500 });
+        currentY += 12;
         
         // Step 2
         doc.fontSize(8).font('Helvetica-Bold')
@@ -620,33 +563,17 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
            .text('Comprehensive testing of cellular connection, antenna signal strength, network cable connectivity, and system integration.', 50, currentY, { width: 500, lineGap: 2 });
       }
 
-      // Statement of Work for Fixed Wireless (Failover Only - No Antenna) - Ultra Condensed
+      // Statement of Work for Fixed Wireless (Failover Only - No Antenna) - Minimal
       if (assessment.serviceType === 'site-assessment' && 
           assessment.connectionUsage === 'failover' && 
           assessment.lowSignalAntennaCable !== 'yes') {
-        // Continue on same page to save space
-        currentY += 20;
-        
-        doc.fontSize(10).font('Helvetica-Bold')
+        currentY += 16;
+        doc.fontSize(8).font('Helvetica-Bold')
            .text('Scope of Work: Failover Cellular Router Installation', 50, currentY);
-        
-        currentY += 16;
-        doc.fontSize(7).font('Helvetica')
-           .text('Cellular router installation as failover ISP with site survey, router setup, and network integration for seamless failover operation. Hardware provided by Wireless Vendor, materials by NXTKonekt.', 50, currentY, { width: 500, lineGap: 2 });
-        
-        currentY += 18;
-        doc.fontSize(8).font('Helvetica-Bold')
-           .text('Services: ', 50, currentY);
-        doc.fontSize(7).font('Helvetica')
-           .text('Site survey • Router preparation • Secure mounting • Basic configuration • Failover integration', 100, currentY, { width: 400, lineGap: 2 });
-        
-        currentY += 16;
-        doc.fontSize(8).font('Helvetica-Bold')
-           .text('Process: ', 50, currentY);
-        doc.fontSize(7).font('Helvetica')
-           .text('1) Site planning & router placement 2) Hardware preparation 3) Router mounting & power 4) SIM installation 5) Failover configuration 6) Network integration & testing', 100, currentY, { width: 400, lineGap: 2 });
-        
-        currentY += 18;
+        currentY += 12;
+        doc.fontSize(6).font('Helvetica')
+           .text('Site survey, router installation, network integration for seamless failover operation. Hardware by Wireless Vendor, materials by NXTKonekt.', 50, currentY, { width: 500 });
+        currentY += 12;
         
         doc.text('• Failover Testing: Verification of smooth transition during primary ISP outage.', 50, currentY, { width: 500, lineGap: 4 });
         currentY += 20;
