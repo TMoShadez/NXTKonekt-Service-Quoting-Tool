@@ -537,12 +537,149 @@ export default function Dashboard() {
                   </div>
                 </div>
 
+                {/* Infrastructure Requirements */}
                 <div>
-                  <h3 className="font-semibold mb-2">Site Information</h3>
-                  <p><strong>Address:</strong> {selectedQuote.assessment?.siteAddress || 'N/A'}</p>
-                  <p><strong>Industry:</strong> {selectedQuote.assessment?.industry || 'N/A'}</p>
-                  <p><strong>Building Type:</strong> {selectedQuote.assessment?.buildingType || 'N/A'}</p>
+                  <h3 className="font-semibold mb-3">Infrastructure Requirements</h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    {selectedQuote.assessment?.deviceCount && (
+                      <p><strong>Device Count:</strong> {selectedQuote.assessment.deviceCount} devices</p>
+                    )}
+                    <p><strong>Power Available:</strong> {selectedQuote.assessment?.powerAvailable ? 'Yes' : 'No'}</p>
+                    <p><strong>Ethernet Required:</strong> {selectedQuote.assessment?.ethernetRequired ? 'Yes' : 'No'}</p>
+                    <p><strong>Device Connection Assistance:</strong> {
+                      selectedQuote.assessment?.deviceConnectionAssistance === 'yes' ? 'Required' : 
+                      selectedQuote.assessment?.deviceConnectionAssistance === 'no' ? 'Not Required' : 'Not specified'
+                    }</p>
+                    {selectedQuote.assessment?.routerMake && (
+                      <p><strong>Router:</strong> {selectedQuote.assessment.routerMake} {selectedQuote.assessment.routerModel}</p>
+                    )}
+                    {selectedQuote.assessment?.routerCount && (
+                      <p><strong>Router Count:</strong> {selectedQuote.assessment.routerCount}</p>
+                    )}
+                    {selectedQuote.assessment?.routerLocation && (
+                      <p><strong>Router Location:</strong> {selectedQuote.assessment.routerLocation}</p>
+                    )}
+                    {selectedQuote.assessment?.cableFootage && (
+                      <p><strong>Cable Footage:</strong> {selectedQuote.assessment.cableFootage}</p>
+                    )}
+                    {selectedQuote.assessment?.antennaType && (
+                      <p><strong>Antenna Type:</strong> {selectedQuote.assessment.antennaType}</p>
+                    )}
+                    {selectedQuote.assessment?.antennaInstallationLocation && (
+                      <p><strong>Antenna Location:</strong> {selectedQuote.assessment.antennaInstallationLocation}</p>
+                    )}
+                    {selectedQuote.assessment?.routerMounting && (
+                      <p><strong>Router Mounting:</strong> {selectedQuote.assessment.routerMounting}</p>
+                    )}
+                    {selectedQuote.assessment?.dualWanSupport && (
+                      <p><strong>Dual WAN Support:</strong> {selectedQuote.assessment.dualWanSupport}</p>
+                    )}
+                  </div>
                 </div>
+
+                {/* Site Characteristics */}
+                <div>
+                  <h3 className="font-semibold mb-3">Site Characteristics</h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <p><strong>Address:</strong> {selectedQuote.assessment?.siteAddress || 'N/A'}</p>
+                    <p><strong>Industry:</strong> {selectedQuote.assessment?.industry || 'N/A'}</p>
+                    {selectedQuote.assessment?.buildingType && (
+                      <p><strong>Building Type:</strong> {selectedQuote.assessment.buildingType}</p>
+                    )}
+                    {selectedQuote.assessment?.coverageArea && (
+                      <p><strong>Coverage Area:</strong> {selectedQuote.assessment.coverageArea.toLocaleString()} sq ft</p>
+                    )}
+                    {selectedQuote.assessment?.floors && (
+                      <p><strong>Number of Floors:</strong> {selectedQuote.assessment.floors}</p>
+                    )}
+                    <p><strong>Ceiling Mount:</strong> {selectedQuote.assessment?.ceilingMount ? 'Yes' : 'No'}</p>
+                    <p><strong>Outdoor Coverage:</strong> {selectedQuote.assessment?.outdoorCoverage ? 'Required' : 'Not Required'}</p>
+                    {selectedQuote.assessment?.ceilingHeight && (
+                      <p><strong>Ceiling Height:</strong> {selectedQuote.assessment.ceilingHeight}</p>
+                    )}
+                    {selectedQuote.assessment?.ceilingType && (
+                      <p><strong>Ceiling Type:</strong> {selectedQuote.assessment.ceilingType}</p>
+                    )}
+                    {selectedQuote.assessment?.networkSignal && (
+                      <p><strong>Network Signal:</strong> {selectedQuote.assessment.networkSignal}</p>
+                    )}
+                    {selectedQuote.assessment?.signalStrength && (
+                      <p><strong>Signal Strength:</strong> {selectedQuote.assessment.signalStrength}</p>
+                    )}
+                    {selectedQuote.assessment?.connectionUsage && (
+                      <p><strong>Connection Usage:</strong> {selectedQuote.assessment.connectionUsage}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Environmental Factors & Notes */}
+                {(selectedQuote.assessment?.interferenceSources || selectedQuote.assessment?.specialRequirements || selectedQuote.assessment?.additionalNotes) && (
+                  <div>
+                    <h3 className="font-semibold mb-3">Environmental Factors & Special Requirements</h3>
+                    <div className="space-y-3 text-sm">
+                      {selectedQuote.assessment?.interferenceSources && (
+                        <div>
+                          <p><strong>Interference Sources:</strong></p>
+                          <p className="mt-1 text-gray-600 leading-relaxed">{selectedQuote.assessment.interferenceSources}</p>
+                        </div>
+                      )}
+                      {selectedQuote.assessment?.specialRequirements && (
+                        <div>
+                          <p><strong>Special Requirements:</strong></p>
+                          <p className="mt-1 text-gray-600 leading-relaxed">{selectedQuote.assessment.specialRequirements}</p>
+                        </div>
+                      )}
+                      {selectedQuote.assessment?.additionalNotes && (
+                        <div>
+                          <p><strong>Additional Notes:</strong></p>
+                          <p className="mt-1 text-gray-600 leading-relaxed">{selectedQuote.assessment.additionalNotes}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Fleet-specific details if applicable */}
+                {selectedQuote.assessment?.serviceType === 'fleet-tracking' && (
+                  <div>
+                    <h3 className="font-semibold mb-3">Fleet Tracking Details</h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      {selectedQuote.assessment?.totalFleetSize && (
+                        <p><strong>Total Fleet Size:</strong> {selectedQuote.assessment.totalFleetSize} vehicles</p>
+                      )}
+                      {selectedQuote.assessment?.trackerType && (
+                        <p><strong>Tracker Type:</strong> {selectedQuote.assessment.trackerType}</p>
+                      )}
+                      {selectedQuote.assessment?.iotTrackingPartner && (
+                        <p><strong>IoT Partner:</strong> {selectedQuote.assessment.iotTrackingPartner}</p>
+                      )}
+                      {selectedQuote.assessment?.carrierSim && (
+                        <p><strong>Carrier SIM:</strong> {selectedQuote.assessment.carrierSim}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Fleet Camera specific details if applicable */}
+                {selectedQuote.assessment?.serviceType === 'fleet-camera' && (
+                  <div>
+                    <h3 className="font-semibold mb-3">Fleet Camera Details</h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      {selectedQuote.assessment?.cameraSolutionType && (
+                        <p><strong>Camera Solution:</strong> {selectedQuote.assessment.cameraSolutionType}</p>
+                      )}
+                      {selectedQuote.assessment?.numberOfCameras && (
+                        <p><strong>Number of Cameras:</strong> {selectedQuote.assessment.numberOfCameras}</p>
+                      )}
+                      {selectedQuote.assessment?.removalNeeded && (
+                        <p><strong>Removal Needed:</strong> {selectedQuote.assessment.removalNeeded}</p>
+                      )}
+                      {selectedQuote.assessment?.existingCameraSolution && (
+                        <p><strong>Existing Solution:</strong> {selectedQuote.assessment.existingCameraSolution}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex gap-2">
                   {selectedQuote.pdfUrl && (
