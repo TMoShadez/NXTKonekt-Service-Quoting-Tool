@@ -15,7 +15,10 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import LoginError from "@/pages/login-error";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  // Check if user has admin access
+  const isAdmin = user && (user.isSystemAdmin || user.role === 'admin');
 
   return (
     <Switch>
@@ -30,7 +33,13 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Dashboard} />
-          <Route path="/admin" component={AdminDashboard} />
+          {/* Admin routes - only accessible to system admins */}
+          {isAdmin ? (
+            <Route path="/admin" component={AdminDashboard} />
+          ) : (
+            <Route path="/admin" component={() => <NotFound />} />
+          )}
+          {/* Partner routes - accessible to all authenticated users */}
           <Route path="/assessment/:id?" component={Assessment} />
           <Route path="/fleet-tracking/:id?" component={FleetTrackingForm} />
           <Route path="/fleet-camera/:id?" component={FleetCameraForm} />

@@ -29,7 +29,7 @@ export default function AdminDashboard() {
 
   // Redirect if not system admin
   useEffect(() => {
-    if (!authLoading && isAuthenticated && !user?.isSystemAdmin && user?.role !== 'admin') {
+    if (!authLoading && isAuthenticated && !(user as any)?.isSystemAdmin && (user as any)?.role !== 'admin') {
       window.location.href = '/dashboard';
     }
   }, [authLoading, isAuthenticated, user]);
@@ -37,15 +37,15 @@ export default function AdminDashboard() {
   // Admin stats query
   const { data: adminStats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
-    enabled: user?.isSystemAdmin || user?.role === 'admin',
+    enabled: (user as any)?.isSystemAdmin || (user as any)?.role === 'admin',
     staleTime: 0,
     refetchOnMount: true,
   });
 
-  // Partners query
-  const { data: partners, isLoading: partnersLoading } = useQuery<User[]>({
+  // Partners query  
+  const { data: partners, isLoading: partnersLoading } = useQuery<any[]>({
     queryKey: ["/api/admin/partners"],
-    enabled: user?.isSystemAdmin || user?.role === 'admin',
+    enabled: (user as any)?.isSystemAdmin || (user as any)?.role === 'admin',
     staleTime: 0,
     refetchOnMount: true,
   });
@@ -53,7 +53,7 @@ export default function AdminDashboard() {
   // Quotes query
   const { data: quotes, isLoading: quotesLoading } = useQuery<Quote[]>({
     queryKey: ["/api/admin/quotes"],
-    enabled: user?.isSystemAdmin || user?.role === 'admin',
+    enabled: (user as any)?.isSystemAdmin || (user as any)?.role === 'admin',
     staleTime: 0,
     refetchOnMount: true,
   });
@@ -61,7 +61,7 @@ export default function AdminDashboard() {
   // Organizations query
   const { data: organizations, isLoading: orgsLoading } = useQuery<Organization[]>({
     queryKey: ["/api/admin/organizations"],
-    enabled: user?.isSystemAdmin || user?.role === 'admin',
+    enabled: (user as any)?.isSystemAdmin || (user as any)?.role === 'admin',
     staleTime: 0,
     refetchOnMount: true,
   });
@@ -69,7 +69,7 @@ export default function AdminDashboard() {
   // Users query for role management
   const { data: users, isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
-    enabled: user?.isSystemAdmin || user?.role === 'admin',
+    enabled: (user as any)?.isSystemAdmin || (user as any)?.role === 'admin',
     staleTime: 0,
     refetchOnMount: true,
   });
@@ -77,7 +77,7 @@ export default function AdminDashboard() {
   // HubSpot test query
   const { data: hubspotStatus, isLoading: hubspotLoading } = useQuery({
     queryKey: ["/api/admin/hubspot/test"],
-    enabled: user?.isSystemAdmin || user?.role === 'admin',
+    enabled: (user as any)?.isSystemAdmin || (user as any)?.role === 'admin',
     staleTime: 0,
     refetchOnMount: true,
   });
@@ -376,22 +376,24 @@ export default function AdminDashboard() {
                     <TableBody>
                       {partners?.map((partner) => (
                         <TableRow key={partner.id}>
-                          <TableCell className="font-medium">{partner.username}</TableCell>
+                          <TableCell className="font-medium">
+                            {partner.firstName ? `${partner.firstName} ${partner.lastName || ''}`.trim() : partner.email}
+                          </TableCell>
                           <TableCell>{partner.email}</TableCell>
-                          <TableCell>{partner.organizationId || 'N/A'}</TableCell>
+                          <TableCell>{partner.organization?.name || 'N/A'}</TableCell>
                           <TableCell>
-                            <Badge variant={partner.status === 'approved' ? 'default' : 
-                                            partner.status === 'pending' ? 'secondary' : 'destructive'}>
-                              {partner.status}
+                            <Badge variant={partner.organization?.partnerStatus === 'approved' ? 'default' : 
+                                            partner.organization?.partnerStatus === 'pending' ? 'secondary' : 'destructive'}>
+                              {partner.organization?.partnerStatus || 'N/A'}
                             </Badge>
                           </TableCell>
                           <TableCell>{new Date(partner.createdAt || Date.now()).toLocaleDateString()}</TableCell>
                           <TableCell>
-                            {partner.status === 'pending' && (
+                            {partner.organization?.partnerStatus === 'pending' && (
                               <div className="flex gap-2">
                                 <Button 
                                   size="sm" 
-                                  onClick={() => approvePartnerMutation.mutate(partner.id)}
+                                  onClick={() => approvePartnerMutation.mutate(partner.organization?.id)}
                                   disabled={approvePartnerMutation.isPending}
                                 >
                                   <CheckCircle className="h-4 w-4 mr-1" />
@@ -400,7 +402,7 @@ export default function AdminDashboard() {
                                 <Button 
                                   size="sm" 
                                   variant="destructive"
-                                  onClick={() => rejectPartnerMutation.mutate(partner.id)}
+                                  onClick={() => rejectPartnerMutation.mutate(partner.organization?.id)}
                                   disabled={rejectPartnerMutation.isPending}
                                 >
                                   <XCircle className="h-4 w-4 mr-1" />
@@ -408,7 +410,7 @@ export default function AdminDashboard() {
                                 </Button>
                               </div>
                             )}
-                            {partner.status === 'approved' && (
+                            {partner.organization?.partnerStatus === 'approved' && (
                               <Badge variant="outline">Active</Badge>
                             )}
                           </TableCell>
@@ -444,7 +446,9 @@ export default function AdminDashboard() {
                     <TableBody>
                       {users?.map((u) => (
                         <TableRow key={u.id}>
-                          <TableCell className="font-medium">{u.username}</TableCell>
+                          <TableCell className="font-medium">
+                            {u.firstName ? `${u.firstName} ${u.lastName || ''}`.trim() : u.email}
+                          </TableCell>
                           <TableCell>{u.email}</TableCell>
                           <TableCell>
                             <Badge variant="outline">{u.role || 'user'}</Badge>
@@ -495,17 +499,17 @@ export default function AdminDashboard() {
                 ) : (
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                      <Badge variant={hubspotStatus?.success ? 'default' : 'destructive'}>
-                        {hubspotStatus?.success ? 'Connected' : 'Error'}
+                      <Badge variant={(hubspotStatus as any)?.success ? 'default' : 'destructive'}>
+                        {(hubspotStatus as any)?.success ? 'Connected' : 'Error'}
                       </Badge>
                       <span className="text-sm text-gray-600 dark:text-gray-300">
-                        {hubspotStatus?.success 
-                          ? `Found ${hubspotStatus.contactCount} contacts` 
-                          : hubspotStatus?.error || 'Connection failed'}
+                        {(hubspotStatus as any)?.success 
+                          ? `Found ${(hubspotStatus as any)?.contactCount} contacts` 
+                          : (hubspotStatus as any)?.error || 'Connection failed'}
                       </span>
                     </div>
                     
-                    {hubspotStatus?.success && (
+                    {(hubspotStatus as any)?.success && (
                       <div className="grid grid-cols-2 gap-4">
                         <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
                           <h4 className="font-medium text-green-800 dark:text-green-200">API Status</h4>
@@ -513,7 +517,7 @@ export default function AdminDashboard() {
                         </div>
                         <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                           <h4 className="font-medium text-blue-800 dark:text-blue-200">Contact Count</h4>
-                          <p className="text-sm text-blue-600 dark:text-blue-300">{hubspotStatus.contactCount} contacts found</p>
+                          <p className="text-sm text-blue-600 dark:text-blue-300">{(hubspotStatus as any)?.contactCount} contacts found</p>
                         </div>
                       </div>
                     )}

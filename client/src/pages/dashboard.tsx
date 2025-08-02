@@ -270,9 +270,17 @@ export default function Dashboard() {
             
             <div className="flex items-center space-x-4">
               <div className="hidden lg:flex items-center space-x-4">
-                <span className="text-sm nxt-gray-500">
-                  {(user as any)?.firstName} {(user as any)?.lastName}
-                </span>
+                <div className="text-right">
+                  <span className="block text-sm font-medium nxt-gray-800">
+                    {(user as any)?.firstName ? `${(user as any).firstName} ${(user as any).lastName || ''}`.trim() : (user as any)?.email || 'User'}
+                  </span>
+                  <span className="block text-xs nxt-gray-500">
+                    {(user as any)?.isSystemAdmin ? 'System Administrator' : 
+                     (user as any)?.role === 'admin' ? 'Administrator' : 
+                     (user as any)?.role === 'sales_executive' ? 'Sales Executive' : 
+                     'Partner'}
+                  </span>
+                </div>
                 <div className="h-8 w-8 bg-nxt-blue rounded-full flex items-center justify-center">
                   {(user as any)?.profileImageUrl ? (
                     <img 
@@ -290,11 +298,12 @@ export default function Dashboard() {
                     size="sm" 
                     onClick={() => window.location.href = "/admin"}
                     className="text-blue-600 hover:bg-blue-50"
+                    title="Admin Dashboard"
                   >
                     <Shield size={16} />
                   </Button>
                 )}
-                <Button variant="ghost" size="sm" onClick={handleLogout}>
+                <Button variant="ghost" size="sm" onClick={handleLogout} title="Logout">
                   <LogOut size={16} />
                 </Button>
               </div>
