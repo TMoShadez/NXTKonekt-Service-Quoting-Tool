@@ -15,10 +15,15 @@ The **Database Schema** includes entities for Users, Sessions, Organizations, As
 
 **Recent Updates (August 2025)**:
 - Fixed admin dashboard quote management to display actual data instead of "N/A" values
-- Implemented comprehensive quote details modal with full assessment information
+- Implemented comprehensive quote details modal with full assessment information matching partner dashboard
 - Created `/api/admin/quotes/:id/details` endpoint for detailed quote data retrieval
 - Enhanced role-based access control throughout the application
 - Removed Assessment Management section from admin interface as requested
+- Replicated complete quote details card from partner dashboard to admin dashboard with full visibility into:
+  - Sales executive and customer information
+  - Comprehensive pricing breakdowns
+  - Infrastructure requirements and site characteristics
+  - Environmental factors and service-specific details
 
 ## Role-Based Access Control
 Comprehensive role-based access control implemented throughout the application:
