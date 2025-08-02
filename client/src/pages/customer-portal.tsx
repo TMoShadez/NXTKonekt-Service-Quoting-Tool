@@ -214,6 +214,261 @@ export default function CustomerPortal() {
           </CardContent>
         </Card>
 
+        {/* Technical Specifications & Site Details */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Technical Specifications & Site Details</CardTitle>
+            <CardDescription>Complete infrastructure requirements and site characteristics for your installation</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            
+            {/* Infrastructure Requirements */}
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                Infrastructure Requirements
+              </h4>
+              <div className="grid md:grid-cols-2 gap-4 text-sm">
+                {assessment.deviceCount && (
+                  <div>
+                    <span className="font-medium text-gray-700">Device Count:</span>
+                    <span className="ml-2 text-gray-600">{assessment.deviceCount} devices</span>
+                  </div>
+                )}
+                <div>
+                  <span className="font-medium text-gray-700">Power Available:</span>
+                  <span className="ml-2 text-gray-600">{assessment.powerAvailable ? 'Yes' : 'No'}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Ethernet Required:</span>
+                  <span className="ml-2 text-gray-600">{assessment.ethernetRequired ? 'Yes' : 'No'}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Device Connection Assistance:</span>
+                  <span className="ml-2 text-gray-600">
+                    {assessment.deviceConnectionAssistance === 'yes' ? 'Required' : 
+                     assessment.deviceConnectionAssistance === 'no' ? 'Not Required' : 'Not specified'}
+                  </span>
+                </div>
+                {assessment.routerMake && (
+                  <div>
+                    <span className="font-medium text-gray-700">Router:</span>
+                    <span className="ml-2 text-gray-600">{assessment.routerMake} {assessment.routerModel}</span>
+                  </div>
+                )}
+                {assessment.routerCount && (
+                  <div>
+                    <span className="font-medium text-gray-700">Router Count:</span>
+                    <span className="ml-2 text-gray-600">{assessment.routerCount}</span>
+                  </div>
+                )}
+                {assessment.routerLocation && (
+                  <div>
+                    <span className="font-medium text-gray-700">Router Location:</span>
+                    <span className="ml-2 text-gray-600">{assessment.routerLocation}</span>
+                  </div>
+                )}
+                {assessment.cableFootage && (
+                  <div>
+                    <span className="font-medium text-gray-700">Cable Footage:</span>
+                    <span className="ml-2 text-gray-600">{assessment.cableFootage}</span>
+                  </div>
+                )}
+                {assessment.antennaType && (
+                  <div>
+                    <span className="font-medium text-gray-700">Antenna Type:</span>
+                    <span className="ml-2 text-gray-600">{assessment.antennaType}</span>
+                  </div>
+                )}
+                {assessment.antennaInstallationLocation && (
+                  <div>
+                    <span className="font-medium text-gray-700">Antenna Location:</span>
+                    <span className="ml-2 text-gray-600">{assessment.antennaInstallationLocation}</span>
+                  </div>
+                )}
+                {assessment.routerMounting && (
+                  <div>
+                    <span className="font-medium text-gray-700">Router Mounting:</span>
+                    <span className="ml-2 text-gray-600">{assessment.routerMounting}</span>
+                  </div>
+                )}
+                {assessment.dualWanSupport && (
+                  <div>
+                    <span className="font-medium text-gray-700">Dual WAN Support:</span>
+                    <span className="ml-2 text-gray-600">{assessment.dualWanSupport}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Site Characteristics */}
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-3">Site Characteristics</h4>
+              <div className="grid md:grid-cols-2 gap-4 text-sm">
+                {assessment.buildingType && (
+                  <div>
+                    <span className="font-medium text-gray-700">Building Type:</span>
+                    <span className="ml-2 text-gray-600">{assessment.buildingType}</span>
+                  </div>
+                )}
+                {assessment.coverageArea && (
+                  <div>
+                    <span className="font-medium text-gray-700">Coverage Area:</span>
+                    <span className="ml-2 text-gray-600">{assessment.coverageArea.toLocaleString()} sq ft</span>
+                  </div>
+                )}
+                {assessment.floors && (
+                  <div>
+                    <span className="font-medium text-gray-700">Number of Floors:</span>
+                    <span className="ml-2 text-gray-600">{assessment.floors}</span>
+                  </div>
+                )}
+                <div>
+                  <span className="font-medium text-gray-700">Ceiling Mount:</span>
+                  <span className="ml-2 text-gray-600">{assessment.ceilingMount ? 'Yes' : 'No'}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700">Outdoor Coverage:</span>
+                  <span className="ml-2 text-gray-600">{assessment.outdoorCoverage ? 'Required' : 'Not Required'}</span>
+                </div>
+                {assessment.ceilingHeight && (
+                  <div>
+                    <span className="font-medium text-gray-700">Ceiling Height:</span>
+                    <span className="ml-2 text-gray-600">{assessment.ceilingHeight}</span>
+                  </div>
+                )}
+                {assessment.ceilingType && (
+                  <div>
+                    <span className="font-medium text-gray-700">Ceiling Type:</span>
+                    <span className="ml-2 text-gray-600">{assessment.ceilingType}</span>
+                  </div>
+                )}
+                {assessment.networkSignal && (
+                  <div>
+                    <span className="font-medium text-gray-700">Network Signal:</span>
+                    <span className="ml-2 text-gray-600">{assessment.networkSignal}</span>
+                  </div>
+                )}
+                {assessment.signalStrength && (
+                  <div>
+                    <span className="font-medium text-gray-700">Signal Strength:</span>
+                    <span className="ml-2 text-gray-600">{assessment.signalStrength}</span>
+                  </div>
+                )}
+                {assessment.connectionUsage && (
+                  <div>
+                    <span className="font-medium text-gray-700">Connection Usage:</span>
+                    <span className="ml-2 text-gray-600">{assessment.connectionUsage}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Environmental Factors & Notes */}
+            {(assessment.interferenceSources || assessment.specialRequirements || assessment.additionalNotes) && (
+              <>
+                <Separator />
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">Environmental Factors & Special Requirements</h4>
+                  <div className="space-y-3 text-sm">
+                    {assessment.interferenceSources && (
+                      <div>
+                        <span className="font-medium text-gray-700">Interference Sources:</span>
+                        <p className="ml-0 mt-1 text-gray-600 leading-relaxed">{assessment.interferenceSources}</p>
+                      </div>
+                    )}
+                    {assessment.specialRequirements && (
+                      <div>
+                        <span className="font-medium text-gray-700">Special Requirements:</span>
+                        <p className="ml-0 mt-1 text-gray-600 leading-relaxed">{assessment.specialRequirements}</p>
+                      </div>
+                    )}
+                    {assessment.additionalNotes && (
+                      <div>
+                        <span className="font-medium text-gray-700">Additional Notes:</span>
+                        <p className="ml-0 mt-1 text-gray-600 leading-relaxed">{assessment.additionalNotes}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Fleet-specific details if applicable */}
+            {assessment.serviceType === 'fleet-tracking' && (
+              <>
+                <Separator />
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">Fleet Tracking Details</h4>
+                  <div className="grid md:grid-cols-2 gap-4 text-sm">
+                    {assessment.totalFleetSize && (
+                      <div>
+                        <span className="font-medium text-gray-700">Total Fleet Size:</span>
+                        <span className="ml-2 text-gray-600">{assessment.totalFleetSize} vehicles</span>
+                      </div>
+                    )}
+                    {assessment.trackerType && (
+                      <div>
+                        <span className="font-medium text-gray-700">Tracker Type:</span>
+                        <span className="ml-2 text-gray-600">{assessment.trackerType}</span>
+                      </div>
+                    )}
+                    {assessment.iotTrackingPartner && (
+                      <div>
+                        <span className="font-medium text-gray-700">IoT Partner:</span>
+                        <span className="ml-2 text-gray-600">{assessment.iotTrackingPartner}</span>
+                      </div>
+                    )}
+                    {assessment.carrierSim && (
+                      <div>
+                        <span className="font-medium text-gray-700">Carrier SIM:</span>
+                        <span className="ml-2 text-gray-600">{assessment.carrierSim}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Fleet Camera specific details if applicable */}
+            {assessment.serviceType === 'fleet-camera' && (
+              <>
+                <Separator />
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3">Fleet Camera Details</h4>
+                  <div className="grid md:grid-cols-2 gap-4 text-sm">
+                    {assessment.cameraSolutionType && (
+                      <div>
+                        <span className="font-medium text-gray-700">Camera Solution:</span>
+                        <span className="ml-2 text-gray-600">{assessment.cameraSolutionType}</span>
+                      </div>
+                    )}
+                    {assessment.numberOfCameras && (
+                      <div>
+                        <span className="font-medium text-gray-700">Number of Cameras:</span>
+                        <span className="ml-2 text-gray-600">{assessment.numberOfCameras}</span>
+                      </div>
+                    )}
+                    {assessment.removalNeeded && (
+                      <div>
+                        <span className="font-medium text-gray-700">Removal Needed:</span>
+                        <span className="ml-2 text-gray-600">{assessment.removalNeeded}</span>
+                      </div>
+                    )}
+                    {assessment.existingCameraSolution && (
+                      <div>
+                        <span className="font-medium text-gray-700">Existing Solution:</span>
+                        <span className="ml-2 text-gray-600">{assessment.existingCameraSolution}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Sales Executive Contact */}
         <Card>
           <CardHeader>
