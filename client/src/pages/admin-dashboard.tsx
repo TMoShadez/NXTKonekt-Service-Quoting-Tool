@@ -50,8 +50,8 @@ export default function AdminDashboard() {
     refetchOnMount: true,
   });
 
-  // Quotes query
-  const { data: quotes, isLoading: quotesLoading } = useQuery<Quote[]>({
+  // Quotes query with joined assessment data
+  const { data: quotes, isLoading: quotesLoading } = useQuery<any[]>({
     queryKey: ["/api/admin/quotes"],
     enabled: (user as any)?.isSystemAdmin || (user as any)?.role === 'admin',
     staleTime: 0,
@@ -599,13 +599,14 @@ export default function AdminDashboard() {
                       {quotes?.map((quote) => (
                         <TableRow key={quote.id}>
                           <TableCell className="font-medium">{quote.quoteNumber}</TableCell>
-                          <TableCell>N/A</TableCell>
-                          <TableCell>N/A</TableCell>
-                          <TableCell>N/A</TableCell>
-                          <TableCell>${quote.totalCost}</TableCell>
+                          <TableCell>{quote.customerCompany || quote.customerName || 'N/A'}</TableCell>
+                          <TableCell>{quote.salesExecutiveName || 'N/A'}</TableCell>
+                          <TableCell>{quote.organizationName || 'N/A'}</TableCell>
+                          <TableCell>${parseFloat(quote.totalCost || 0).toFixed(2)}</TableCell>
                           <TableCell>
-                            <Badge variant={quote.status === 'active' ? 'default' : 'secondary'}>
-                              {quote.status}
+                            <Badge variant={quote.status === 'approved' ? 'default' : 
+                                           quote.status === 'pending' ? 'secondary' : 'destructive'}>
+                              {quote.status || 'pending'}
                             </Badge>
                           </TableCell>
                           <TableCell>{new Date(quote.createdAt || Date.now()).toLocaleDateString()}</TableCell>
@@ -625,6 +626,7 @@ export default function AdminDashboard() {
                                 variant="outline"
                                 onClick={() => window.open(`/api/files/pdf/${quote.pdfUrl}`, '_blank')}
                                 className="flex items-center gap-1"
+                                disabled={!quote.pdfUrl}
                               >
                                 <Download className="h-4 w-4" />
                                 PDF
@@ -664,11 +666,13 @@ export default function AdminDashboard() {
                 <Card className="p-4">
                   <h3 className="font-semibold mb-3 text-blue-600">Quote Information</h3>
                   <div className="space-y-2">
-                    <p><strong>Quote Number:</strong> {selectedQuote?.quoteNumber}</p>
-                    <p><strong>Total Cost:</strong> ${selectedQuote?.totalCost}</p>
-                    <p><strong>Survey Cost:</strong> ${selectedQuote?.surveyCost || 'N/A'}</p>
-                    <p><strong>Status:</strong> {selectedQuote?.status}</p>
-                    <p><strong>Created:</strong> {new Date(selectedQuote?.createdAt || Date.now()).toLocaleDateString()}</p>
+                    <p><strong>Quote Number:</strong> {selectedQuoteData?.quoteNumber}</p>
+                    <p><strong>Total Cost:</strong> ${parseFloat(selectedQuoteData?.totalCost || 0).toFixed(2)}</p>
+                    <p><strong>Survey Cost:</strong> ${parseFloat(selectedQuoteData?.surveyCost || 0).toFixed(2)}</p>
+                    <p><strong>Installation Cost:</strong> ${parseFloat(selectedQuoteData?.installationCost || 0).toFixed(2)}</p>
+                    <p><strong>Hardware Cost:</strong> ${parseFloat(selectedQuoteData?.hardwareCost || 0).toFixed(2)}</p>
+                    <p><strong>Status:</strong> {selectedQuoteData?.status || 'pending'}</p>
+                    <p><strong>Created:</strong> {new Date(selectedQuoteData?.createdAt || Date.now()).toLocaleDateString()}</p>
                   </div>
                 </Card>
                 <Card className="p-4">
@@ -783,8 +787,9 @@ export default function AdminDashboard() {
           <DialogFooter className="flex justify-between">
             <Button
               variant="outline"
-              onClick={() => window.open(`/api/files/pdf/${selectedQuote.pdfUrl}`, '_blank')}
+              onClick={() => window.open(`/api/files/pdf/${selectedQuoteData?.pdfUrl}`, '_blank')}
               className="flex items-center gap-2"
+              disabled={!selectedQuoteData?.pdfUrl}
             >
               <Download className="h-4 w-4" />
               Download Quote PDF
@@ -792,14 +797,14 @@ export default function AdminDashboard() {
             <div className="flex gap-2">
               <Button
                 variant="destructive"
-                onClick={() => closeQuoteMutation.mutate(selectedQuote?.id)}
+                onClick={() => closeQuoteMutation.mutate(selectedQuoteData?.id)}
                 disabled={closeQuoteMutation.isPending}
               >
                 Close Quote
               </Button>
               <Button
                 variant="outline"
-                onClick={() => deleteQuoteMutation.mutate(selectedQuote?.id)}
+                onClick={() => deleteQuoteMutation.mutate(selectedQuoteData?.id)}
                 disabled={deleteQuoteMutation.isPending}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
