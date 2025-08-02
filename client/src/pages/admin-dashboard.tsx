@@ -626,7 +626,7 @@ export default function AdminDashboard() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => window.open(`/api/files/pdf/${quote.pdfUrl}`, '_blank')}
+                                onClick={() => window.open(quote.pdfUrl, '_blank')}
                                 className="flex items-center gap-1"
                                 disabled={!quote.pdfUrl}
                               >
@@ -857,7 +857,7 @@ export default function AdminDashboard() {
             {selectedQuoteData?.pdfUrl && (
               <Button 
                 variant="outline"
-                onClick={() => window.open(`/api/files/pdf/${selectedQuoteData.pdfUrl}`, '_blank')}
+                onClick={() => window.open(selectedQuoteData.pdfUrl, '_blank')}
               >
                 <Download className="mr-2 h-4 w-4" />
                 Download PDF
