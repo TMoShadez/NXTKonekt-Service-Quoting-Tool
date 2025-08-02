@@ -1,15 +1,13 @@
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState } from "react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -19,13 +17,8 @@ import type { User, Organization, Quote } from "@shared/schema";
 interface AdminStats {
   totalPartners: number;
   pendingPartners: number;
-  totalAssessments: number;
+  activeQuotes: number;
   totalQuotes: number;
-  monthlyRevenue: number;
-}
-
-interface PartnerWithOrg extends User {
-  organization?: Organization;
 }
 
 export default function AdminDashboard() {
@@ -36,18 +29,13 @@ export default function AdminDashboard() {
 
   // Redirect if not system admin
   useEffect(() => {
-    if (!authLoading && (!isAuthenticated || (!user?.isSystemAdmin && user?.role !== 'admin'))) {
-      toast({
-        title: "Access Denied",
-        description: "System administrator access required.",
-        variant: "destructive",
-      });
-      window.location.href = "/";
+    if (!authLoading && isAuthenticated && !user?.isSystemAdmin && user?.role !== 'admin') {
+      window.location.href = '/dashboard';
     }
-  }, [user, authLoading, isAuthenticated, toast]);
+  }, [authLoading, isAuthenticated, user]);
 
   // Admin stats query
-  const { data: stats } = useQuery<AdminStats>({
+  const { data: adminStats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
     enabled: user?.isSystemAdmin || user?.role === 'admin',
     staleTime: 0,
@@ -55,7 +43,7 @@ export default function AdminDashboard() {
   });
 
   // Partners query
-  const { data: partners, isLoading: partnersLoading } = useQuery<PartnerWithOrg[]>({
+  const { data: partners, isLoading: partnersLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/partners"],
     enabled: user?.isSystemAdmin || user?.role === 'admin',
     staleTime: 0,
@@ -70,117 +58,140 @@ export default function AdminDashboard() {
     refetchOnMount: true,
   });
 
-  // Quote assessment details query
-  const { data: quoteAssessmentData, isLoading: quoteAssessmentLoading } = useQuery({
-    queryKey: ["/api/admin/quotes", selectedQuote?.id, "assessment"],
-    enabled: !!selectedQuote?.id && (user?.isSystemAdmin || user?.role === 'admin'),
-  });
-
-  // Invitations query
-  const { data: invitations } = useQuery({
-    queryKey: ["/api/admin/invitations"],
+  // Organizations query
+  const { data: organizations, isLoading: orgsLoading } = useQuery<Organization[]>({
+    queryKey: ["/api/admin/organizations"],
     enabled: user?.isSystemAdmin || user?.role === 'admin',
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
-  // Analytics query
-  const { data: analytics } = useQuery({
-    queryKey: ["/api/admin/analytics"],
+  // Users query for role management
+  const { data: users, isLoading: usersLoading } = useQuery<User[]>({
+    queryKey: ["/api/admin/users"],
     enabled: user?.isSystemAdmin || user?.role === 'admin',
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
-  // No need for additional queries since admin dashboard already has all data
+  // HubSpot test query
+  const { data: hubspotStatus, isLoading: hubspotLoading } = useQuery({
+    queryKey: ["/api/admin/hubspot/test"],
+    enabled: user?.isSystemAdmin || user?.role === 'admin',
+    staleTime: 0,
+    refetchOnMount: true,
+  });
 
-  // Test email connection mutation
-  const testEmailMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest("GET", "/api/admin/test-email");
-    },
-    onSuccess: (data) => {
+  // Handle quote details view with full assessment data
+  const handleViewQuoteDetails = async (quote: any) => {
+    try {
+      const response = await fetch(`/api/admin/quotes/${quote.id}/details`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch quote details');
+      }
+      const quoteWithAssessment = await response.json();
+      setSelectedQuoteData(quoteWithAssessment);
+      setSelectedQuote(quote);
+    } catch (error) {
       toast({
-        title: data.success ? "Email Connection Success" : "Email Connection Failed",
-        description: data.success 
-          ? "Company mailbox is properly configured and ready to send invitations"
-          : `Email configuration error: ${data.error}`,
-        variant: data.success ? "default" : "destructive",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Email Test Failed",
-        description: "Failed to test email connection",
+        title: "Error",
+        description: "Failed to load quote details. Please try again.",
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  // Update partner status mutation
-  const updatePartnerMutation = useMutation({
-    mutationFn: async ({ partnerId, status }: { partnerId: string; status: string }) => {
-      await apiRequest("PATCH", `/api/admin/partners/${partnerId}/status`, { status });
+  // Partner approval mutation
+  const approvePartnerMutation = useMutation({
+    mutationFn: async (partnerId: string) => {
+      const response = await fetch(`/api/admin/partners/${partnerId}/approve`, {
+        method: 'POST',
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to approve partner');
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       toast({
-        title: "Partner Updated",
-        description: "Partner status has been updated successfully.",
+        title: "Partner Approved",
+        description: "Partner has been approved successfully.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
-        title: "Update Failed",
-        description: "Failed to update partner status.",
+        title: "Approval Failed",
+        description: error.message || "Failed to approve partner. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  // Toggle user active status mutation
-  const toggleUserMutation = useMutation({
-    mutationFn: async ({ userId, isActive }: { userId: string; isActive: boolean }) => {
-      await apiRequest("PATCH", `/api/admin/users/${userId}/toggle`, { isActive });
+  // Partner rejection mutation
+  const rejectPartnerMutation = useMutation({
+    mutationFn: async (partnerId: string) => {
+      const response = await fetch(`/api/admin/partners/${partnerId}/reject`, {
+        method: 'POST',
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to reject partner');
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       toast({
-        title: "User Updated",
-        description: "User status has been updated successfully.",
+        title: "Partner Rejected",
+        description: "Partner has been rejected successfully.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
-        title: "Update Failed",
-        description: "Failed to update user status.",
+        title: "Rejection Failed",
+        description: error.message || "Failed to reject partner. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  // Send email invitation mutation
-  const sendInvitationMutation = useMutation({
-    mutationFn: async (data: { email: string; recipientName?: string; companyName?: string }) => {
-      return apiRequest("POST", "/api/admin/send-invitation", data);
+  // Role update mutation
+  const updateRoleMutation = useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
+      const response = await fetch(`/api/admin/users/${userId}/role`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update role');
+      }
+      return response.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({
-        title: "Invitation Sent",
-        description: "Partner invitation email has been sent successfully",
+        title: "Role Updated",
+        description: "User role has been updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/invitations"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
-        title: "Invitation Failed",
-        description: "Failed to send partner invitation",
+        title: "Update Failed",
+        description: error.message || "Failed to update role. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  // Copy signup link function
+  // Copy signup link to clipboard
   const copySignupLink = async () => {
-    const signupLink = `${window.location.origin}/api/login`;
+    const signupLink = `${window.location.origin}/auth/login?signup=true`;
     try {
       await navigator.clipboard.writeText(signupLink);
       toast({
@@ -188,16 +199,10 @@ export default function AdminDashboard() {
         description: "Partner signup link has been copied to clipboard",
       });
     } catch (error) {
-      // Fallback for older browsers
-      const textArea = document.createElement("textarea");
-      textArea.value = signupLink;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
       toast({
-        title: "Link Copied",
-        description: "Partner signup link has been copied to clipboard",
+        title: "Copy Failed",
+        description: "Failed to copy link to clipboard",
+        variant: "destructive",
       });
     }
   };
@@ -205,21 +210,25 @@ export default function AdminDashboard() {
   // Close quote mutation
   const closeQuoteMutation = useMutation({
     mutationFn: async (quoteId: number) => {
-      await apiRequest(`/api/admin/quotes/${quoteId}/close`, {
-        method: "PATCH",
-        body: { status: "closed" },
+      const response = await fetch(`/api/admin/quotes/${quoteId}/close`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'closed' }),
       });
+      if (!response.ok) {
+        throw new Error('Failed to close quote');
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/quotes"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       setSelectedQuote(null);
       toast({
         title: "Quote Closed",
         description: "Quote has been closed successfully.",
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to close quote. Please try again.",
@@ -231,20 +240,23 @@ export default function AdminDashboard() {
   // Delete quote mutation
   const deleteQuoteMutation = useMutation({
     mutationFn: async (quoteId: number) => {
-      await apiRequest(`/api/admin/quotes/${quoteId}`, {
-        method: "DELETE",
+      const response = await fetch(`/api/admin/quotes/${quoteId}`, {
+        method: 'DELETE',
       });
+      if (!response.ok) {
+        throw new Error('Failed to delete quote');
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/quotes"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
       setSelectedQuote(null);
       toast({
         title: "Quote Deleted",
-        description: "Quote has been permanently deleted.",
+        description: "Quote has been deleted successfully.",
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to delete quote. Please try again.",
@@ -257,163 +269,27 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <Shield className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">Loading...</h3>
+          <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h1 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
+            {authLoading ? 'Verifying access...' : 'Access Denied'}
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            {authLoading ? 'Please wait while we verify your permissions.' : 'System administrator access required.'}
+          </p>
         </div>
       </div>
     );
   }
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, any> = {
-      pending: { variant: "secondary", icon: Clock },
-      approved: { variant: "default", icon: CheckCircle },
-      suspended: { variant: "destructive", icon: XCircle },
-    };
-    const config = variants[status] || variants.pending;
-    const Icon = config.icon;
-    
-    return (
-      <Badge variant={config.variant} className="flex items-center gap-1">
-        <Icon className="h-3 w-3" />
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </Badge>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Shield className="h-8 w-8 text-blue-600 mr-3" />
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">NXTKonekt Partner Management</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
-                      size="sm"
-                    >
-                      <Mail className="h-4 w-4" />
-                      Send Email Invitation
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Send Partner Invitation</DialogTitle>
-                      <DialogDescription>
-                        Send a branded email invitation to potential partners
-                      </DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={(e) => {
-                      e.preventDefault();
-                      const formData = new FormData(e.currentTarget);
-                      sendInvitationMutation.mutate({
-                        email: formData.get('email') as string,
-                        recipientName: formData.get('recipientName') as string,
-                        companyName: formData.get('companyName') as string,
-                      });
-                    }}>
-                      <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="email" className="text-right">
-                            Email *
-                          </Label>
-                          <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            required
-                            className="col-span-3"
-                            placeholder="partner@company.com"
-                          />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="recipientName" className="text-right">
-                            Name
-                          </Label>
-                          <Input
-                            id="recipientName"
-                            name="recipientName"
-                            className="col-span-3"
-                            placeholder="John Doe"
-                          />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="companyName" className="text-right">
-                            Company
-                          </Label>
-                          <Input
-                            id="companyName"
-                            name="companyName"
-                            className="col-span-3"
-                            placeholder="ABC Installation Services"
-                          />
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button 
-                          type="submit" 
-                          disabled={sendInvitationMutation.isPending}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          {sendInvitationMutation.isPending ? (
-                            <>Sending...</>
-                          ) : (
-                            <>
-                              <Send className="h-4 w-4 mr-2" />
-                              Send Invitation
-                            </>
-                          )}
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-                
-                <Button
-                  onClick={() => testEmailMutation.mutate()}
-                  disabled={testEmailMutation.isPending}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  size="sm"
-                >
-                  <Mail className="h-4 w-4" />
-                  {testEmailMutation.isPending ? "Testing..." : "Test Email"}
-                </Button>
-
-                <Button
-                  onClick={copySignupLink}
-                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
-                  size="sm"
-                >
-                  <Copy className="h-4 w-4" />
-                  Copy Signup Link
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  onClick={() => window.location.href = "/"}
-                  className="flex items-center gap-2"
-                >
-                  <Settings className="h-4 w-4" />
-                  Back to App
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">System Administration</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">Manage partners, users, and system settings</p>
+        </div>
+
+        {/* Admin Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -421,52 +297,47 @@ export default function AdminDashboard() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalPartners || 0}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats?.pendingPartners || 0} pending approval
-              </p>
+              <div className="text-2xl font-bold">{statsLoading ? '-' : adminStats?.totalPartners || 0}</div>
+              <p className="text-xs text-muted-foreground">Active partnerships</p>
             </CardContent>
           </Card>
-          
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Assessments</CardTitle>
+              <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{statsLoading ? '-' : adminStats?.pendingPartners || 0}</div>
+              <p className="text-xs text-muted-foreground">Awaiting review</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Quotes</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalAssessments || 0}</div>
-              <p className="text-xs text-muted-foreground">Total completed</p>
+              <div className="text-2xl font-bold">{statsLoading ? '-' : adminStats?.activeQuotes || 0}</div>
+              <p className="text-xs text-muted-foreground">Open quotes</p>
             </CardContent>
           </Card>
-          
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Quotes Generated</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Quotes</CardTitle>
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalQuotes || 0}</div>
+              <div className="text-2xl font-bold">{statsLoading ? '-' : adminStats?.totalQuotes || 0}</div>
               <p className="text-xs text-muted-foreground">All time</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">${stats?.monthlyRevenue?.toLocaleString() || 0}</div>
-              <p className="text-xs text-muted-foreground">This month</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content Tabs */}
+        {/* Admin Tabs */}
         <Tabs defaultValue="partners" className="space-y-4">
-          <TabsList>
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="partners">Partners</TabsTrigger>
-            <TabsTrigger value="users">User Roles</TabsTrigger>
+            <TabsTrigger value="user-roles">User Roles</TabsTrigger>
             <TabsTrigger value="hubspot">HubSpot</TabsTrigger>
             <TabsTrigger value="invitations">Invitations</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -476,20 +347,15 @@ export default function AdminDashboard() {
           <TabsContent value="partners" className="space-y-4">
             <Card>
               <CardHeader>
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-center">
                   <div>
                     <CardTitle>Partner Management</CardTitle>
-                    <CardDescription>
-                      Manage partner registrations and approvals. Use the "Copy Partner Signup Link" button above to share the registration link with new partners.
-                    </CardDescription>
+                    <CardDescription>Approve or reject partner applications</CardDescription>
                   </div>
-                  <div className="text-xs text-gray-500 bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-md">
-                    <div className="font-medium mb-1">Partner Signup Process:</div>
-                    <div>1. Copy the signup link above</div>
-                    <div>2. Email to potential partners</div>
-                    <div>3. They sign in and create organization</div>
-                    <div>4. Approve their status here</div>
-                  </div>
+                  <Button onClick={copySignupLink} variant="outline" className="flex items-center gap-2">
+                    <Copy className="h-4 w-4" />
+                    Copy Signup Link
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -499,69 +365,52 @@ export default function AdminDashboard() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Partner Name</TableHead>
+                        <TableHead>Name</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Organization</TableHead>
-                        <TableHead>Type</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Active</TableHead>
+                        <TableHead>Registration Date</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {partners?.map((partner) => (
                         <TableRow key={partner.id}>
-                          <TableCell className="font-medium">
-                            {partner.firstName} {partner.lastName}
-                          </TableCell>
+                          <TableCell className="font-medium">{partner.username}</TableCell>
                           <TableCell>{partner.email}</TableCell>
-                          <TableCell>{partner.organization?.name || "No org"}</TableCell>
-                          <TableCell className="capitalize">
-                            {partner.organization?.partnerType || "installer"}
-                          </TableCell>
+                          <TableCell>{partner.organizationId || 'N/A'}</TableCell>
                           <TableCell>
-                            {getStatusBadge(partner.organization?.partnerStatus || "pending")}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={partner.isActive ? "default" : "secondary"}>
-                              {partner.isActive ? "Active" : "Inactive"}
+                            <Badge variant={partner.status === 'approved' ? 'default' : 
+                                            partner.status === 'pending' ? 'secondary' : 'destructive'}>
+                              {partner.status}
                             </Badge>
                           </TableCell>
+                          <TableCell>{new Date(partner.createdAt || Date.now()).toLocaleDateString()}</TableCell>
                           <TableCell>
-                            <div className="flex gap-2">
-                              <Select
-                                value={partner.organization?.partnerStatus || "pending"}
-                                onValueChange={(status) =>
-                                  partner.organization?.id &&
-                                  updatePartnerMutation.mutate({
-                                    partnerId: partner.organization.id.toString(),
-                                    status,
-                                  })
-                                }
-                              >
-                                <SelectTrigger className="w-32">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="approved">Approved</SelectItem>
-                                  <SelectItem value="suspended">Suspended</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  toggleUserMutation.mutate({
-                                    userId: partner.id,
-                                    isActive: !partner.isActive,
-                                  })
-                                }
-                              >
-                                {partner.isActive ? "Deactivate" : "Activate"}
-                              </Button>
-                            </div>
+                            {partner.status === 'pending' && (
+                              <div className="flex gap-2">
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => approvePartnerMutation.mutate(partner.id)}
+                                  disabled={approvePartnerMutation.isPending}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Approve
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="destructive"
+                                  onClick={() => rejectPartnerMutation.mutate(partner.id)}
+                                  disabled={rejectPartnerMutation.isPending}
+                                >
+                                  <XCircle className="h-4 w-4 mr-1" />
+                                  Reject
+                                </Button>
+                              </div>
+                            )}
+                            {partner.status === 'approved' && (
+                              <Badge variant="outline">Active</Badge>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -572,16 +421,16 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="users" className="space-y-4">
+          <TabsContent value="user-roles" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle>User Role Management</CardTitle>
-                <CardDescription>
-                  Manage user roles and admin permissions
-                </CardDescription>
+                <CardDescription>Manage user permissions and roles</CardDescription>
               </CardHeader>
               <CardContent>
-                {partners ? (
+                {usersLoading ? (
+                  <div className="text-center py-4">Loading users...</div>
+                ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -589,80 +438,39 @@ export default function AdminDashboard() {
                         <TableHead>Email</TableHead>
                         <TableHead>Current Role</TableHead>
                         <TableHead>System Admin</TableHead>
-                        <TableHead>Status</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {partners.map((user: any) => (
-                        <TableRow key={user.id}>
-                          <TableCell className="font-medium">
-                            {user.firstName} {user.lastName}
-                          </TableCell>
-                          <TableCell>{user.email}</TableCell>
+                      {users?.map((u) => (
+                        <TableRow key={u.id}>
+                          <TableCell className="font-medium">{u.username}</TableCell>
+                          <TableCell>{u.email}</TableCell>
                           <TableCell>
-                            <Badge variant={user.role === 'admin' ? 'destructive' : 'default'}>
-                              {user.role}
-                            </Badge>
+                            <Badge variant="outline">{u.role || 'user'}</Badge>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={user.isSystemAdmin ? 'destructive' : 'secondary'}>
-                              {user.isSystemAdmin ? 'Yes' : 'No'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={user.isActive ? "default" : "secondary"}>
-                              {user.isActive ? "Active" : "Inactive"}
+                            <Badge variant={u.isSystemAdmin ? 'default' : 'secondary'}>
+                              {u.isSystemAdmin ? 'Yes' : 'No'}
                             </Badge>
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
-                              <Select
-                                value={user.role}
-                                onValueChange={(role) => {
-                                  // Update user role
-                                  fetch(`/api/admin/users/${user.id}/role`, {
-                                    method: 'PATCH',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ role })
-                                  }).then(() => {
-                                    queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
-                                    toast({
-                                      title: "Role Updated",
-                                      description: `User role changed to ${role}`,
-                                    });
-                                  });
-                                }}
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => updateRoleMutation.mutate({ userId: u.id, role: 'admin' })}
+                                disabled={updateRoleMutation.isPending || u.role === 'admin'}
                               >
-                                <SelectTrigger className="w-32">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="partner">Partner</SelectItem>
-                                  <SelectItem value="sales_executive">Sales Executive</SelectItem>
-                                  <SelectItem value="admin">Admin</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              
-                              <Button
-                                variant={user.isSystemAdmin ? "destructive" : "outline"}
-                                size="sm"
-                                onClick={() => {
-                                  // Toggle system admin status
-                                  fetch(`/api/admin/users/${user.id}/role`, {
-                                    method: 'PATCH',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ isSystemAdmin: !user.isSystemAdmin })
-                                  }).then(() => {
-                                    queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
-                                    toast({
-                                      title: "System Admin Updated",
-                                      description: `User ${user.isSystemAdmin ? 'removed from' : 'added to'} system admin`,
-                                    });
-                                  });
-                                }}
+                                Make Admin
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => updateRoleMutation.mutate({ userId: u.id, role: 'user' })}
+                                disabled={updateRoleMutation.isPending || u.role === 'user'}
                               >
-                                {user.isSystemAdmin ? "Remove Admin" : "Make Admin"}
+                                Make User
                               </Button>
                             </div>
                           </TableCell>
@@ -670,8 +478,6 @@ export default function AdminDashboard() {
                       ))}
                     </TableBody>
                   </Table>
-                ) : (
-                  <div className="text-center py-4">Loading users...</div>
                 )}
               </CardContent>
             </Card>
@@ -680,75 +486,39 @@ export default function AdminDashboard() {
           <TabsContent value="hubspot" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center text-lg font-semibold">
-                  <Settings className="mr-2" size={20} />
-                  HubSpot CRM Integration
-                </CardTitle>
-                <CardDescription>
-                  Test and manage HubSpot CRM connection for automated quote synchronization
-                </CardDescription>
+                <CardTitle>HubSpot Integration</CardTitle>
+                <CardDescription>Monitor HubSpot API connectivity and sync status</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <Button 
-                      variant="outline"
-                      onClick={() => {
-                        // Test HubSpot connection
-                        fetch('/api/hubspot/test')
-                          .then(res => res.json())
-                          .then(data => {
-                            toast({
-                              title: data.connected ? "HubSpot Connected" : "HubSpot Connection Failed",
-                              description: data.message,
-                              variant: data.connected ? "default" : "destructive",
-                            });
-                          })
-                          .catch(() => {
-                            toast({
-                              title: "HubSpot Test Failed",
-                              description: "Failed to test HubSpot connection",
-                              variant: "destructive",
-                            });
-                          });
-                      }}
-                      className="flex items-center"
-                    >
-                      <ExternalLink className="mr-2" size={16} />
-                      Test HubSpot Connection
-                    </Button>
-                  </div>
-                  
-                  <div className="text-sm text-gray-600">
-                    <div className="flex items-center mb-2">
-                      <div className="h-2 w-2 bg-green-500 rounded-full mr-2"></div>
-                      Quotes automatically sync to HubSpot when created. Quote approvals/rejections update deal status.
+                {hubspotLoading ? (
+                  <div className="text-center py-4">Testing HubSpot connection...</div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Badge variant={hubspotStatus?.success ? 'default' : 'destructive'}>
+                        {hubspotStatus?.success ? 'Connected' : 'Error'}
+                      </Badge>
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
+                        {hubspotStatus?.success 
+                          ? `Found ${hubspotStatus.contactCount} contacts` 
+                          : hubspotStatus?.error || 'Connection failed'}
+                      </span>
                     </div>
-                    <div className="text-xs text-green-600 bg-green-50 p-3 rounded border">
-                      <strong>✅ Working:</strong> Contacts, Deals, and Tickets create successfully.
-                      <br/>
-                      <strong>⚠️ Limited:</strong> Contact-Deal-Ticket associations may be skipped (missing associations scope), but individual records sync perfectly to HubSpot.
-                    </div>
+                    
+                    {hubspotStatus?.success && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                          <h4 className="font-medium text-green-800 dark:text-green-200">API Status</h4>
+                          <p className="text-sm text-green-600 dark:text-green-300">Connected and responding</p>
+                        </div>
+                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                          <h4 className="font-medium text-blue-800 dark:text-blue-200">Contact Count</h4>
+                          <p className="text-sm text-blue-600 dark:text-blue-300">{hubspotStatus.contactCount} contacts found</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  
-                  <div className="border-t pt-4">
-                    <h4 className="font-medium mb-2">Integration Status</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="bg-blue-50 p-3 rounded-lg">
-                        <div className="text-sm font-medium text-blue-800">Contacts</div>
-                        <div className="text-xs text-blue-600">Auto-created from assessments</div>
-                      </div>
-                      <div className="bg-green-50 p-3 rounded-lg">
-                        <div className="text-sm font-medium text-green-800">Deals</div>
-                        <div className="text-xs text-green-600">Created with quotes</div>
-                      </div>
-                      <div className="bg-purple-50 p-3 rounded-lg">
-                        <div className="text-sm font-medium text-purple-800">Tickets</div>
-                        <div className="text-xs text-purple-600">Follow-up tracking</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -756,45 +526,13 @@ export default function AdminDashboard() {
           <TabsContent value="invitations" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Partner Invitations</CardTitle>
-                <CardDescription>
-                  Track sent invitations and signup progress
-                </CardDescription>
+                <CardTitle>Invitation Management</CardTitle>
+                <CardDescription>Track sent invitations and signup conversions</CardDescription>
               </CardHeader>
               <CardContent>
-                {invitations ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Invited By</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Sent Date</TableHead>
-                        <TableHead>Expires</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {invitations.map((invitation: any) => (
-                        <TableRow key={invitation.id}>
-                          <TableCell className="font-medium">{invitation.email}</TableCell>
-                          <TableCell>{invitation.invitedByName}</TableCell>
-                          <TableCell>
-                            <Badge variant={
-                              invitation.status === 'accepted' ? 'default' :
-                              invitation.status === 'expired' ? 'destructive' : 'secondary'
-                            }>
-                              {invitation.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{new Date(invitation.createdAt).toLocaleDateString()}</TableCell>
-                          <TableCell>{new Date(invitation.expiresAt).toLocaleDateString()}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <div className="text-center py-4">Loading invitations...</div>
-                )}
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  Invitation tracking coming soon...
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -802,70 +540,29 @@ export default function AdminDashboard() {
           <TabsContent value="analytics" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Signup Analytics</CardTitle>
-                <CardDescription>
-                  Track partner signup funnel and conversion rates
-                </CardDescription>
+                <CardTitle>Analytics Dashboard</CardTitle>
+                <CardDescription>System metrics and usage analytics</CardDescription>
               </CardHeader>
               <CardContent>
-                {analytics ? (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {analytics.filter((a: any) => a.event === 'invitation_sent').length}
-                        </div>
-                        <div className="text-sm text-blue-600">Invitations Sent</div>
-                      </div>
-                      <div className="bg-yellow-50 p-4 rounded-lg">
-                        <div className="text-2xl font-bold text-yellow-600">
-                          {analytics.filter((a: any) => a.event === 'invitation_clicked').length}
-                        </div>
-                        <div className="text-sm text-yellow-600">Clicks</div>
-                      </div>
-                      <div className="bg-green-50 p-4 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">
-                          {analytics.filter((a: any) => a.event === 'signup_completed').length}
-                        </div>
-                        <div className="text-sm text-green-600">Signups</div>
-                      </div>
-                      <div className="bg-purple-50 p-4 rounded-lg">
-                        <div className="text-2xl font-bold text-purple-600">
-                          {analytics.filter((a: any) => a.event === 'organization_created').length}
-                        </div>
-                        <div className="text-sm text-purple-600">Organizations</div>
-                      </div>
-                    </div>
-                    
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Event</TableHead>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Timestamp</TableHead>
-                          <TableHead>Details</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {analytics.slice(0, 10).map((event: any) => (
-                          <TableRow key={event.id}>
-                            <TableCell>
-                              <Badge variant="outline">
-                                {event.event.replace('_', ' ')}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{event.email || 'N/A'}</TableCell>
-                            <TableCell>{new Date(event.timestamp).toLocaleString()}</TableCell>
-                            <TableCell className="text-xs text-gray-500">
-                              {event.metadata ? JSON.stringify(event.metadata).slice(0, 50) + '...' : 'N/A'}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                ) : (
+                {statsLoading ? (
                   <div className="text-center py-4">Loading analytics...</div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-6 rounded-lg">
+                      <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">Partner Conversion</h3>
+                      <div className="text-3xl font-bold text-blue-900 dark:text-blue-100">
+                        {adminStats?.totalPartners ? Math.round((adminStats.totalPartners - (adminStats.pendingPartners || 0)) / adminStats.totalPartners * 100) : 0}%
+                      </div>
+                      <p className="text-sm text-blue-600 dark:text-blue-300">Approval rate</p>
+                    </div>
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-6 rounded-lg">
+                      <h3 className="font-semibold text-green-800 dark:text-green-200 mb-2">Quote Generation</h3>
+                      <div className="text-3xl font-bold text-green-900 dark:text-green-100">
+                        {adminStats?.totalQuotes || 0}
+                      </div>
+                      <p className="text-sm text-green-600 dark:text-green-300">Total quotes created</p>
+                    </div>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -874,10 +571,8 @@ export default function AdminDashboard() {
           <TabsContent value="quotes" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Recent Quotes</CardTitle>
-                <CardDescription>
-                  Overview of generated quotes
-                </CardDescription>
+                <CardTitle>Quote Management</CardTitle>
+                <CardDescription>View and manage all system quotes</CardDescription>
               </CardHeader>
               <CardContent>
                 {quotesLoading ? (
@@ -889,49 +584,46 @@ export default function AdminDashboard() {
                         <TableHead>Quote #</TableHead>
                         <TableHead>Customer</TableHead>
                         <TableHead>Sales Executive</TableHead>
-                        <TableHead>Partner Org</TableHead>
-                        <TableHead>Amount</TableHead>
+                        <TableHead>Organization</TableHead>
+                        <TableHead>Total Cost</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Created</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {quotes?.slice(0, 10).map((quote) => (
+                      {quotes?.map((quote) => (
                         <TableRow key={quote.id}>
-                          <TableCell>{quote.quoteNumber}</TableCell>
-                          <TableCell>
-                            {quote.customerName || quote.customerCompany || 'N/A'}
-                          </TableCell>
-                          <TableCell>
-                            {quote.salesExecutiveName || quote.salesExecutiveEmail || 'N/A'}
-                          </TableCell>
-                          <TableCell>{quote.organizationName || 'N/A'}</TableCell>
+                          <TableCell className="font-medium">{quote.quoteNumber}</TableCell>
+                          <TableCell>N/A</TableCell>
+                          <TableCell>N/A</TableCell>
+                          <TableCell>N/A</TableCell>
                           <TableCell>${quote.totalCost}</TableCell>
-                          <TableCell className="capitalize">
-                            <Badge variant={quote.status === 'approved' ? 'default' : 'secondary'}>
+                          <TableCell>
+                            <Badge variant={quote.status === 'active' ? 'default' : 'secondary'}>
                               {quote.status}
                             </Badge>
                           </TableCell>
+                          <TableCell>{new Date(quote.createdAt || Date.now()).toLocaleDateString()}</TableCell>
                           <TableCell>
-                            {new Date(quote.createdAt!).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setSelectedQuote(quote)}
+                            <div className="flex gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleViewQuoteDetails(quote)}
+                                className="flex items-center gap-1"
                               >
                                 <Eye className="h-4 w-4" />
+                                View
                               </Button>
                               <Button
-                                variant="ghost"
                                 size="sm"
-                                onClick={() => deleteQuoteMutation.mutate(quote.id)}
-                                disabled={deleteQuoteMutation.isPending}
+                                variant="outline"
+                                onClick={() => window.open(`/api/files/pdf/${quote.pdfUrl}`, '_blank')}
+                                className="flex items-center gap-1"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Download className="h-4 w-4" />
+                                PDF
                               </Button>
                             </div>
                           </TableCell>
@@ -946,229 +638,153 @@ export default function AdminDashboard() {
         </Tabs>
       </div>
 
-      {/* Quote Details Modal with Complete Assessment Information */}
+      {/* Quote Details Modal */}
       <Dialog open={!!selectedQuote} onOpenChange={() => setSelectedQuote(null)}>
-        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
               Quote Details - {selectedQuote?.quoteNumber}
               <Badge variant="outline" className="ml-2">
-                {selectedQuote?.serviceType?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                {selectedQuoteData?.assessment?.serviceType?.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
               </Badge>
             </DialogTitle>
             <DialogDescription>
-              Complete quote and assessment information
+              Complete quote details and assessment information
             </DialogDescription>
           </DialogHeader>
-          {selectedQuote && (
+          {selectedQuoteData && (
             <div className="space-y-6">
-              {/* Quote and Customer Summary */}
-              <div className="grid grid-cols-3 gap-4">
+              {/* Quote Summary */}
+              <div className="grid grid-cols-2 gap-6">
                 <Card className="p-4">
-                  <h3 className="font-semibold mb-3 text-blue-600">Customer Information</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><strong>Name:</strong> {selectedQuote.customerName || quoteAssessmentData?.assessment?.customerContactName || 'N/A'}</p>
-                    <p><strong>Company:</strong> {selectedQuote.customerCompany || quoteAssessmentData?.assessment?.customerCompanyName || 'N/A'}</p>
-                    <p><strong>Email:</strong> {selectedQuote.customerEmail || quoteAssessmentData?.assessment?.customerEmail || 'N/A'}</p>
-                    <p><strong>Phone:</strong> {selectedQuote.customerPhone || quoteAssessmentData?.assessment?.customerPhone || 'N/A'}</p>
-                    <p><strong>Site Address:</strong> {quoteAssessmentData?.assessment?.siteAddress || 'N/A'}</p>
-                    <p><strong>Industry:</strong> {quoteAssessmentData?.assessment?.industry || 'N/A'}</p>
-                    <p><strong>Preferred Installation Date:</strong> {quoteAssessmentData?.assessment?.preferredInstallationDate || 'N/A'}</p>
+                  <h3 className="font-semibold mb-3 text-blue-600">Quote Information</h3>
+                  <div className="space-y-2">
+                    <p><strong>Quote Number:</strong> {selectedQuote?.quoteNumber}</p>
+                    <p><strong>Total Cost:</strong> ${selectedQuote?.totalCost}</p>
+                    <p><strong>Survey Cost:</strong> ${selectedQuote?.surveyCost || 'N/A'}</p>
+                    <p><strong>Status:</strong> {selectedQuote?.status}</p>
+                    <p><strong>Created:</strong> {new Date(selectedQuote?.createdAt || Date.now()).toLocaleDateString()}</p>
                   </div>
                 </Card>
                 <Card className="p-4">
-                  <h3 className="font-semibold mb-3 text-green-600">Quote Summary</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><strong>Quote Number:</strong> {selectedQuote.quoteNumber || 'N/A'}</p>
-                    <p><strong>Total Cost:</strong> ${selectedQuote.totalCost || 0}</p>
-                    <p><strong>Status:</strong> <Badge variant={selectedQuote.status === 'approved' ? 'default' : 'secondary'}>{selectedQuote.status || 'N/A'}</Badge></p>
-                    <p><strong>Created:</strong> {new Date(selectedQuote.createdAt || Date.now()).toLocaleDateString()}</p>
-                    <p><strong>Survey Hours:</strong> {selectedQuote.surveyHours || 0}</p>
-                    <p><strong>Installation Hours:</strong> {selectedQuote.installationHours || 0}</p>
-                    <p><strong>Labor Hold:</strong> ${selectedQuote.laborHoldCost || 0}</p>
-                  </div>
-                </Card>
-                <Card className="p-4">
-                  <h3 className="font-semibold mb-3 text-purple-600">Sales Executive</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><strong>Name:</strong> {quoteAssessmentData?.assessment?.salesExecutiveName || 'N/A'}</p>
-                    <p><strong>Email:</strong> {quoteAssessmentData?.assessment?.salesExecutiveEmail || 'N/A'}</p>
-                    <p><strong>Phone:</strong> {quoteAssessmentData?.assessment?.salesExecutivePhone || 'N/A'}</p>
-                    <p><strong>Organization:</strong> {selectedQuote.organizationName || quoteAssessmentData?.organization?.name || 'N/A'}</p>
+                  <h3 className="font-semibold mb-3 text-green-600">Customer Information</h3>
+                  <div className="space-y-2">
+                    <p><strong>Name:</strong> {selectedQuoteData?.assessment?.customerContactName || 'N/A'}</p>
+                    <p><strong>Company:</strong> {selectedQuoteData?.assessment?.customerCompanyName || 'N/A'}</p>
+                    <p><strong>Email:</strong> {selectedQuoteData?.assessment?.customerEmail || 'N/A'}</p>
+                    <p><strong>Phone:</strong> {selectedQuoteData?.assessment?.customerPhone || 'N/A'}</p>
+                    <p><strong>Organization:</strong> {selectedQuoteData?.organization?.name || 'N/A'}</p>
                   </div>
                 </Card>
               </div>
 
-              {/* Complete Assessment Details */}
-              {quoteAssessmentLoading ? (
-                <div className="text-center py-8">Loading complete assessment details...</div>
-              ) : quoteAssessmentData?.assessment ? (
-                <>
-                  {/* Infrastructure Requirements */}
-                  <div>
-                    <h3 className="font-semibold mb-3">Infrastructure Requirements</h3>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      {quoteAssessmentData.assessment.deviceCount && (
-                        <p><strong>Device Count:</strong> {quoteAssessmentData.assessment.deviceCount} devices</p>
+              {/* Service-Specific Assessment Details */}
+              {selectedQuoteData?.assessment?.serviceType === 'fixed-wireless' && (
+                <div className="grid grid-cols-3 gap-6">
+                  <Card className="p-4">
+                    <h3 className="font-semibold mb-3 text-purple-600">Infrastructure Requirements</h3>
+                    <div className="space-y-2 text-sm">
+                      <p><strong>Network Signal:</strong> {selectedQuoteData?.assessment?.networkSignal || 'Not specified'}</p>
+                      <p><strong>Signal Strength:</strong> {selectedQuoteData?.assessment?.signalStrength || 'Not specified'}</p>
+                      <p><strong>Connection Usage:</strong> {selectedQuoteData?.assessment?.connectionUsage || 'Not specified'}</p>
+                      <p><strong>Router Location:</strong> {selectedQuoteData?.assessment?.routerLocation || 'Not specified'}</p>
+                      <p><strong>Antenna Cable Required:</strong> {selectedQuoteData?.assessment?.antennaCable ? 'Yes' : 'No'}</p>
+                      <p><strong>Low Signal Antenna Cable:</strong> {selectedQuoteData?.assessment?.lowSignalAntennaCable ? 'Yes' : 'No'}</p>
+                      <p><strong>Device Connection Assistance:</strong> {selectedQuoteData?.assessment?.deviceConnectionAssistance ? 'Yes' : 'No'}</p>
+                      <p><strong>Router Make:</strong> {selectedQuoteData?.assessment?.routerMake || 'Not specified'}</p>
+                      <p><strong>Router Model:</strong> {selectedQuoteData?.assessment?.routerModel || 'Not specified'}</p>
+                      <p><strong>Number of Routers:</strong> {selectedQuoteData?.assessment?.routerCount || 'Not specified'}</p>
+                    </div>
+                  </Card>
+                  <Card className="p-4">
+                    <h3 className="font-semibold mb-3 text-orange-600">Site Characteristics</h3>
+                    <div className="space-y-2 text-sm">
+                      <p><strong>Building Type:</strong> {selectedQuoteData?.assessment?.buildingType || 'Not specified'}</p>
+                      <p><strong>Coverage Area:</strong> {selectedQuoteData?.assessment?.coverageArea || 'Not specified'}</p>
+                      <p><strong>Floors:</strong> {selectedQuoteData?.assessment?.floors || 'Not specified'}</p>
+                      <p><strong>Device Count:</strong> {selectedQuoteData?.assessment?.deviceCount || 'Not specified'}</p>
+                      <p><strong>Ceiling Height:</strong> {selectedQuoteData?.assessment?.ceilingHeight || 'Not specified'}</p>
+                      <p><strong>Ceiling Type:</strong> {selectedQuoteData?.assessment?.ceilingType || 'Not specified'}</p>
+                      <p><strong>Cable Footage:</strong> {selectedQuoteData?.assessment?.cableFootage || 'Not specified'}</p>
+                      <p><strong>Antenna Type:</strong> {selectedQuoteData?.assessment?.antennaType || 'Not specified'}</p>
+                      <p><strong>Antenna Location:</strong> {selectedQuoteData?.assessment?.antennaInstallationLocation || 'Not specified'}</p>
+                    </div>
+                  </Card>
+                  <Card className="p-4">
+                    <h3 className="font-semibold mb-3 text-red-600">Environmental Factors</h3>
+                    <div className="space-y-2 text-sm">
+                      <p><strong>Interference Sources:</strong> {selectedQuoteData?.assessment?.interferenceSources || 'Not specified'}</p>
+                      <p><strong>Special Requirements:</strong> {selectedQuoteData?.assessment?.specialRequirements || 'Not specified'}</p>
+                      <p><strong>Additional Notes:</strong> {selectedQuoteData?.assessment?.additionalNotes || 'Not specified'}</p>
+                      <p><strong>Site Address:</strong> {selectedQuoteData?.assessment?.siteAddress || 'Not specified'}</p>
+                      <p><strong>Industry:</strong> {selectedQuoteData?.assessment?.industry || 'Not specified'}</p>
+                      <p><strong>Preferred Install Date:</strong> {selectedQuoteData?.assessment?.preferredInstallationDate || 'Not specified'}</p>
+                    </div>
+                  </Card>
+                </div>
+              )}
+
+              {/* Fleet services would have similar organized sections */}
+              {(selectedQuoteData?.assessment?.serviceType === 'fleet-tracking' || selectedQuoteData?.assessment?.serviceType === 'fleet-camera') && (
+                <div className="grid grid-cols-3 gap-6">
+                  <Card className="p-4">
+                    <h3 className="font-semibold mb-3 text-purple-600">Fleet Information</h3>
+                    <div className="space-y-2 text-sm">
+                      <p><strong>Vehicle Count for Installation:</strong> {selectedQuoteData?.assessment?.vehicleCount || 'Not specified'}</p>
+                      <p><strong>Total Fleet Size:</strong> {selectedQuoteData?.assessment?.totalFleetSize || 'Not specified'}</p>
+                      <p><strong>Billing Address:</strong> {selectedQuoteData?.assessment?.billingAddress || 'Not specified'}</p>
+                      <p><strong>Installation Site Address:</strong> {selectedQuoteData?.assessment?.installationSiteAddress || 'Not specified'}</p>
+                    </div>
+                  </Card>
+                  <Card className="p-4">
+                    <h3 className="font-semibold mb-3 text-orange-600">Service Details</h3>
+                    <div className="space-y-2 text-sm">
+                      {selectedQuoteData?.assessment?.serviceType === 'fleet-tracking' && (
+                        <>
+                          <p><strong>Tracker Type:</strong> {selectedQuoteData?.assessment?.trackerType || 'Not specified'}</p>
+                          <p><strong>Installation Type:</strong> {selectedQuoteData?.assessment?.installationType || 'Not specified'}</p>
+                        </>
                       )}
-                      <p><strong>Power Available:</strong> {quoteAssessmentData.assessment.powerAvailable ? 'Yes' : 'No'}</p>
-                      <p><strong>Ethernet Required:</strong> {quoteAssessmentData.assessment.ethernetRequired ? 'Yes' : 'No'}</p>
-                      <p><strong>Device Connection Assistance:</strong> {
-                        quoteAssessmentData.assessment.deviceConnectionAssistance === 'yes' ? 'Required' : 
-                        quoteAssessmentData.assessment.deviceConnectionAssistance === 'no' ? 'Not Required' : 'Not specified'
-                      }</p>
-                      {quoteAssessmentData.assessment.routerMake && (
-                        <p><strong>Router:</strong> {quoteAssessmentData.assessment.routerMake} {quoteAssessmentData.assessment.routerModel}</p>
+                      {selectedQuoteData?.assessment?.serviceType === 'fleet-camera' && (
+                        <>
+                          <p><strong>Camera Solution Type:</strong> {selectedQuoteData?.assessment?.cameraSolutionType || 'Not specified'}</p>
+                          <p><strong>Number of Cameras:</strong> {selectedQuoteData?.assessment?.numberOfCameras || 'Not specified'}</p>
+                        </>
                       )}
-                      {quoteAssessmentData.assessment.routerCount && (
-                        <p><strong>Router Count:</strong> {quoteAssessmentData.assessment.routerCount}</p>
-                      )}
-                      {quoteAssessmentData.assessment.routerLocation && (
-                        <p><strong>Router Location:</strong> {quoteAssessmentData.assessment.routerLocation}</p>
-                      )}
-                      {quoteAssessmentData.assessment.cableFootage && (
-                        <p><strong>Cable Footage:</strong> {quoteAssessmentData.assessment.cableFootage}</p>
-                      )}
-                      {quoteAssessmentData.assessment.antennaType && (
-                        <p><strong>Antenna Type:</strong> {quoteAssessmentData.assessment.antennaType}</p>
-                      )}
-                      {quoteAssessmentData.assessment.antennaInstallationLocation && (
-                        <p><strong>Antenna Location:</strong> {quoteAssessmentData.assessment.antennaInstallationLocation}</p>
-                      )}
-                      {quoteAssessmentData.assessment.routerMounting && (
-                        <p><strong>Router Mounting:</strong> {quoteAssessmentData.assessment.routerMounting}</p>
-                      )}
-                      {quoteAssessmentData.assessment.dualWanSupport && (
-                        <p><strong>Dual WAN Support:</strong> {quoteAssessmentData.assessment.dualWanSupport}</p>
+                      <p><strong>Tracking Partner:</strong> {selectedQuoteData?.assessment?.iotTrackingPartner || 'Not specified'}</p>
+                      <p><strong>Carrier SIM:</strong> {selectedQuoteData?.assessment?.carrierSim || 'Not specified'}</p>
+                    </div>
+                  </Card>
+                  <Card className="p-4">
+                    <h3 className="font-semibold mb-3 text-red-600">Vehicle Information</h3>
+                    <div className="space-y-2 text-sm">
+                      {selectedQuoteData?.assessment?.vehicleDetails ? (
+                        <div className="space-y-2">
+                          {JSON.parse(selectedQuoteData.assessment.vehicleDetails).map((vehicle: any, index: number) => (
+                            <div key={index} className="bg-gray-50 dark:bg-gray-800 p-2 rounded">
+                              <p><strong>Vehicle {index + 1}:</strong> {vehicle.year || 'N/A'} {vehicle.make || 'N/A'} {vehicle.model || 'N/A'}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p>No vehicle details specified</p>
                       )}
                     </div>
-                  </div>
-
-                  {/* Site Characteristics */}
-                  <div>
-                    <h3 className="font-semibold mb-3">Site Characteristics</h3>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <p><strong>Address:</strong> {quoteAssessmentData.assessment.siteAddress || 'N/A'}</p>
-                      <p><strong>Industry:</strong> {quoteAssessmentData.assessment.industry || 'N/A'}</p>
-                      {quoteAssessmentData.assessment.buildingType && (
-                        <p><strong>Building Type:</strong> {quoteAssessmentData.assessment.buildingType}</p>
-                      )}
-                      {quoteAssessmentData.assessment.coverageArea && (
-                        <p><strong>Coverage Area:</strong> {quoteAssessmentData.assessment.coverageArea.toLocaleString()} sq ft</p>
-                      )}
-                      {quoteAssessmentData.assessment.floors && (
-                        <p><strong>Number of Floors:</strong> {quoteAssessmentData.assessment.floors}</p>
-                      )}
-                      <p><strong>Ceiling Mount:</strong> {quoteAssessmentData.assessment.ceilingMount ? 'Yes' : 'No'}</p>
-                      <p><strong>Outdoor Coverage:</strong> {quoteAssessmentData.assessment.outdoorCoverage ? 'Required' : 'Not Required'}</p>
-                      {quoteAssessmentData.assessment.ceilingHeight && (
-                        <p><strong>Ceiling Height:</strong> {quoteAssessmentData.assessment.ceilingHeight}</p>
-                      )}
-                      {quoteAssessmentData.assessment.ceilingType && (
-                        <p><strong>Ceiling Type:</strong> {quoteAssessmentData.assessment.ceilingType}</p>
-                      )}
-                      {quoteAssessmentData.assessment.networkSignal && (
-                        <p><strong>Network Signal:</strong> {quoteAssessmentData.assessment.networkSignal}</p>
-                      )}
-                      {quoteAssessmentData.assessment.signalStrength && (
-                        <p><strong>Signal Strength:</strong> {quoteAssessmentData.assessment.signalStrength}</p>
-                      )}
-                      {quoteAssessmentData.assessment.connectionUsage && (
-                        <p><strong>Connection Usage:</strong> {quoteAssessmentData.assessment.connectionUsage}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Environmental Factors & Notes */}
-                  {(quoteAssessmentData.assessment.interferenceSources || quoteAssessmentData.assessment.specialRequirements || quoteAssessmentData.assessment.additionalNotes) && (
-                    <div>
-                      <h3 className="font-semibold mb-3">Environmental Factors & Special Requirements</h3>
-                      <div className="space-y-3 text-sm">
-                        {quoteAssessmentData.assessment.interferenceSources && (
-                          <div>
-                            <p><strong>Interference Sources:</strong></p>
-                            <p className="mt-1 text-gray-600 leading-relaxed">{quoteAssessmentData.assessment.interferenceSources}</p>
-                          </div>
-                        )}
-                        {quoteAssessmentData.assessment.specialRequirements && (
-                          <div>
-                            <p><strong>Special Requirements:</strong></p>
-                            <p className="mt-1 text-gray-600 leading-relaxed">{quoteAssessmentData.assessment.specialRequirements}</p>
-                          </div>
-                        )}
-                        {quoteAssessmentData.assessment.additionalNotes && (
-                          <div>
-                            <p><strong>Additional Notes:</strong></p>
-                            <p className="mt-1 text-gray-600 leading-relaxed">{quoteAssessmentData.assessment.additionalNotes}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Fleet-specific details if applicable */}
-                  {quoteAssessmentData.assessment.serviceType === 'fleet-tracking' && (
-                    <div>
-                      <h3 className="font-semibold mb-3">Fleet Tracking Details</h3>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        {quoteAssessmentData.assessment.totalFleetSize && (
-                          <p><strong>Total Fleet Size:</strong> {quoteAssessmentData.assessment.totalFleetSize} vehicles</p>
-                        )}
-                        {quoteAssessmentData.assessment.trackerType && (
-                          <p><strong>Tracker Type:</strong> {quoteAssessmentData.assessment.trackerType}</p>
-                        )}
-                        {quoteAssessmentData.assessment.iotTrackingPartner && (
-                          <p><strong>IoT Partner:</strong> {quoteAssessmentData.assessment.iotTrackingPartner}</p>
-                        )}
-                        {quoteAssessmentData.assessment.carrierSim && (
-                          <p><strong>Carrier SIM:</strong> {quoteAssessmentData.assessment.carrierSim}</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Fleet Camera specific details if applicable */}
-                  {quoteAssessmentData.assessment.serviceType === 'fleet-camera' && (
-                    <div>
-                      <h3 className="font-semibold mb-3">Fleet Camera Details</h3>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        {quoteAssessmentData.assessment.cameraSolutionType && (
-                          <p><strong>Camera Solution:</strong> {quoteAssessmentData.assessment.cameraSolutionType}</p>
-                        )}
-                        {quoteAssessmentData.assessment.numberOfCameras && (
-                          <p><strong>Number of Cameras:</strong> {quoteAssessmentData.assessment.numberOfCameras}</p>
-                        )}
-                        {quoteAssessmentData.assessment.removalNeeded && (
-                          <p><strong>Removal Needed:</strong> {quoteAssessmentData.assessment.removalNeeded}</p>
-                        )}
-                        {quoteAssessmentData.assessment.existingCameraSolution && (
-                          <p><strong>Existing Solution:</strong> {quoteAssessmentData.assessment.existingCameraSolution}</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-
-                </>
-              ) : (
-                <Card className="p-4">
-                  <p className="text-center text-gray-500">Assessment details not available for this quote.</p>
-                </Card>
+                  </Card>
+                </div>
               )}
             </div>
           )}
           <DialogFooter className="flex justify-between">
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => window.open(`/api/files/pdf/${selectedQuote.pdfUrl}`, '_blank')}
-                className="flex items-center gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Download Quote PDF
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              onClick={() => window.open(`/api/files/pdf/${selectedQuote.pdfUrl}`, '_blank')}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Download Quote PDF
+            </Button>
             <div className="flex gap-2">
               <Button
                 variant="destructive"
@@ -1189,239 +805,6 @@ export default function AdminDashboard() {
                 Close
               </Button>
             </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Assessment Details Modal */}
-      <Dialog open={!!selectedAssessment} onOpenChange={() => setSelectedAssessment(null)}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Assessment Details - #{selectedAssessment?.id}
-              <Badge variant="outline" className="ml-2">
-                {selectedAssessment?.serviceType?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-              </Badge>
-            </DialogTitle>
-            <DialogDescription>
-              Complete assessment details and responses to all questions
-            </DialogDescription>
-          </DialogHeader>
-          {selectedAssessment && (
-            <div className="space-y-6">
-              {/* Basic Information */}
-              <div className="grid grid-cols-2 gap-6">
-                <Card className="p-4">
-                  <h3 className="font-semibold mb-3 text-blue-600">Customer Information</h3>
-                  <div className="space-y-2">
-                    <p><strong>Name:</strong> {selectedAssessment.customerContactName || 'N/A'}</p>
-                    <p><strong>Company:</strong> {selectedAssessment.customerCompanyName || 'N/A'}</p>
-                    <p><strong>Email:</strong> {selectedAssessment.customerEmail || 'N/A'}</p>
-                    <p><strong>Phone:</strong> {selectedAssessment.customerPhone || 'N/A'}</p>
-                    <p><strong>Site Address:</strong> {selectedAssessment.siteAddress || 'N/A'}</p>
-                    <p><strong>Industry:</strong> {selectedAssessment.industry || 'N/A'}</p>
-                    <p><strong>Preferred Installation Date:</strong> {selectedAssessment.preferredInstallationDate || 'N/A'}</p>
-                  </div>
-                </Card>
-                <Card className="p-4">
-                  <h3 className="font-semibold mb-3 text-green-600">Sales Executive & Assessment</h3>
-                  <div className="space-y-2">
-                    <p><strong>Sales Executive:</strong> {selectedAssessment.salesExecutiveName || 'N/A'}</p>
-                    <p><strong>Executive Email:</strong> {selectedAssessment.salesExecutiveEmail || 'N/A'}</p>
-                    <p><strong>Executive Phone:</strong> {selectedAssessment.salesExecutivePhone || 'N/A'}</p>
-                    <p><strong>Organization:</strong> {selectedAssessment.organizationName || 'N/A'}</p>
-                    <p><strong>Assessment ID:</strong> #{selectedAssessment.id}</p>
-                    <p><strong>Created:</strong> {new Date(selectedAssessment.createdAt || Date.now()).toLocaleDateString()}</p>
-                    <p><strong>Total Cost:</strong> ${selectedAssessment.totalCost || 0}</p>
-                  </div>
-                </Card>
-              </div>
-
-              {/* Service-Specific Questions */}
-              {selectedAssessment.serviceType === 'fixed-wireless' && (
-                <Card className="p-4">
-                  <h3 className="font-semibold mb-4 text-purple-600 flex items-center gap-2">
-                    <Settings className="h-4 w-4" />
-                    Fixed Wireless Assessment Questions
-                  </h3>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-gray-700">Infrastructure Requirements</h4>
-                      <div className="space-y-2 text-sm">
-                        <p><strong>Network Signal:</strong> {selectedAssessment.networkSignal || 'Not specified'}</p>
-                        <p><strong>Signal Strength:</strong> {selectedAssessment.signalStrength || 'Not specified'}</p>
-                        <p><strong>Connection Usage:</strong> {selectedAssessment.connectionUsage || 'Not specified'}</p>
-                        <p><strong>Router Location:</strong> {selectedAssessment.routerLocation || 'Not specified'}</p>
-                        <p><strong>Antenna Cable Required:</strong> {selectedAssessment.antennaCable ? 'Yes' : 'No'}</p>
-                        <p><strong>Low Signal Antenna Cable:</strong> {selectedAssessment.lowSignalAntennaCable ? 'Yes' : 'No'}</p>
-                        <p><strong>Device Connection Assistance:</strong> {selectedAssessment.deviceConnectionAssistance ? 'Yes' : 'No'}</p>
-                        <p><strong>Router Make:</strong> {selectedAssessment.routerMake || 'Not specified'}</p>
-                        <p><strong>Router Model:</strong> {selectedAssessment.routerModel || 'Not specified'}</p>
-                        <p><strong>Number of Routers:</strong> {selectedAssessment.routerCount || 'Not specified'}</p>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-gray-700">Site Characteristics</h4>
-                      <div className="space-y-2 text-sm">
-                        <p><strong>Building Type:</strong> {selectedAssessment.buildingType || 'Not specified'}</p>
-                        <p><strong>Coverage Area:</strong> {selectedAssessment.coverageArea || 'Not specified'}</p>
-                        <p><strong>Floors:</strong> {selectedAssessment.floors || 'Not specified'}</p>
-                        <p><strong>Device Count:</strong> {selectedAssessment.deviceCount || 'Not specified'}</p>
-                        <p><strong>Ceiling Height:</strong> {selectedAssessment.ceilingHeight || 'Not specified'}</p>
-                        <p><strong>Ceiling Type:</strong> {selectedAssessment.ceilingType || 'Not specified'}</p>
-                        <p><strong>Cable Footage:</strong> {selectedAssessment.cableFootage || 'Not specified'}</p>
-                        <p><strong>Antenna Type:</strong> {selectedAssessment.antennaType || 'Not specified'}</p>
-                        <p><strong>Antenna Location:</strong> {selectedAssessment.antennaInstallationLocation || 'Not specified'}</p>
-                        <p><strong>Router Mounting:</strong> {selectedAssessment.routerMounting || 'Not specified'}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-4 border-t">
-                    <h4 className="font-medium text-gray-700 mb-2">Environmental Factors</h4>
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <p><strong>Power Available:</strong> {selectedAssessment.powerAvailable ? 'Yes' : 'No'}</p>
-                      <p><strong>Ethernet Required:</strong> {selectedAssessment.ethernetRequired ? 'Yes' : 'No'}</p>
-                      <p><strong>Ceiling Mount:</strong> {selectedAssessment.ceilingMount ? 'Yes' : 'No'}</p>
-                      <p><strong>Outdoor Coverage:</strong> {selectedAssessment.outdoorCoverage ? 'Yes' : 'No'}</p>
-                      <p><strong>Dual WAN Support:</strong> {selectedAssessment.dualWanSupport ? 'Yes' : 'No'}</p>
-                    </div>
-                    {(selectedAssessment.interferenceSources || selectedAssessment.specialRequirements) && (
-                      <div className="mt-3 space-y-2">
-                        {selectedAssessment.interferenceSources && (
-                          <p><strong>Interference Sources:</strong> {selectedAssessment.interferenceSources}</p>
-                        )}
-                        {selectedAssessment.specialRequirements && (
-                          <p><strong>Special Requirements:</strong> {selectedAssessment.specialRequirements}</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              )}
-
-              {selectedAssessment.serviceType === 'fleet-tracking' && (
-                <Card className="p-4">
-                  <h3 className="font-semibold mb-4 text-orange-600 flex items-center gap-2">
-                    <Settings className="h-4 w-4" />
-                    Fleet Tracking Assessment Questions
-                  </h3>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-gray-700">Fleet Information</h4>
-                      <div className="space-y-2 text-sm">
-                        <p><strong>Billing Address:</strong> {selectedAssessment.billingAddress || 'Not specified'}</p>
-                        <p><strong>Installation Site Address:</strong> {selectedAssessment.installationSiteAddress || 'Not specified'}</p>
-                        <p><strong>Number of Vehicles for Installation:</strong> {selectedAssessment.vehicleCount || 'Not specified'}</p>
-                        <p><strong>Total Fleet Size:</strong> {selectedAssessment.totalFleetSize || 'Not specified'}</p>
-                        <p><strong>Installation Type:</strong> {selectedAssessment.installationType || 'Not specified'}</p>
-                        <p><strong>Tracker Type:</strong> {selectedAssessment.trackerType || 'Not specified'}</p>
-                        <p><strong>IoT Tracking Partner:</strong> {selectedAssessment.iotTrackingPartner || 'Not specified'}</p>
-                        <p><strong>Carrier SIM:</strong> {selectedAssessment.carrierSim || 'Not specified'}</p>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-gray-700">Vehicle Details</h4>
-                      <div className="space-y-2 text-sm">
-                        {selectedAssessment.vehicleDetails ? (
-                          <div className="space-y-2">
-                            {JSON.parse(selectedAssessment.vehicleDetails).map((vehicle: any, index: number) => (
-                              <div key={index} className="bg-gray-50 p-2 rounded">
-                                <p><strong>Vehicle {index + 1}:</strong> {vehicle.year || 'N/A'} {vehicle.make || 'N/A'} {vehicle.model || 'N/A'}</p>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          selectedAssessment.vehicleYear || selectedAssessment.vehicleMake || selectedAssessment.vehicleModel ? (
-                            <div className="bg-gray-50 p-2 rounded">
-                              <p><strong>Vehicle:</strong> {selectedAssessment.vehicleYear || 'N/A'} {selectedAssessment.vehicleMake || 'N/A'} {selectedAssessment.vehicleModel || 'N/A'}</p>
-                            </div>
-                          ) : (
-                            <p>No vehicle details specified</p>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              )}
-
-              {selectedAssessment.serviceType === 'fleet-camera' && (
-                <Card className="p-4">
-                  <h3 className="font-semibold mb-4 text-red-600 flex items-center gap-2">
-                    <Settings className="h-4 w-4" />
-                    Fleet Camera Assessment Questions
-                  </h3>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-gray-700">Camera Solution Details</h4>
-                      <div className="space-y-2 text-sm">
-                        <p><strong>Billing Address:</strong> {selectedAssessment.billingAddress || 'Not specified'}</p>
-                        <p><strong>Installation Site Address:</strong> {selectedAssessment.installationSiteAddress || 'Not specified'}</p>
-                        <p><strong>Number of Vehicles for Installation:</strong> {selectedAssessment.vehicleCount || 'Not specified'}</p>
-                        <p><strong>Total Fleet Size:</strong> {selectedAssessment.totalFleetSize || 'Not specified'}</p>
-                        <p><strong>Camera Solution Type:</strong> {selectedAssessment.cameraSolutionType || 'Not specified'}</p>
-                        <p><strong>Number of Cameras:</strong> {selectedAssessment.numberOfCameras || 'Not specified'}</p>
-                        <p><strong>Tracking Partner:</strong> {selectedAssessment.iotTrackingPartner || 'Not specified'}</p>
-                        <p><strong>Carrier SIM:</strong> {selectedAssessment.carrierSim || 'Not specified'}</p>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-gray-700">Installation & Removal</h4>
-                      <div className="space-y-2 text-sm">
-                        <p><strong>Removal of existing solution needed:</strong> {selectedAssessment.removalNeeded ? 'Yes' : 'No'}</p>
-                        {selectedAssessment.removalNeeded && (
-                          <>
-                            <p><strong>Existing Camera Solution:</strong> {selectedAssessment.existingCameraSolution || 'Not specified'}</p>
-                            {selectedAssessment.otherSolutionDetails && (
-                              <p><strong>Other Solution Details:</strong> {selectedAssessment.otherSolutionDetails}</p>
-                            )}
-                            <p><strong>Removal Vehicle Count:</strong> {selectedAssessment.removalVehicleCount || 'Not specified'}</p>
-                          </>
-                        )}
-                        <p><strong>Protective Wiring Harness:</strong> {selectedAssessment.protectiveWiringHarness ? 'Yes' : 'No'}</p>
-                      </div>
-                      
-                      <h4 className="font-medium text-gray-700 mt-4">Vehicle Details</h4>
-                      <div className="space-y-2 text-sm">
-                        {selectedAssessment.vehicleDetails ? (
-                          <div className="space-y-2">
-                            {JSON.parse(selectedAssessment.vehicleDetails).map((vehicle: any, index: number) => (
-                              <div key={index} className="bg-gray-50 p-2 rounded">
-                                <p><strong>Vehicle {index + 1}:</strong> {vehicle.year || 'N/A'} {vehicle.make || 'N/A'} {vehicle.model || 'N/A'}</p>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          selectedAssessment.vehicleYear || selectedAssessment.vehicleMake || selectedAssessment.vehicleModel ? (
-                            <div className="bg-gray-50 p-2 rounded">
-                              <p><strong>Vehicle:</strong> {selectedAssessment.vehicleYear || 'N/A'} {selectedAssessment.vehicleMake || 'N/A'} {selectedAssessment.vehicleModel || 'N/A'}</p>
-                            </div>
-                          ) : (
-                            <p>No vehicle details specified</p>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              )}
-
-
-            </div>
-          )}
-          <DialogFooter className="flex justify-between">
-            <Button 
-              variant="outline"
-              onClick={() => handleDownloadAssessment(selectedAssessment?.id)}
-              className="flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Download PDF Report
-            </Button>
-            <Button variant="secondary" onClick={() => setSelectedAssessment(null)}>
-              Close
-            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
