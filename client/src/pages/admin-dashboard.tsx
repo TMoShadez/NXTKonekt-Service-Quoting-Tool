@@ -87,12 +87,14 @@ export default function AdminDashboard() {
     try {
       const response = await fetch(`/api/admin/quotes/${quote.id}/details`);
       if (!response.ok) {
-        throw new Error('Failed to fetch quote details');
+        throw new Error(`Failed to fetch quote details: ${response.status}`);
       }
       const quoteWithAssessment = await response.json();
+      console.log('Quote details loaded:', quoteWithAssessment);
       setSelectedQuoteData(quoteWithAssessment);
       setSelectedQuote(quote);
     } catch (error) {
+      console.error('Error loading quote details:', error);
       toast({
         title: "Error",
         description: "Failed to load quote details. Please try again.",

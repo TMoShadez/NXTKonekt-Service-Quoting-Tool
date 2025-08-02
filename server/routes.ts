@@ -781,7 +781,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin get single quote route
+  // Admin get single quote route with full details
   app.get('/api/admin/quotes/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { id } = req.params;
@@ -795,6 +795,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching quote:", error);
       res.status(500).json({ message: "Failed to fetch quote" });
+    }
+  });
+
+  // Admin get quote details with assessment data
+  app.get('/api/admin/quotes/:id/details', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Get complete quote details with assessment, user, and organization information
+      const quoteDetails = await db.select({
+        id: quotes.id,
+        assessmentId: quotes.assessmentId,
+        quoteNumber: quotes.quoteNumber,
+        surveyCost: quotes.surveyCost,
+        installationCost: quotes.installationCost,
+        configurationCost: quotes.configurationCost,
+        trainingCost: quotes.trainingCost,
+        hardwareCost: quotes.hardwareCost,
+        removalCost: quotes.removalCost,
+        totalCost: quotes.totalCost,
+        surveyHours: quotes.surveyHours,
+        installationHours: quotes.installationHours,
+        configurationHours: quotes.configurationHours,
+        removalHours: quotes.removalHours,
+        laborHoldHours: quotes.laborHoldHours,
+        laborHoldCost: quotes.laborHoldCost,
+        hourlyRate: quotes.hourlyRate,
+        status: quotes.status,
+        pdfUrl: quotes.pdfUrl,
+        emailSent: quotes.emailSent,
+        createdAt: quotes.createdAt,
+        updatedAt: quotes.updatedAt,
+        assessment: assessments,
+        user: users,
+        organization: organizations,
+      })
+      .from(quotes)
+      .leftJoin(assessments, eq(quotes.assessmentId, assessments.id))
+      .leftJoin(users, eq(assessments.userId, users.id))
+      .leftJoin(organizations, eq(assessments.organizationId, organizations.id))
+      .where(eq(quotes.id, parseInt(id)))
+      .limit(1);
+      
+      if (!quoteDetails.length) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      
+      res.json(quoteDetails[0]);
+    } catch (error) {
+      console.error("Error fetching quote details:", error);
+      res.status(500).json({ message: "Failed to fetch quote details" });
     }
   });
 
