@@ -664,158 +664,223 @@ export default function AdminDashboard() {
           {selectedQuoteData && (
             <div className="space-y-6">
               {/* Quote Summary */}
-              <div className="grid grid-cols-2 gap-6">
-                <Card className="p-4">
-                  <h3 className="font-semibold mb-3 text-blue-600">Quote Information</h3>
-                  <div className="space-y-2">
-                    <p><strong>Quote Number:</strong> {selectedQuoteData?.quoteNumber}</p>
-                    <p><strong>Total Cost:</strong> ${parseFloat(selectedQuoteData?.totalCost || 0).toFixed(2)}</p>
-                    <p><strong>Survey Cost:</strong> ${parseFloat(selectedQuoteData?.surveyCost || 0).toFixed(2)}</p>
-                    <p><strong>Installation Cost:</strong> ${parseFloat(selectedQuoteData?.installationCost || 0).toFixed(2)}</p>
-                    <p><strong>Hardware Cost:</strong> ${parseFloat(selectedQuoteData?.hardwareCost || 0).toFixed(2)}</p>
-                    <p><strong>Status:</strong> {selectedQuoteData?.status || 'pending'}</p>
-                    <p><strong>Created:</strong> {new Date(selectedQuoteData?.createdAt || Date.now()).toLocaleDateString()}</p>
-                  </div>
-                </Card>
-                <Card className="p-4">
-                  <h3 className="font-semibold mb-3 text-green-600">Customer Information</h3>
-                  <div className="space-y-2">
-                    <p><strong>Name:</strong> {selectedQuoteData?.assessment?.customerContactName || 'N/A'}</p>
-                    <p><strong>Company:</strong> {selectedQuoteData?.assessment?.customerCompanyName || 'N/A'}</p>
-                    <p><strong>Email:</strong> {selectedQuoteData?.assessment?.customerEmail || 'N/A'}</p>
-                    <p><strong>Phone:</strong> {selectedQuoteData?.assessment?.customerPhone || 'N/A'}</p>
-                    <p><strong>Organization:</strong> {selectedQuoteData?.organization?.name || 'N/A'}</p>
-                  </div>
-                </Card>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <h3 className="font-semibold mb-2">Sales Executive</h3>
+                  <p><strong>Name:</strong> {selectedQuoteData?.assessment?.salesExecutiveName || 'N/A'}</p>
+                  <p><strong>Email:</strong> {selectedQuoteData?.assessment?.salesExecutiveEmail || 'N/A'}</p>
+                  <p><strong>Phone:</strong> {selectedQuoteData?.assessment?.salesExecutivePhone || 'N/A'}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-2">Customer Information</h3>
+                  <p><strong>Name:</strong> {selectedQuoteData?.assessment?.customerContactName || 'N/A'}</p>
+                  <p><strong>Company:</strong> {selectedQuoteData?.assessment?.customerCompanyName || 'N/A'}</p>
+                  <p><strong>Email:</strong> {selectedQuoteData?.assessment?.customerEmail || 'N/A'}</p>
+                  <p><strong>Phone:</strong> {selectedQuoteData?.assessment?.customerPhone || 'N/A'}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-2">Quote Summary</h3>
+                  <p><strong>Quote Number:</strong> {selectedQuoteData?.quoteNumber}</p>
+                  <p><strong>Service Type:</strong> <Badge variant="outline">{selectedQuoteData?.assessment?.serviceType?.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) || 'N/A'}</Badge></p>
+                  <p><strong>Total Cost:</strong> ${parseFloat(selectedQuoteData?.totalCost || 0).toFixed(2)}</p>
+                  <p><strong>Status:</strong> <Badge variant={selectedQuoteData?.status === 'approved' ? 'default' : 'secondary'}>{selectedQuoteData?.status}</Badge></p>
+                  <p><strong>Created:</strong> {new Date(selectedQuoteData?.createdAt || Date.now()).toLocaleString()}</p>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold mb-2">Pricing Breakdown</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <p>Survey Hours: {selectedQuoteData?.surveyHours || 0}</p>
+                  <p>Survey Cost: ${parseFloat(selectedQuoteData?.surveyCost || 0).toFixed(2)}</p>
+                  <p>Installation Hours: {selectedQuoteData?.installationHours || 0}</p>
+                  <p>Installation Cost: ${parseFloat(selectedQuoteData?.installationCost || 0).toFixed(2)}</p>
+                  <p>Configuration Hours: {selectedQuoteData?.configurationHours || 0}</p>
+                  <p>Configuration Cost: ${parseFloat(selectedQuoteData?.configurationCost || 0).toFixed(2)}</p>
+                  <p>Hardware Cost: ${parseFloat(selectedQuoteData?.hardwareCost || 0).toFixed(2)}</p>
+                  <p>Labor Hold: ${parseFloat(selectedQuoteData?.laborHoldCost || 0).toFixed(2)}</p>
+                  {selectedQuoteData?.removalCost && parseFloat(selectedQuoteData.removalCost) > 0 && (
+                    <>
+                      <p>Removal Hours: {selectedQuoteData.removalHours || 0}</p>
+                      <p>Removal Cost: ${parseFloat(selectedQuoteData.removalCost).toFixed(2)}</p>
+                    </>
+                  )}
+                </div>
               </div>
 
-              {/* Service-Specific Assessment Details */}
-              {selectedQuoteData?.assessment?.serviceType === 'fixed-wireless' && (
-                <div className="grid grid-cols-3 gap-6">
-                  <Card className="p-4">
-                    <h3 className="font-semibold mb-3 text-purple-600">Infrastructure Requirements</h3>
-                    <div className="space-y-2 text-sm">
-                      <p><strong>Network Signal:</strong> {selectedQuoteData?.assessment?.networkSignal || 'Not specified'}</p>
-                      <p><strong>Signal Strength:</strong> {selectedQuoteData?.assessment?.signalStrength || 'Not specified'}</p>
-                      <p><strong>Connection Usage:</strong> {selectedQuoteData?.assessment?.connectionUsage || 'Not specified'}</p>
-                      <p><strong>Router Location:</strong> {selectedQuoteData?.assessment?.routerLocation || 'Not specified'}</p>
-                      <p><strong>Antenna Cable Required:</strong> {selectedQuoteData?.assessment?.antennaCable ? 'Yes' : 'No'}</p>
-                      <p><strong>Low Signal Antenna Cable:</strong> {selectedQuoteData?.assessment?.lowSignalAntennaCable ? 'Yes' : 'No'}</p>
-                      <p><strong>Device Connection Assistance:</strong> {selectedQuoteData?.assessment?.deviceConnectionAssistance ? 'Yes' : 'No'}</p>
-                      <p><strong>Router Make:</strong> {selectedQuoteData?.assessment?.routerMake || 'Not specified'}</p>
-                      <p><strong>Router Model:</strong> {selectedQuoteData?.assessment?.routerModel || 'Not specified'}</p>
-                      <p><strong>Number of Routers:</strong> {selectedQuoteData?.assessment?.routerCount || 'Not specified'}</p>
-                    </div>
-                  </Card>
-                  <Card className="p-4">
-                    <h3 className="font-semibold mb-3 text-orange-600">Site Characteristics</h3>
-                    <div className="space-y-2 text-sm">
-                      <p><strong>Building Type:</strong> {selectedQuoteData?.assessment?.buildingType || 'Not specified'}</p>
-                      <p><strong>Coverage Area:</strong> {selectedQuoteData?.assessment?.coverageArea || 'Not specified'}</p>
-                      <p><strong>Floors:</strong> {selectedQuoteData?.assessment?.floors || 'Not specified'}</p>
-                      <p><strong>Device Count:</strong> {selectedQuoteData?.assessment?.deviceCount || 'Not specified'}</p>
-                      <p><strong>Ceiling Height:</strong> {selectedQuoteData?.assessment?.ceilingHeight || 'Not specified'}</p>
-                      <p><strong>Ceiling Type:</strong> {selectedQuoteData?.assessment?.ceilingType || 'Not specified'}</p>
-                      <p><strong>Cable Footage:</strong> {selectedQuoteData?.assessment?.cableFootage || 'Not specified'}</p>
-                      <p><strong>Antenna Type:</strong> {selectedQuoteData?.assessment?.antennaType || 'Not specified'}</p>
-                      <p><strong>Antenna Location:</strong> {selectedQuoteData?.assessment?.antennaInstallationLocation || 'Not specified'}</p>
-                    </div>
-                  </Card>
-                  <Card className="p-4">
-                    <h3 className="font-semibold mb-3 text-red-600">Environmental Factors</h3>
-                    <div className="space-y-2 text-sm">
-                      <p><strong>Interference Sources:</strong> {selectedQuoteData?.assessment?.interferenceSources || 'Not specified'}</p>
-                      <p><strong>Special Requirements:</strong> {selectedQuoteData?.assessment?.specialRequirements || 'Not specified'}</p>
-                      <p><strong>Additional Notes:</strong> {selectedQuoteData?.assessment?.additionalNotes || 'Not specified'}</p>
-                      <p><strong>Site Address:</strong> {selectedQuoteData?.assessment?.siteAddress || 'Not specified'}</p>
-                      <p><strong>Industry:</strong> {selectedQuoteData?.assessment?.industry || 'Not specified'}</p>
-                      <p><strong>Preferred Install Date:</strong> {selectedQuoteData?.assessment?.preferredInstallationDate || 'Not specified'}</p>
-                    </div>
-                  </Card>
+              {/* Infrastructure Requirements */}
+              <div>
+                <h3 className="font-semibold mb-3">Infrastructure Requirements</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {selectedQuoteData?.assessment?.deviceCount && (
+                    <p><strong>Device Count:</strong> {selectedQuoteData.assessment.deviceCount} devices</p>
+                  )}
+                  <p><strong>Power Available:</strong> {selectedQuoteData?.assessment?.powerAvailable ? 'Yes' : 'No'}</p>
+                  <p><strong>Ethernet Required:</strong> {selectedQuoteData?.assessment?.ethernetRequired ? 'Yes' : 'No'}</p>
+                  <p><strong>Device Connection Assistance:</strong> {
+                    selectedQuoteData?.assessment?.deviceConnectionAssistance === 'yes' ? 'Required' : 
+                    selectedQuoteData?.assessment?.deviceConnectionAssistance === 'no' ? 'Not Required' : 'Not specified'
+                  }</p>
+                  {selectedQuoteData?.assessment?.routerMake && (
+                    <p><strong>Router:</strong> {selectedQuoteData.assessment.routerMake} {selectedQuoteData.assessment.routerModel}</p>
+                  )}
+                  {selectedQuoteData?.assessment?.routerCount && (
+                    <p><strong>Router Count:</strong> {selectedQuoteData.assessment.routerCount}</p>
+                  )}
+                  {selectedQuoteData?.assessment?.routerLocation && (
+                    <p><strong>Router Location:</strong> {selectedQuoteData.assessment.routerLocation}</p>
+                  )}
+                  {selectedQuoteData?.assessment?.cableFootage && (
+                    <p><strong>Cable Footage:</strong> {selectedQuoteData.assessment.cableFootage}</p>
+                  )}
+                  {selectedQuoteData?.assessment?.antennaType && (
+                    <p><strong>Antenna Type:</strong> {selectedQuoteData.assessment.antennaType}</p>
+                  )}
+                  {selectedQuoteData?.assessment?.antennaInstallationLocation && (
+                    <p><strong>Antenna Location:</strong> {selectedQuoteData.assessment.antennaInstallationLocation}</p>
+                  )}
+                  {selectedQuoteData?.assessment?.routerMounting && (
+                    <p><strong>Router Mounting:</strong> {selectedQuoteData.assessment.routerMounting}</p>
+                  )}
+                  {selectedQuoteData?.assessment?.dualWanSupport && (
+                    <p><strong>Dual WAN Support:</strong> {selectedQuoteData.assessment.dualWanSupport}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Site Characteristics */}
+              <div>
+                <h3 className="font-semibold mb-3">Site Characteristics</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <p><strong>Address:</strong> {selectedQuoteData?.assessment?.siteAddress || 'N/A'}</p>
+                  <p><strong>Industry:</strong> {selectedQuoteData?.assessment?.industry || 'N/A'}</p>
+                  {selectedQuoteData?.assessment?.buildingType && (
+                    <p><strong>Building Type:</strong> {selectedQuoteData.assessment.buildingType}</p>
+                  )}
+                  {selectedQuoteData?.assessment?.coverageArea && (
+                    <p><strong>Coverage Area:</strong> {selectedQuoteData.assessment.coverageArea.toLocaleString()} sq ft</p>
+                  )}
+                  {selectedQuoteData?.assessment?.floors && (
+                    <p><strong>Number of Floors:</strong> {selectedQuoteData.assessment.floors}</p>
+                  )}
+                  <p><strong>Ceiling Mount:</strong> {selectedQuoteData?.assessment?.ceilingMount ? 'Yes' : 'No'}</p>
+                  <p><strong>Outdoor Coverage:</strong> {selectedQuoteData?.assessment?.outdoorCoverage ? 'Required' : 'Not Required'}</p>
+                  {selectedQuoteData?.assessment?.ceilingHeight && (
+                    <p><strong>Ceiling Height:</strong> {selectedQuoteData.assessment.ceilingHeight}</p>
+                  )}
+                  {selectedQuoteData?.assessment?.ceilingType && (
+                    <p><strong>Ceiling Type:</strong> {selectedQuoteData.assessment.ceilingType}</p>
+                  )}
+                  {selectedQuoteData?.assessment?.networkSignal && (
+                    <p><strong>Network Signal:</strong> {selectedQuoteData.assessment.networkSignal}</p>
+                  )}
+                  {selectedQuoteData?.assessment?.signalStrength && (
+                    <p><strong>Signal Strength:</strong> {selectedQuoteData.assessment.signalStrength}</p>
+                  )}
+                  {selectedQuoteData?.assessment?.connectionUsage && (
+                    <p><strong>Connection Usage:</strong> {selectedQuoteData.assessment.connectionUsage}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Environmental Factors & Notes */}
+              {(selectedQuoteData?.assessment?.interferenceSources || selectedQuoteData?.assessment?.specialRequirements || selectedQuoteData?.assessment?.additionalNotes) && (
+                <div>
+                  <h3 className="font-semibold mb-3">Environmental Factors & Special Requirements</h3>
+                  <div className="space-y-3 text-sm">
+                    {selectedQuoteData?.assessment?.interferenceSources && (
+                      <div>
+                        <p><strong>Interference Sources:</strong></p>
+                        <p className="mt-1 text-gray-600 leading-relaxed">{selectedQuoteData.assessment.interferenceSources}</p>
+                      </div>
+                    )}
+                    {selectedQuoteData?.assessment?.specialRequirements && (
+                      <div>
+                        <p><strong>Special Requirements:</strong></p>
+                        <p className="mt-1 text-gray-600 leading-relaxed">{selectedQuoteData.assessment.specialRequirements}</p>
+                      </div>
+                    )}
+                    {selectedQuoteData?.assessment?.additionalNotes && (
+                      <div>
+                        <p><strong>Additional Notes:</strong></p>
+                        <p className="mt-1 text-gray-600 leading-relaxed">{selectedQuoteData.assessment.additionalNotes}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
-              {/* Fleet services would have similar organized sections */}
-              {(selectedQuoteData?.assessment?.serviceType === 'fleet-tracking' || selectedQuoteData?.assessment?.serviceType === 'fleet-camera') && (
-                <div className="grid grid-cols-3 gap-6">
-                  <Card className="p-4">
-                    <h3 className="font-semibold mb-3 text-purple-600">Fleet Information</h3>
-                    <div className="space-y-2 text-sm">
-                      <p><strong>Vehicle Count for Installation:</strong> {selectedQuoteData?.assessment?.vehicleCount || 'Not specified'}</p>
-                      <p><strong>Total Fleet Size:</strong> {selectedQuoteData?.assessment?.totalFleetSize || 'Not specified'}</p>
-                      <p><strong>Billing Address:</strong> {selectedQuoteData?.assessment?.billingAddress || 'Not specified'}</p>
-                      <p><strong>Installation Site Address:</strong> {selectedQuoteData?.assessment?.installationSiteAddress || 'Not specified'}</p>
-                    </div>
-                  </Card>
-                  <Card className="p-4">
-                    <h3 className="font-semibold mb-3 text-orange-600">Service Details</h3>
-                    <div className="space-y-2 text-sm">
-                      {selectedQuoteData?.assessment?.serviceType === 'fleet-tracking' && (
-                        <>
-                          <p><strong>Tracker Type:</strong> {selectedQuoteData?.assessment?.trackerType || 'Not specified'}</p>
-                          <p><strong>Installation Type:</strong> {selectedQuoteData?.assessment?.installationType || 'Not specified'}</p>
-                        </>
-                      )}
-                      {selectedQuoteData?.assessment?.serviceType === 'fleet-camera' && (
-                        <>
-                          <p><strong>Camera Solution Type:</strong> {selectedQuoteData?.assessment?.cameraSolutionType || 'Not specified'}</p>
-                          <p><strong>Number of Cameras:</strong> {selectedQuoteData?.assessment?.numberOfCameras || 'Not specified'}</p>
-                        </>
-                      )}
-                      <p><strong>Tracking Partner:</strong> {selectedQuoteData?.assessment?.iotTrackingPartner || 'Not specified'}</p>
-                      <p><strong>Carrier SIM:</strong> {selectedQuoteData?.assessment?.carrierSim || 'Not specified'}</p>
-                    </div>
-                  </Card>
-                  <Card className="p-4">
-                    <h3 className="font-semibold mb-3 text-red-600">Vehicle Information</h3>
-                    <div className="space-y-2 text-sm">
-                      {selectedQuoteData?.assessment?.vehicleDetails ? (
-                        <div className="space-y-2">
-                          {JSON.parse(selectedQuoteData.assessment.vehicleDetails).map((vehicle: any, index: number) => (
-                            <div key={index} className="bg-gray-50 dark:bg-gray-800 p-2 rounded">
-                              <p><strong>Vehicle {index + 1}:</strong> {vehicle.year || 'N/A'} {vehicle.make || 'N/A'} {vehicle.model || 'N/A'}</p>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p>No vehicle details specified</p>
-                      )}
-                    </div>
-                  </Card>
+              {/* Fleet-specific details if applicable */}
+              {selectedQuoteData?.assessment?.serviceType === 'fleet-tracking' && (
+                <div>
+                  <h3 className="font-semibold mb-3">Fleet Tracking Details</h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    {selectedQuoteData?.assessment?.totalFleetSize && (
+                      <p><strong>Total Fleet Size:</strong> {selectedQuoteData.assessment.totalFleetSize} vehicles</p>
+                    )}
+                    {selectedQuoteData?.assessment?.trackerType && (
+                      <p><strong>Tracker Type:</strong> {selectedQuoteData.assessment.trackerType}</p>
+                    )}
+                    {selectedQuoteData?.assessment?.iotTrackingPartner && (
+                      <p><strong>IoT Partner:</strong> {selectedQuoteData.assessment.iotTrackingPartner}</p>
+                    )}
+                    {selectedQuoteData?.assessment?.carrierSim && (
+                      <p><strong>Carrier SIM:</strong> {selectedQuoteData.assessment.carrierSim}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Fleet Camera specific details if applicable */}
+              {selectedQuoteData?.assessment?.serviceType === 'fleet-camera' && (
+                <div>
+                  <h3 className="font-semibold mb-3">Fleet Camera Details</h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    {selectedQuoteData?.assessment?.cameraSolutionType && (
+                      <p><strong>Camera Solution:</strong> {selectedQuoteData.assessment.cameraSolutionType}</p>
+                    )}
+                    {selectedQuoteData?.assessment?.numberOfCameras && (
+                      <p><strong>Number of Cameras:</strong> {selectedQuoteData.assessment.numberOfCameras}</p>
+                    )}
+                    {selectedQuoteData?.assessment?.removalNeeded && (
+                      <p><strong>Removal Needed:</strong> {selectedQuoteData.assessment.removalNeeded}</p>
+                    )}
+                    {selectedQuoteData?.assessment?.existingCameraSolution && (
+                      <p><strong>Existing Solution:</strong> {selectedQuoteData.assessment.existingCameraSolution}</p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
           )}
-          <DialogFooter className="flex justify-between">
+          <DialogFooter className="flex gap-2">
+            {selectedQuoteData?.pdfUrl && (
+              <Button 
+                variant="outline"
+                onClick={() => window.open(`/api/files/pdf/${selectedQuoteData.pdfUrl}`, '_blank')}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Download PDF
+              </Button>
+            )}
+            <Button
+              variant="destructive"
+              onClick={() => closeQuoteMutation.mutate(selectedQuoteData?.id)}
+              disabled={closeQuoteMutation.isPending}
+            >
+              Close Quote
+            </Button>
             <Button
               variant="outline"
-              onClick={() => window.open(`/api/files/pdf/${selectedQuoteData?.pdfUrl}`, '_blank')}
-              className="flex items-center gap-2"
-              disabled={!selectedQuoteData?.pdfUrl}
+              onClick={() => deleteQuoteMutation.mutate(selectedQuoteData?.id)}
+              disabled={deleteQuoteMutation.isPending}
             >
-              <Download className="h-4 w-4" />
-              Download Quote PDF
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Quote
             </Button>
-            <div className="flex gap-2">
-              <Button
-                variant="destructive"
-                onClick={() => closeQuoteMutation.mutate(selectedQuoteData?.id)}
-                disabled={closeQuoteMutation.isPending}
-              >
-                Close Quote
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => deleteQuoteMutation.mutate(selectedQuoteData?.id)}
-                disabled={deleteQuoteMutation.isPending}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete Quote
-              </Button>
-              <Button variant="secondary" onClick={() => setSelectedQuote(null)}>
-                Close
-              </Button>
-            </div>
+            <Button variant="secondary" onClick={() => setSelectedQuote(null)}>
+              Close
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
