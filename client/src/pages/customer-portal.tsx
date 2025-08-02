@@ -116,8 +116,8 @@ export default function CustomerPortal() {
             </div>
             <div className="text-right">
               <div className="text-sm text-gray-500">From</div>
-              <div className="font-semibold text-nxt-blue">{organization.name}</div>
-              {getStatusBadge(quote.status)}
+              <div className="font-semibold text-nxt-blue">{organization?.name || 'Organization'}</div>
+              {getStatusBadge(quote.status || 'pending')}
             </div>
           </div>
         </div>
@@ -136,7 +136,7 @@ export default function CustomerPortal() {
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <h4 className="font-semibold text-gray-900">Service Type</h4>
-                <p className="text-gray-700">{getServiceTypeDisplay(assessment.serviceType)}</p>
+                <p className="text-gray-700">{getServiceTypeDisplay(assessment.serviceType || 'site-assessment')}</p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900">Installation Location</h4>
@@ -150,7 +150,7 @@ export default function CustomerPortal() {
                 <h4 className="font-semibold text-gray-900">Preferred Installation Date</h4>
                 <p className="text-gray-700 flex items-center">
                   <Calendar className="w-4 h-4 mr-1" />
-                  {new Date(assessment.preferredInstallationDate).toLocaleDateString()}
+                  {assessment.preferredInstallationDate ? new Date(assessment.preferredInstallationDate).toLocaleDateString() : 'Not specified'}
                 </p>
               </div>
             </div>
@@ -165,7 +165,7 @@ export default function CustomerPortal() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {parseFloat(quote.surveyCost) > 0 && (
+              {quote.surveyCost && parseFloat(quote.surveyCost) > 0 && (
                 <div className="flex justify-between">
                   <span>Site Survey ({quote.surveyHours} hours)</span>
                   <span>${quote.surveyCost}</span>
@@ -175,19 +175,19 @@ export default function CustomerPortal() {
                 <span>Installation ({quote.installationHours} hours @ ${quote.hourlyRate}/hr)</span>
                 <span>${quote.installationCost}</span>
               </div>
-              {parseFloat(quote.configurationCost) > 0 && (
+              {quote.configurationCost && parseFloat(quote.configurationCost) > 0 && (
                 <div className="flex justify-between">
                   <span>Configuration ({quote.configurationHours} hours @ ${quote.hourlyRate}/hr)</span>
                   <span>${quote.configurationCost}</span>
                 </div>
               )}
-              {parseFloat(quote.trainingCost) > 0 && (
+              {quote.trainingCost && parseFloat(quote.trainingCost) > 0 && (
                 <div className="flex justify-between">
                   <span>Training & Support</span>
                   <span>${quote.trainingCost}</span>
                 </div>
               )}
-              {parseFloat(quote.hardwareCost) > 0 && (
+              {quote.hardwareCost && parseFloat(quote.hardwareCost) > 0 && (
                 <div className="flex justify-between">
                   <span>Hardware & Materials</span>
                   <span>${quote.hardwareCost}</span>
@@ -199,7 +199,7 @@ export default function CustomerPortal() {
                   <span>${quote.removalCost}</span>
                 </div>
               )}
-              {parseFloat(quote.laborHoldCost) > 0 && (
+              {quote.laborHoldCost && parseFloat(quote.laborHoldCost) > 0 && (
                 <div className="flex justify-between">
                   <span>Labor Hold - Final bill Return ({quote.laborHoldHours} hours)</span>
                   <span>${quote.laborHoldCost}</span>
