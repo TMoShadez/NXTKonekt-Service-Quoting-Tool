@@ -626,7 +626,12 @@ export default function AdminDashboard() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => window.open(quote.pdfUrl, '_blank')}
+                                onClick={() => {
+                                  if (quote.pdfUrl) {
+                                    const filename = quote.pdfUrl.split('/').pop();
+                                    window.open(`/api/files/pdf/${filename}`, '_blank');
+                                  }
+                                }}
                                 className="flex items-center gap-1"
                                 disabled={!quote.pdfUrl}
                               >
@@ -857,7 +862,12 @@ export default function AdminDashboard() {
             {selectedQuoteData?.pdfUrl && (
               <Button 
                 variant="outline"
-                onClick={() => window.open(selectedQuoteData.pdfUrl, '_blank')}
+                onClick={() => {
+                  if (selectedQuoteData.pdfUrl) {
+                    const filename = selectedQuoteData.pdfUrl.split('/').pop();
+                    window.open(`/api/files/pdf/${filename}`, '_blank');
+                  }
+                }}
               >
                 <Download className="mr-2 h-4 w-4" />
                 Download PDF
