@@ -765,6 +765,80 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
         doc.text('• Basic Router Configuration: Cellular connection, Wi-Fi setup, and failover integration', 50, currentY, { width: 500 });
         currentY += 11;
         doc.text('• Failover Testing: Verification of smooth transition during primary ISP outage', 50, currentY, { width: 500 });
+        
+        currentY += 18;
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Our Process', 50, currentY);
+        
+        currentY += 13;
+        doc.fontSize(9).font('Helvetica')
+           .text('Detailed breakdown of installation steps:', 50, currentY, { width: 500 });
+        
+        currentY += 18;
+        doc.fontSize(9).font('Helvetica-Bold')
+           .text('1. Preparation and Planning', 50, currentY);
+        
+        currentY += 13;
+        doc.fontSize(8).font('Helvetica')
+           .text('• Location Determination: Site contact collaboration for optimal router placement within 5 feet of power outlet', 50, currentY, { width: 500 });
+        currentY += 11;
+        doc.text('• Network Assessment: Evaluation of existing network infrastructure for failover integration', 50, currentY, { width: 500 });
+        currentY += 11;
+        doc.text('• Signal Evaluation: Cellular signal strength testing for reliable failover performance', 50, currentY, { width: 500 });
+        currentY += 11;
+        doc.text('• Hardware Verification: Component check and documentation review', 50, currentY, { width: 500 });
+        
+        currentY += 16;
+        doc.fontSize(9).font('Helvetica-Bold')
+           .text('2. Router Installation', 50, currentY);
+        
+        currentY += 13;
+        doc.fontSize(8).font('Helvetica')
+           .text('• Physical Installation: Professional mounting and secure placement of cellular router', 50, currentY, { width: 500 });
+        currentY += 11;
+        doc.text('• Power Connection: Electrical connection and initial power-on verification', 50, currentY, { width: 500 });
+        currentY += 11;
+        doc.text('• SIM Card Installation: Cellular service activation and initial connectivity testing', 50, currentY, { width: 500 });
+        
+        currentY += 16;
+        doc.fontSize(9).font('Helvetica-Bold')
+           .text('3. Network Configuration', 50, currentY);
+        
+        currentY += 13;
+        doc.fontSize(8).font('Helvetica')
+           .text('• Router Configuration: Cellular connection setup and performance optimization', 50, currentY, { width: 500 });
+        currentY += 11;
+        doc.text('• Failover Integration: Network configuration for automatic failover activation', 50, currentY, { width: 500 });
+        currentY += 11;
+        doc.text('• Testing and Verification: Comprehensive testing of failover functionality', 50, currentY, { width: 500 });
+        
+        currentY += 16;
+        doc.fontSize(9).font('Helvetica-Bold')
+           .text('4. Quality Assurance', 50, currentY);
+        
+        currentY += 13;
+        doc.fontSize(8).font('Helvetica')
+           .text('• Connection Speed Testing: Verification of cellular internet speed and reliability', 50, currentY, { width: 500 });
+        currentY += 11;
+        doc.text('• Failover Simulation: Testing automatic switching during primary connection failure', 50, currentY, { width: 500 });
+        currentY += 11;
+        doc.text('• Network Integration Testing: Ensuring seamless integration with existing systems', 50, currentY, { width: 500 });
+        
+        currentY += 18;
+        doc.fontSize(10).font('Helvetica-Bold')
+           .text('Important Notes', 50, currentY);
+        
+        currentY += 13;
+        doc.fontSize(8).font('Helvetica')
+           .text('• Router must be placed within 5 feet of available power outlet', 50, currentY, { width: 500 });
+        currentY += 11;
+        doc.text('• Existing network infrastructure required for failover integration', 50, currentY, { width: 500 });
+        currentY += 11;
+        doc.text('• Installation timeframe: Approximately 60-90 minutes depending on site complexity', 50, currentY, { width: 500 });
+        currentY += 11;
+        doc.text('• Professional cleanup and documentation provided upon completion', 50, currentY, { width: 500 });
+        currentY += 11;
+        doc.text('• Client training on failover monitoring and basic troubleshooting included', 50, currentY, { width: 500 });
       }
 
       // Default Statement of Work for Fixed Wireless when specific type not determined
