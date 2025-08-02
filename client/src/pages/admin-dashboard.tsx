@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Shield, Users, FileText, BarChart3, CheckCircle, XCircle, Clock, Settings, Link, Copy, Mail, Send, TrendingUp, Eye, Trash2, Download, ExternalLink } from "lucide-react";
-import type { User, Organization, Assessment, Quote } from "@shared/schema";
+import type { User, Organization, Quote } from "@shared/schema";
 
 interface AdminStats {
   totalPartners: number;
@@ -32,7 +32,6 @@ export default function AdminDashboard() {
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [selectedQuote, setSelectedQuote] = useState<any>(null);
-  const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
   const [selectedQuoteData, setSelectedQuoteData] = useState<any>(null);
 
   // Redirect if not system admin
@@ -58,14 +57,6 @@ export default function AdminDashboard() {
   // Partners query
   const { data: partners, isLoading: partnersLoading } = useQuery<PartnerWithOrg[]>({
     queryKey: ["/api/admin/partners"],
-    enabled: user?.isSystemAdmin || user?.role === 'admin',
-    staleTime: 0,
-    refetchOnMount: true,
-  });
-
-  // Assessments query
-  const { data: assessments, isLoading: assessmentsLoading } = useQuery<Assessment[]>({
-    queryKey: ["/api/admin/assessments"],
     enabled: user?.isSystemAdmin || user?.role === 'admin',
     staleTime: 0,
     refetchOnMount: true,
@@ -211,15 +202,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // Handler functions for assessment downloads
-  const handleDownloadAssessment = (assessmentId: number) => {
-    downloadAssessmentMutation.mutate(assessmentId);
-  };
-
-  const handleBulkExport = () => {
-    bulkExportMutation.mutate();
-  };
-
   // Close quote mutation
   const closeQuoteMutation = useMutation({
     mutationFn: async (quoteId: number) => {
@@ -266,66 +248,6 @@ export default function AdminDashboard() {
       toast({
         title: "Error",
         description: "Failed to delete quote. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Individual assessment download mutation (PDF)
-  const downloadAssessmentMutation = useMutation({
-    mutationFn: async (assessmentId: number) => {
-      const response = await fetch(`/api/admin/assessments/${assessmentId}/download`);
-      if (!response.ok) {
-        throw new Error('Failed to download assessment PDF');
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `assessment-${assessmentId}-${new Date().toISOString().split('T')[0]}.pdf`;
-      link.click();
-      window.URL.revokeObjectURL(url);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Assessment Downloaded",
-        description: "Complete assessment report has been downloaded as PDF.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Download Failed",
-        description: "Failed to download assessment PDF.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Bulk assessment export mutation
-  const bulkExportMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch('/api/admin/assessments/export');
-      if (!response.ok) {
-        throw new Error('Failed to export assessments');
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `all-assessments-${new Date().toISOString().split('T')[0]}.csv`;
-      link.click();
-      window.URL.revokeObjectURL(url);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Assessments Exported",
-        description: "All assessment data has been exported to CSV successfully.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Export Failed",
-        description: "Failed to export assessment data.",
         variant: "destructive",
       });
     },
@@ -548,7 +470,6 @@ export default function AdminDashboard() {
             <TabsTrigger value="hubspot">HubSpot</TabsTrigger>
             <TabsTrigger value="invitations">Invitations</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="assessments">Assessments</TabsTrigger>
             <TabsTrigger value="quotes">Quotes</TabsTrigger>
           </TabsList>
 
@@ -945,170 +866,6 @@ export default function AdminDashboard() {
                   </div>
                 ) : (
                   <div className="text-center py-4">Loading analytics...</div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="assessments" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle>Assessment Management - Complete Details View</CardTitle>
-                    <CardDescription>
-                      Full administrative visibility of all assessment information, technical specifications, and customer details for effective work planning and service delivery
-                    </CardDescription>
-                  </div>
-                  <Button
-                    onClick={handleBulkExport}
-                    disabled={bulkExportMutation.isPending}
-                    className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    {bulkExportMutation.isPending ? "Exporting..." : "Export All to CSV"}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {assessmentsLoading ? (
-                  <div className="text-center py-4">Loading assessments...</div>
-                ) : (
-                  <div className="space-y-4">
-                    {assessments?.slice(0, 10).map((assessment) => (
-                      <Card key={assessment.id} className="p-6 border border-gray-200">
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="flex items-center gap-3">
-                            <Badge variant="outline" className="text-lg px-3 py-1">
-                              Assessment #{assessment.id}
-                            </Badge>
-                            <Badge variant="secondary" className="capitalize">
-                              {assessment.serviceType?.replace('-', ' ')}
-                            </Badge>
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setSelectedAssessment(assessment)}
-                              title="View in Modal"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDownloadAssessment(assessment.id)}
-                              title="Download PDF Report"
-                              className="text-green-600 hover:text-green-700"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                          {/* Customer & Basic Info */}
-                          <Card className="p-4 bg-blue-50">
-                            <h4 className="font-semibold text-blue-700 mb-3">Customer Information</h4>
-                            <div className="space-y-2 text-sm">
-                              <p><strong>Name:</strong> {assessment.customerContactName || 'N/A'}</p>
-                              <p><strong>Company:</strong> {assessment.customerCompanyName || 'N/A'}</p>
-                              <p><strong>Email:</strong> {assessment.customerEmail || 'N/A'}</p>
-                              <p><strong>Phone:</strong> {assessment.customerPhone || 'N/A'}</p>
-                              <p><strong>Site Address:</strong> {assessment.siteAddress || 'N/A'}</p>
-                              <p><strong>Industry:</strong> {assessment.industry || 'N/A'}</p>
-                              <p><strong>Preferred Install Date:</strong> {assessment.preferredInstallationDate || 'N/A'}</p>
-                            </div>
-                          </Card>
-
-                          {/* Sales Executive Info */}
-                          <Card className="p-4 bg-green-50">
-                            <h4 className="font-semibold text-green-700 mb-3">Sales Executive</h4>
-                            <div className="space-y-2 text-sm">
-                              <p><strong>Name:</strong> {assessment.salesExecutiveName || 'N/A'}</p>
-                              <p><strong>Email:</strong> {assessment.salesExecutiveEmail || 'N/A'}</p>
-                              <p><strong>Phone:</strong> {assessment.salesExecutivePhone || 'N/A'}</p>
-                              <p><strong>Organization:</strong> {assessment.organizationName || 'N/A'}</p>
-                              <p><strong>Created:</strong> {new Date(assessment.createdAt!).toLocaleDateString()}</p>
-                              <p><strong>Total Cost:</strong> ${assessment.totalCost || 0}</p>
-                            </div>
-                          </Card>
-
-                          {/* Service-Specific Technical Details */}
-                          <Card className="p-4 bg-purple-50">
-                            <h4 className="font-semibold text-purple-700 mb-3">Technical Assessment</h4>
-                            <div className="space-y-2 text-sm">
-                              {assessment.serviceType === 'site-assessment' && (
-                                <>
-                                  <p><strong>Building Type:</strong> {assessment.buildingType || 'N/A'}</p>
-                                  <p><strong>Network Signal:</strong> {assessment.networkSignal || 'N/A'}</p>
-                                  <p><strong>Signal Strength:</strong> {assessment.signalStrength || 'N/A'}</p>
-                                  <p><strong>Device Count:</strong> {assessment.deviceCount || 'N/A'} devices</p>
-                                  <p><strong>Router Location:</strong> {assessment.routerLocation || 'N/A'}</p>
-                                  <p><strong>Coverage Area:</strong> {assessment.coverageArea ? `${assessment.coverageArea.toLocaleString()} sq ft` : 'N/A'}</p>
-                                  <p><strong>Power Available:</strong> {assessment.powerAvailable ? 'Yes' : 'No'}</p>
-                                  <p><strong>Ethernet Required:</strong> {assessment.ethernetRequired ? 'Yes' : 'No'}</p>
-                                </>
-                              )}
-                              {assessment.serviceType === 'fleet-tracking' && (
-                                <>
-                                  <p><strong>Fleet Size:</strong> {assessment.fleetSize || 'N/A'}</p>
-                                  <p><strong>Installation Count:</strong> {assessment.deviceCount || 'N/A'}</p>
-                                  <p><strong>Installation Type:</strong> {assessment.installationType || 'N/A'}</p>
-                                  <p><strong>Tracker Type:</strong> {assessment.trackerType || 'N/A'}</p>
-                                  <p><strong>IoT Partner:</strong> {assessment.iotTrackingPartner || 'N/A'}</p>
-                                  <p><strong>Carrier SIM:</strong> {assessment.carrierSim || 'N/A'}</p>
-                                  {assessment.vehicleDetails && (
-                                    <div className="mt-2">
-                                      <strong>Vehicles:</strong>
-                                      <div className="ml-2 text-xs">
-                                        {JSON.parse(assessment.vehicleDetails || '[]').map((vehicle: any, index: number) => (
-                                          <div key={index}>{vehicle.year} {vehicle.make} {vehicle.model}</div>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  )}
-                                </>
-                              )}
-                              {assessment.serviceType === 'fleet-camera' && (
-                                <>
-                                  <p><strong>Installation Count:</strong> {assessment.deviceCount || 'N/A'}</p>
-                                  <p><strong>Camera Solution:</strong> {assessment.cameraSolutionType || 'N/A'}</p>
-                                  <p><strong>Number of Cameras:</strong> {assessment.numberOfCameras || 'N/A'}</p>
-                                  <p><strong>Tracking Partner:</strong> {assessment.trackingPartner || 'N/A'}</p>
-                                  <p><strong>Carrier SIM:</strong> {assessment.carrierSim || 'N/A'}</p>
-                                  <p><strong>Removal Needed:</strong> {assessment.removalNeeded ? 'Yes' : 'No'}</p>
-                                  {assessment.removalNeeded && (
-                                    <p><strong>Existing Solution:</strong> {assessment.existingCameraSolution || 'N/A'}</p>
-                                  )}
-                                  <p><strong>Protective Harness:</strong> {assessment.protectiveWiringHarness ? 'Yes' : 'No'}</p>
-                                </>
-                              )}
-                            </div>
-                          </Card>
-                        </div>
-
-                        {/* Additional Requirements Section */}
-                        {(assessment.interferenceSources || assessment.specialRequirements || assessment.additionalNotes) && (
-                          <Card className="p-4 bg-yellow-50 mt-4">
-                            <h4 className="font-semibold text-yellow-700 mb-3">Additional Requirements & Notes</h4>
-                            <div className="space-y-2 text-sm">
-                              {assessment.interferenceSources && (
-                                <p><strong>Interference Sources:</strong> {assessment.interferenceSources}</p>
-                              )}
-                              {assessment.specialRequirements && (
-                                <p><strong>Special Requirements:</strong> {assessment.specialRequirements}</p>
-                              )}
-                              {assessment.additionalNotes && (
-                                <p><strong>Additional Notes:</strong> {assessment.additionalNotes}</p>
-                              )}
-                            </div>
-                          </Card>
-                        )}
-                      </Card>
-                    ))}
-                  </div>
                 )}
               </CardContent>
             </Card>
