@@ -1039,18 +1039,16 @@ export default function AdminDashboard() {
                           <Card className="p-4 bg-purple-50">
                             <h4 className="font-semibold text-purple-700 mb-3">Technical Assessment</h4>
                             <div className="space-y-2 text-sm">
-                              {assessment.serviceType === 'fixed-wireless' && (
+                              {assessment.serviceType === 'site-assessment' && (
                                 <>
                                   <p><strong>Building Type:</strong> {assessment.buildingType || 'N/A'}</p>
                                   <p><strong>Network Signal:</strong> {assessment.networkSignal || 'N/A'}</p>
                                   <p><strong>Signal Strength:</strong> {assessment.signalStrength || 'N/A'}</p>
-                                  <p><strong>Connection Usage:</strong> {assessment.connectionUsage || 'N/A'}</p>
+                                  <p><strong>Device Count:</strong> {assessment.deviceCount || 'N/A'} devices</p>
                                   <p><strong>Router Location:</strong> {assessment.routerLocation || 'N/A'}</p>
-                                  <p><strong>Device Count:</strong> {assessment.deviceCount || 'N/A'}</p>
-                                  <p><strong>Router Count:</strong> {assessment.routerCount || 'N/A'}</p>
-                                  <p><strong>Antenna Cable:</strong> {assessment.antennaCable ? 'Yes' : 'No'}</p>
-                                  <p><strong>Cable Footage:</strong> {assessment.cableFootage || 'N/A'}</p>
-                                  <p><strong>Router Make/Model:</strong> {assessment.routerMake || 'N/A'} {assessment.routerModel || ''}</p>
+                                  <p><strong>Coverage Area:</strong> {assessment.coverageArea ? `${assessment.coverageArea.toLocaleString()} sq ft` : 'N/A'}</p>
+                                  <p><strong>Power Available:</strong> {assessment.powerAvailable ? 'Yes' : 'No'}</p>
+                                  <p><strong>Ethernet Required:</strong> {assessment.ethernetRequired ? 'Yes' : 'No'}</p>
                                 </>
                               )}
                               {assessment.serviceType === 'fleet-tracking' && (
