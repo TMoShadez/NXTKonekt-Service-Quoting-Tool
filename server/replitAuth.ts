@@ -121,9 +121,16 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/login", (req, res, next) => {
     const hostname = req.get('host') || req.hostname;
+    const invitationToken = req.query.invitation as string;
     
     console.log(`Login attempt for hostname: ${hostname}`);
     console.log('Available strategies:', Object.keys(passport._strategies || {}));
+    
+    if (invitationToken) {
+      console.log(`🎫 Partner invitation login with token: ${invitationToken.substring(0, 8)}...`);
+      // Store invitation token in session for use after authentication
+      (req.session as any).invitationToken = invitationToken;
+    }
     
     const strategyName = `replitauth:${hostname}`;
     
@@ -170,13 +177,58 @@ export async function setupAuth(app: Express) {
         return res.redirect('/login-error?reason=no_user');
       }
       
-      req.logIn(user, (err) => {
+      req.logIn(user, async (err) => {
         if (err) {
           console.error('Login session error:', err);
           return res.redirect('/login-error?reason=session_error');
         }
         
         console.log('User successfully authenticated:', user.claims?.email);
+        
+        // Check if this is an invitation-based signup
+        const invitationToken = (req.session as any)?.invitationToken;
+        if (invitationToken) {
+          console.log(`🎫 Processing invitation token for user: ${user.claims?.email}`);
+          
+          try {
+            // Import storage here to avoid circular dependency
+            const { storage } = await import('./storage');
+            
+            // Verify and consume invitation
+            const invitation = await storage.getPartnerInvitation(invitationToken);
+            
+            if (invitation && invitation.email === user.claims?.email && new Date() < new Date(invitation.expiresAt)) {
+              console.log(`✅ Valid invitation found for ${user.claims?.email}`);
+              
+              // Track signup completion
+              await storage.trackSignupEvent({
+                event: 'signup_completed',
+                email: user.claims?.email,
+                invitationId: invitation.id,
+                metadata: { userId: user.claims?.sub },
+              });
+              
+              // Mark invitation as used
+              await storage.markInvitationAsUsed(invitation.id);
+              
+              // Clear invitation from session
+              delete (req.session as any).invitationToken;
+              
+              console.log(`🎉 Partner successfully signed up via invitation: ${user.claims?.email}`);
+              return res.redirect('/dashboard?welcome=partner');
+            } else {
+              console.log(`❌ Invalid or expired invitation for ${user.claims?.email}`);
+              // Clear invalid token and continue normal flow
+              delete (req.session as any).invitationToken;
+            }
+            
+          } catch (error) {
+            console.error('Error processing invitation:', error);
+            // Clear token and continue normal flow
+            delete (req.session as any).invitationToken;
+          }
+        }
+        
         return res.redirect('/');
       });
     })(req, res, next);

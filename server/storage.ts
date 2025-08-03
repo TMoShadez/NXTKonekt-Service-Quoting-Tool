@@ -75,7 +75,9 @@ export interface IStorage {
   // Partner invitation operations
   createPartnerInvitation(invitation: InsertPartnerInvitation): Promise<PartnerInvitation>;
   getPartnerInvitation(token: string): Promise<PartnerInvitation | undefined>;
+
   updatePartnerInvitationStatus(id: number, status: string, acceptedAt?: Date): Promise<PartnerInvitation>;
+  markInvitationAsUsed(id: number): Promise<PartnerInvitation>;
   getPartnerInvitations(): Promise<PartnerInvitation[]>;
   
   // Analytics operations
@@ -412,6 +414,17 @@ export class DatabaseStorage implements IStorage {
     const [updated] = await db
       .update(partnerInvitations)
       .set({ status, acceptedAt })
+      .where(eq(partnerInvitations.id, id))
+      .returning();
+    return updated;
+  }
+
+
+
+  async markInvitationAsUsed(id: number): Promise<PartnerInvitation> {
+    const [updated] = await db
+      .update(partnerInvitations)
+      .set({ status: 'accepted', acceptedAt: new Date(), updatedAt: new Date() })
       .where(eq(partnerInvitations.id, id))
       .returning();
     return updated;
