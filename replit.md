@@ -48,7 +48,7 @@ Comprehensive role-based access control implemented throughout the application:
 - **Sales Executives**: Enhanced partner access with additional sales-specific features
 
 **Admin Dashboard Features**:
-- Partner Management: Approve/reject partner applications and manage partner status
+- Partner Management: Comprehensive partner lifecycle management with approve/reject/suspend/reactivate functionality and real-time status updates
 - User Role Management: Modify user roles and system admin privileges
 - HubSpot Integration: Monitor API connectivity and sync status
 - Analytics: System metrics, partner conversion rates, and usage statistics

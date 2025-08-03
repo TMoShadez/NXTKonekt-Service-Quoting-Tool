@@ -161,6 +161,40 @@ export default function AdminDashboard() {
     },
   });
 
+  // Partner status update mutation
+  const updatePartnerStatusMutation = useMutation({
+    mutationFn: async ({ partnerId, status }: { partnerId: string; status: string }) => {
+      const response = await fetch(`/api/admin/partners/${partnerId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update partner status');
+      }
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/partners"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      const statusText = variables.status === 'approved' ? 'Approved' : 
+                        variables.status === 'suspended' ? 'Suspended' : 
+                        'Updated';
+      toast({
+        title: `Partner ${statusText}`,
+        description: `Partner status has been updated to ${variables.status}.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update partner status. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Role update mutation
   const updateRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
@@ -386,35 +420,65 @@ export default function AdminDashboard() {
                           <TableCell>
                             <Badge variant={partner.organization?.partnerStatus === 'approved' ? 'default' : 
                                             partner.organization?.partnerStatus === 'pending' ? 'secondary' : 'destructive'}>
-                              {partner.organization?.partnerStatus || 'N/A'}
+                              {partner.organization?.partnerStatus === 'approved' ? 'Approved' :
+                               partner.organization?.partnerStatus === 'pending' ? 'Pending' :
+                               partner.organization?.partnerStatus === 'suspended' ? 'Suspended' :
+                               'N/A'}
                             </Badge>
                           </TableCell>
                           <TableCell>{new Date(partner.createdAt || Date.now()).toLocaleDateString()}</TableCell>
                           <TableCell>
-                            {partner.organization?.partnerStatus === 'pending' && (
-                              <div className="flex gap-2">
+                            <div className="flex gap-2">
+                              {partner.organization?.partnerStatus === 'pending' && (
+                                <>
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => approvePartnerMutation.mutate(partner.organization?.id)}
+                                    disabled={approvePartnerMutation.isPending}
+                                  >
+                                    <CheckCircle className="h-4 w-4 mr-1" />
+                                    Approve
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="destructive"
+                                    onClick={() => rejectPartnerMutation.mutate(partner.organization?.id)}
+                                    disabled={rejectPartnerMutation.isPending}
+                                  >
+                                    <XCircle className="h-4 w-4 mr-1" />
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                              {partner.organization?.partnerStatus === 'approved' && (
                                 <Button 
                                   size="sm" 
-                                  onClick={() => approvePartnerMutation.mutate(partner.organization?.id)}
-                                  disabled={approvePartnerMutation.isPending}
-                                >
-                                  <CheckCircle className="h-4 w-4 mr-1" />
-                                  Approve
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="destructive"
-                                  onClick={() => rejectPartnerMutation.mutate(partner.organization?.id)}
-                                  disabled={rejectPartnerMutation.isPending}
+                                  variant="outline"
+                                  onClick={() => updatePartnerStatusMutation.mutate({ 
+                                    partnerId: partner.organization?.id, 
+                                    status: 'suspended' 
+                                  })}
+                                  disabled={updatePartnerStatusMutation.isPending}
                                 >
                                   <XCircle className="h-4 w-4 mr-1" />
-                                  Reject
+                                  Suspend
                                 </Button>
-                              </div>
-                            )}
-                            {partner.organization?.partnerStatus === 'approved' && (
-                              <Badge variant="outline">Active</Badge>
-                            )}
+                              )}
+                              {partner.organization?.partnerStatus === 'suspended' && (
+                                <Button 
+                                  size="sm" 
+                                  variant="default"
+                                  onClick={() => updatePartnerStatusMutation.mutate({ 
+                                    partnerId: partner.organization?.id, 
+                                    status: 'approved' 
+                                  })}
+                                  disabled={updatePartnerStatusMutation.isPending}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Reactivate
+                                </Button>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}

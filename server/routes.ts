@@ -1075,6 +1075,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Partner approve endpoint
+  app.post('/api/admin/partners/:id/approve', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      console.log("✅ Partner approval request for ID:", id);
+      
+      const orgId = parseInt(id);
+      if (isNaN(orgId)) {
+        console.log("❌ Invalid organization ID:", id);
+        return res.status(400).json({ message: "Invalid organization ID" });
+      }
+
+      console.log("🔄 Approving organization ID:", orgId);
+      const organization = await storage.updateOrganizationStatus(orgId, 'approved');
+      
+      if (!organization) {
+        console.log("❌ Organization not found for ID:", orgId);
+        return res.status(404).json({ message: "Organization not found" });
+      }
+
+      console.log("✅ Organization approved successfully:", organization);
+      res.json(organization);
+    } catch (error) {
+      console.error("❌ Error approving partner:", error);
+      res.status(500).json({ message: "Failed to approve partner" });
+    }
+  });
+
+  // Partner reject endpoint
+  app.post('/api/admin/partners/:id/reject', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      console.log("❌ Partner rejection request for ID:", id);
+      
+      const orgId = parseInt(id);
+      if (isNaN(orgId)) {
+        console.log("❌ Invalid organization ID:", id);
+        return res.status(400).json({ message: "Invalid organization ID" });
+      }
+
+      console.log("🔄 Rejecting organization ID:", orgId);
+      const organization = await storage.updateOrganizationStatus(orgId, 'suspended');
+      
+      if (!organization) {
+        console.log("❌ Organization not found for ID:", orgId);
+        return res.status(404).json({ message: "Organization not found" });
+      }
+
+      console.log("❌ Organization rejected successfully:", organization);
+      res.json(organization);
+    } catch (error) {
+      console.error("❌ Error rejecting partner:", error);
+      res.status(500).json({ message: "Failed to reject partner" });
+    }
+  });
+
+  // Partner status update endpoint (for general status changes)
   app.patch('/api/admin/partners/:id/status', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { id } = req.params;
