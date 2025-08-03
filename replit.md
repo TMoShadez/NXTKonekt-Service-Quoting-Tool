@@ -39,6 +39,16 @@ The **Database Schema** includes entities for Users, Sessions, Organizations, As
 - Balanced space efficiency with professional presentation and legal requirements
 - Successfully resolved all PDF formatting issues with proper line spacing and no text stacking
 
+**Partner Invitation System (August 2025)**:
+- Resolved 404 error by fixing login endpoint from `/auth/login` to `/api/login`
+- Implemented comprehensive email invitation system in admin dashboard
+- Added partner invitation form with email, name, and company fields
+- Created invitation history tracking with status indicators (pending, accepted, expired)
+- Enhanced authentication flow to handle invitation tokens during login process
+- Integrated invitation verification with email matching and expiry checking
+- Added proper redirection flow for invitation-based signups to partner dashboard
+- Note: SMTP email delivery requires proper account configuration (currently locked by security policies)
+
 ## Role-Based Access Control
 Comprehensive role-based access control implemented throughout the application:
 
