@@ -82,6 +82,19 @@ export default function AdminDashboard() {
     refetchOnMount: true,
   });
 
+  // Invitations query
+  const { data: invitations, isLoading: invitationsLoading } = useQuery<any[]>({
+    queryKey: ["/api/admin/invitations"],
+    enabled: (user as any)?.isSystemAdmin || (user as any)?.role === 'admin',
+    staleTime: 0,
+    refetchOnMount: true,
+  });
+
+  // State for invitation form
+  const [invitationEmail, setInvitationEmail] = useState("");
+  const [invitationName, setInvitationName] = useState("");
+  const [invitationCompany, setInvitationCompany] = useState("");
+
   // Handle quote details view with full assessment data
   const handleViewQuoteDetails = async (quote: any) => {
     try {
@@ -227,12 +240,12 @@ export default function AdminDashboard() {
 
   // Copy signup link to clipboard
   const copySignupLink = async () => {
-    const signupLink = `${window.location.origin}/auth/login?signup=true`;
+    const signupLink = `${window.location.origin}/api/login`;
     try {
       await navigator.clipboard.writeText(signupLink);
       toast({
         title: "Link Copied",
-        description: "Partner signup link has been copied to clipboard",
+        description: "General signup link has been copied to clipboard",
       });
     } catch (error) {
       toast({
@@ -242,6 +255,36 @@ export default function AdminDashboard() {
       });
     }
   };
+
+  // Send email invitation mutation
+  const sendInvitationMutation = useMutation({
+    mutationFn: async ({ email, recipientName, companyName }: { email: string; recipientName?: string; companyName?: string }) => {
+      const response = await fetch('/api/admin/send-invitation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, recipientName, companyName }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to send invitation');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/invitations"] });
+      toast({
+        title: "Invitation Sent",
+        description: "Partner invitation has been sent successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Invitation Failed",
+        description: error.message || "Failed to send invitation. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Close quote mutation
   const closeQuoteMutation = useMutation({
@@ -390,7 +433,7 @@ export default function AdminDashboard() {
                   </div>
                   <Button onClick={copySignupLink} variant="outline" className="flex items-center gap-2">
                     <Copy className="h-4 w-4" />
-                    Copy Signup Link
+                    Copy General Signup Link
                   </Button>
                 </div>
               </CardHeader>
@@ -596,13 +639,105 @@ export default function AdminDashboard() {
           <TabsContent value="invitations" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Invitation Management</CardTitle>
-                <CardDescription>Track sent invitations and signup conversions</CardDescription>
+                <CardTitle>Send Partner Invitation</CardTitle>
+                <CardDescription>Invite new partners to join the platform</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="partner@company.com"
+                      value={invitationEmail}
+                      onChange={(e) => setInvitationEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Recipient Name</Label>
+                    <Input
+                      id="name"
+                      placeholder="John Doe"
+                      value={invitationName}
+                      onChange={(e) => setInvitationName(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="company">Company Name</Label>
+                  <Input
+                    id="company"
+                    placeholder="Company Inc."
+                    value={invitationCompany}
+                    onChange={(e) => setInvitationCompany(e.target.value)}
+                  />
+                </div>
+                <Button 
+                  onClick={() => {
+                    if (invitationEmail) {
+                      sendInvitationMutation.mutate({
+                        email: invitationEmail,
+                        recipientName: invitationName || undefined,
+                        companyName: invitationCompany || undefined,
+                      });
+                      setInvitationEmail("");
+                      setInvitationName("");
+                      setInvitationCompany("");
+                    }
+                  }}
+                  disabled={!invitationEmail || sendInvitationMutation.isPending}
+                  className="w-full"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  {sendInvitationMutation.isPending ? "Sending..." : "Send Invitation"}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Invitation History</CardTitle>
+                <CardDescription>Track sent invitations and their status</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  Invitation tracking coming soon...
-                </div>
+                {invitationsLoading ? (
+                  <div className="text-center py-4">Loading invitations...</div>
+                ) : invitations && invitations.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Recipient</TableHead>
+                        <TableHead>Invited By</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Sent Date</TableHead>
+                        <TableHead>Expires</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {invitations.map((invitation) => (
+                        <TableRow key={invitation.id}>
+                          <TableCell className="font-medium">{invitation.email}</TableCell>
+                          <TableCell>{invitation.recipientName || 'N/A'}</TableCell>
+                          <TableCell>{invitation.invitedByName}</TableCell>
+                          <TableCell>
+                            <Badge variant={invitation.status === 'accepted' ? 'default' : 
+                                          invitation.status === 'pending' ? 'secondary' : 'destructive'}>
+                              {invitation.status || 'pending'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{new Date(invitation.createdAt).toLocaleDateString()}</TableCell>
+                          <TableCell>{new Date(invitation.expiresAt).toLocaleDateString()}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    No invitations sent yet. Send your first invitation above.
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
