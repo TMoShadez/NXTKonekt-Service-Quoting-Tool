@@ -52,10 +52,12 @@ The **Database Schema** includes entities for Users, Sessions, Organizations, As
 ## Role-Based Access Control
 Comprehensive role-based access control implemented throughout the application:
 
-- **System Administrators**: Full access to admin dashboard, partner management, user role management
-- **Administrators**: Access to admin dashboard and partner management functions  
-- **Partners**: Access to assessment creation, quote generation, and personal dashboard
-- **Sales Executives**: Enhanced partner access with additional sales-specific features
+- **System Administrators**: Full access to admin dashboard, partner management, user role management, system configuration
+- **Administrators**: Full access to admin dashboard, partner management, user role management  
+- **Partners & Sales Executives**: Equal access to assessment creation, quote generation, personal dashboard, and all core functionality
+- **Users**: Basic access to assessment creation and personal dashboard
+
+**Access Level Equivalency**: Partners and Sales Executives have identical system permissions and capabilities. Only Admin roles (System Admin and Admin) have elevated privileges for system management, user role assignment, and administrative oversight.
 
 **Admin Dashboard Features**:
 - Partner Management: Comprehensive partner lifecycle management with approve/reject/suspend/reactivate functionality and real-time status updates
