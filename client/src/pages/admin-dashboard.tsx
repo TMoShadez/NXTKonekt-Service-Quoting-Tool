@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Shield, Users, FileText, BarChart3, CheckCircle, XCircle, Clock, Settings, Link, Copy, Mail, Send, TrendingUp, Eye, Trash2, Download, ExternalLink } from "lucide-react";
 import type { User, Organization, Quote } from "@shared/schema";
@@ -446,6 +447,7 @@ export default function AdminDashboard() {
                       <TableRow>
                         <TableHead>Name</TableHead>
                         <TableHead>Email</TableHead>
+                        <TableHead>Role</TableHead>
                         <TableHead>Organization</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Registration Date</TableHead>
@@ -459,6 +461,14 @@ export default function AdminDashboard() {
                             {partner.firstName ? `${partner.firstName} ${partner.lastName || ''}`.trim() : partner.email}
                           </TableCell>
                           <TableCell>{partner.email}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {partner.role === 'partner' ? 'Partner' :
+                               partner.role === 'sales_executive' ? 'Sales Executive' :
+                               partner.role === 'admin' ? 'Admin' :
+                               partner.role || 'User'}
+                            </Badge>
+                          </TableCell>
                           <TableCell>{partner.organization?.name || 'N/A'}</TableCell>
                           <TableCell>
                             <Badge variant={partner.organization?.partnerStatus === 'approved' ? 'default' : 
@@ -471,7 +481,24 @@ export default function AdminDashboard() {
                           </TableCell>
                           <TableCell>{new Date(partner.createdAt || Date.now()).toLocaleDateString()}</TableCell>
                           <TableCell>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 flex-wrap">
+                              {/* Role Assignment */}
+                              <Select 
+                                value={partner.role || 'user'} 
+                                onValueChange={(role) => updateRoleMutation.mutate({ userId: partner.id, role })}
+                              >
+                                <SelectTrigger className="w-36">
+                                  <SelectValue placeholder="Select role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="user">User</SelectItem>
+                                  <SelectItem value="partner">Partner</SelectItem>
+                                  <SelectItem value="sales_executive">Sales Executive</SelectItem>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                </SelectContent>
+                              </Select>
+
+                              {/* Partner Status Actions */}
                               {partner.organization?.partnerStatus === 'pending' && (
                                 <>
                                   <Button 
@@ -569,22 +596,21 @@ export default function AdminDashboard() {
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => updateRoleMutation.mutate({ userId: u.id, role: 'admin' })}
-                                disabled={updateRoleMutation.isPending || u.role === 'admin'}
+                              <Select 
+                                value={u.role || 'user'} 
+                                onValueChange={(role) => updateRoleMutation.mutate({ userId: u.id, role })}
+                                disabled={updateRoleMutation.isPending}
                               >
-                                Make Admin
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => updateRoleMutation.mutate({ userId: u.id, role: 'user' })}
-                                disabled={updateRoleMutation.isPending || u.role === 'user'}
-                              >
-                                Make User
-                              </Button>
+                                <SelectTrigger className="w-40">
+                                  <SelectValue placeholder="Select role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="user">User</SelectItem>
+                                  <SelectItem value="partner">Partner</SelectItem>
+                                  <SelectItem value="sales_executive">Sales Executive</SelectItem>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </div>
                           </TableCell>
                         </TableRow>
