@@ -323,24 +323,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const quoteId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
 
+      console.log(`📄 Starting PDF generation for quote ${quoteId} by user ${userId}`);
+
+      // Validate quote ID
+      if (isNaN(quoteId)) {
+        console.error('Invalid quote ID provided:', req.params.id);
+        return res.status(400).json({ message: "Invalid quote ID" });
+      }
+
       // Get quote with assessment
       const quotes = await storage.getQuotesByUserId(userId);
       const quoteWithAssessment = quotes.find(q => q.id === quoteId);
 
       if (!quoteWithAssessment) {
+        console.error(`Quote ${quoteId} not found for user ${userId}`);
         return res.status(404).json({ message: "Quote not found" });
       }
+
+      console.log('✅ Quote found:', {
+        quoteNumber: quoteWithAssessment.quoteNumber,
+        hasAssessment: !!quoteWithAssessment.assessment,
+        serviceType: quoteWithAssessment.assessment?.serviceType
+      });
 
       // Get organization name
       const organization = await storage.getOrganizationByUserId(userId);
       const organizationName = organization?.name || 'Unknown Organization';
 
+      console.log('📋 Organization:', organizationName);
+
+      // Validate assessment data
+      if (!quoteWithAssessment.assessment) {
+        console.error('Assessment data missing for quote:', quoteId);
+        return res.status(400).json({ message: "Assessment data missing for this quote" });
+      }
+
       // Generate PDF
+      console.log('🔄 Generating PDF...');
       const pdfPath = await generateQuotePDF({
         assessment: quoteWithAssessment.assessment,
         quote: quoteWithAssessment,
         organizationName,
       });
+
+      console.log('✅ PDF generated successfully:', pdfPath);
 
       // Update quote with PDF URL
       const relativePath = path.relative(process.cwd(), pdfPath);
@@ -348,10 +374,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pdfUrl: relativePath,
       });
 
-      res.json({ pdfUrl: `/api/files/pdf/${path.basename(pdfPath)}` });
+      const pdfUrl = `/api/files/pdf/${path.basename(pdfPath)}`;
+      console.log('✅ PDF URL updated in database:', pdfUrl);
+
+      res.json({ pdfUrl });
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      res.status(500).json({ message: "Failed to generate PDF" });
+      console.error("❌ Error generating PDF:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+      res.status(500).json({ 
+        message: "Failed to generate PDF",
+        error: error instanceof Error ? error.message : 'Unknown error',
+        details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : error) : undefined
+      });
     }
   });
 

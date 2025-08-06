@@ -23,30 +23,65 @@ function getServiceTitle(serviceType?: string): string {
 export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
   const { assessment, quote, organizationName } = quoteData;
   
+  console.log('📄 PDF Generation started for:', {
+    quoteNumber: quote.quoteNumber,
+    serviceType: assessment.serviceType,
+    customerName: assessment.customerContactName
+  });
+
+  // Validate input data
+  if (!assessment) {
+    throw new Error('Assessment data is required for PDF generation');
+  }
+  if (!quote) {
+    throw new Error('Quote data is required for PDF generation');
+  }
+  if (!quote.quoteNumber) {
+    throw new Error('Quote number is missing');
+  }
+
   // Create PDFs directory if it doesn't exist
   const pdfsDir = path.join(process.cwd(), 'uploads', 'pdfs');
   if (!fs.existsSync(pdfsDir)) {
+    console.log('📁 Creating PDFs directory:', pdfsDir);
     fs.mkdirSync(pdfsDir, { recursive: true });
   }
 
   const fileName = `quote-${quote.quoteNumber}.pdf`;
   const filePath = path.join(pdfsDir, fileName);
 
+  console.log('📁 PDF will be saved to:', filePath);
+
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({ margin: 40 });
-      doc.pipe(fs.createWriteStream(filePath));
+      
+      // Create write stream with error handling
+      const writeStream = fs.createWriteStream(filePath);
+      writeStream.on('error', (streamError) => {
+        console.error('❌ Write stream error:', streamError);
+        reject(new Error(`File write error: ${streamError.message}`));
+      });
+      
+      doc.pipe(writeStream);
 
       // Header with logo
       const logoPath = path.join(process.cwd(), 'attached_assets', 'NxtKonekt Astro 5_1749972215768.png');
       
+      console.log('🖼️ Checking logo at:', logoPath);
+      
       // Check if logo exists and add it
       if (fs.existsSync(logoPath)) {
         try {
+          console.log('✅ Logo file found, adding to PDF');
           doc.image(logoPath, 50, 30, { width: 50, height: 50 });
         } catch (logoError) {
-          console.warn('Could not load logo for PDF:', logoError);
+          console.warn('⚠️ Could not load logo for PDF:', logoError);
+          // Continue without logo instead of failing
         }
+      } else {
+        console.warn('⚠️ Logo file not found at:', logoPath);
+        // Continue without logo instead of failing
       }
 
       // Company header - Ultra compact
@@ -1047,15 +1082,22 @@ export async function generateQuotePDF(quoteData: QuoteData): Promise<string> {
       doc.end();
 
       doc.on('end', () => {
+        console.log('✅ PDF generation completed successfully:', filePath);
         resolve(filePath);
       });
 
-      doc.on('error', (error) => {
-        reject(error);
+      doc.on('error', (docError) => {
+        console.error('❌ PDFKit document error:', docError);
+        reject(new Error(`PDF document error: ${docError.message}`));
       });
 
     } catch (error) {
-      reject(error);
+      console.error('❌ PDF generation caught error:', error);
+      if (error instanceof Error) {
+        reject(new Error(`PDF generation failed: ${error.message}`));
+      } else {
+        reject(new Error(`PDF generation failed: ${String(error)}`));
+      }
     }
   });
 }
