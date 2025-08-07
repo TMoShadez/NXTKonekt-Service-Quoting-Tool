@@ -95,6 +95,9 @@ export async function setupAuth(app: Express) {
 
   const domains = process.env.REPLIT_DOMAINS!.split(",");
   
+  // Add custom production domain
+  domains.push('nxtkonektpartners.com');
+  
   // Add localhost for development
   if (process.env.NODE_ENV === 'development') {
     domains.push('localhost:5000', 'localhost');
