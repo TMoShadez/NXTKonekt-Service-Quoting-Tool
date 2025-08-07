@@ -512,12 +512,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const filename = req.params.filename;
     const filePath = path.join(process.cwd(), 'uploads', 'pdfs', filename);
     
+    console.log('📄 PDF download request for:', filename);
+    console.log('📁 Looking for file at:', filePath);
+    console.log('📋 File exists:', fs.existsSync(filePath));
+    
     if (fs.existsSync(filePath)) {
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.sendFile(filePath);
+      try {
+        console.log('✅ Serving PDF file:', filename);
+        
+        // Set headers for PDF serving
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Accept-Ranges', 'bytes');
+        
+        // Send the file
+        res.sendFile(path.resolve(filePath), (err) => {
+          if (err) {
+            console.error('❌ Error sending PDF file:', err);
+            if (!res.headersSent) {
+              res.status(500).json({ message: "Error serving file" });
+            }
+          } else {
+            console.log('✅ PDF file sent successfully:', filename);
+          }
+        });
+      } catch (error) {
+        console.error('❌ Error processing PDF request:', error);
+        res.status(500).json({ message: "Error processing file request" });
+      }
     } else {
-      res.status(404).json({ message: "File not found" });
+      console.error('❌ PDF file not found:', filePath);
+      
+      // List available files for debugging
+      try {
+        const pdfsDir = path.join(process.cwd(), 'uploads', 'pdfs');
+        const files = fs.readdirSync(pdfsDir);
+        console.log('📂 Available PDF files:', files.filter(f => f.endsWith('.pdf')));
+      } catch (dirError) {
+        console.error('❌ Error reading PDFs directory:', dirError);
+      }
+      
+      res.status(404).json({ message: "PDF file not found" });
     }
   });
 

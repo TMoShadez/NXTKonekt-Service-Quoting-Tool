@@ -459,7 +459,11 @@ export default function Dashboard() {
                             <Button 
                               variant="link" 
                               className="nxt-gray-500 hover:text-nxt-gray-700 p-0 mr-3"
-                              onClick={() => window.open(quote.pdfUrl, '_blank')}
+                              onClick={() => {
+                                // Extract filename from the stored path and construct proper URL
+                                const filename = quote.pdfUrl.split('/').pop();
+                                window.open(`/api/files/pdf/${filename}`, '_blank');
+                              }}
                             >
                               Download
                             </Button>
@@ -691,10 +695,37 @@ export default function Dashboard() {
                 )}
 
                 <div className="flex gap-2">
+                  <Button 
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        const response = await apiRequest("POST", `/api/quotes/${selectedQuote.id}/pdf`);
+                        const data = await response.json();
+                        window.open(data.pdfUrl, '_blank');
+                        toast({
+                          title: "Success",
+                          description: "PDF generated successfully!",
+                        });
+                      } catch (error) {
+                        toast({
+                          title: "Error", 
+                          description: "Failed to generate PDF",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Generate PDF
+                  </Button>
                   {selectedQuote.pdfUrl && (
                     <Button 
                       variant="outline"
-                      onClick={() => window.open(selectedQuote.pdfUrl, '_blank')}
+                      onClick={() => {
+                        // Extract filename from the stored path and construct proper URL
+                        const filename = selectedQuote.pdfUrl.split('/').pop();
+                        window.open(`/api/files/pdf/${filename}`, '_blank');
+                      }}
                     >
                       <Download className="mr-2 h-4 w-4" />
                       Download PDF
