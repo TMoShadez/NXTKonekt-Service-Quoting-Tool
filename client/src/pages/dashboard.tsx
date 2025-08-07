@@ -455,19 +455,49 @@ export default function Dashboard() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          {quote.pdfUrl && (
-                            <Button 
-                              variant="link" 
-                              className="nxt-gray-500 hover:text-nxt-gray-700 p-0 mr-3"
-                              onClick={() => {
-                                // Extract filename from the stored path and construct proper URL
+                          <Button 
+                            variant="link" 
+                            className="nxt-gray-500 hover:text-nxt-gray-700 p-0 mr-3"
+                            onClick={async () => {
+                              if (quote.pdfUrl) {
+                                // Try to download existing PDF first
                                 const filename = quote.pdfUrl.split('/').pop();
-                                window.open(`/api/files/pdf/${filename}`, '_blank');
-                              }}
-                            >
-                              Download
-                            </Button>
-                          )}
+                                const pdfUrl = `/api/files/pdf/${filename}`;
+                                
+                                // Check if file exists by trying to access it
+                                try {
+                                  const response = await fetch(pdfUrl, { method: 'HEAD' });
+                                  if (response.ok) {
+                                    window.open(pdfUrl, '_blank');
+                                    return;
+                                  }
+                                } catch (error) {
+                                  console.log('PDF file not found, generating new one...');
+                                }
+                              }
+                              
+                              // Generate new PDF if existing one doesn't exist
+                              try {
+                                const response = await apiRequest("POST", `/api/quotes/${quote.id}/pdf`);
+                                const data = await response.json();
+                                window.open(data.pdfUrl, '_blank');
+                                toast({
+                                  title: "Success",
+                                  description: "PDF generated and downloaded successfully!",
+                                });
+                                // Refresh quotes to update the pdfUrl
+                                queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
+                              } catch (error) {
+                                toast({
+                                  title: "Error", 
+                                  description: "Failed to generate PDF",
+                                  variant: "destructive",
+                                });
+                              }
+                            }}
+                          >
+                            Download
+                          </Button>
                           <Button 
                             variant="link" 
                             className="text-nxt-blue hover:text-blue-700 p-0 mr-3"
@@ -718,19 +748,51 @@ export default function Dashboard() {
                     <FileText className="mr-2 h-4 w-4" />
                     Generate PDF
                   </Button>
-                  {selectedQuote.pdfUrl && (
-                    <Button 
-                      variant="outline"
-                      onClick={() => {
-                        // Extract filename from the stored path and construct proper URL
+                  <Button 
+                    variant="outline"
+                    onClick={async () => {
+                      if (selectedQuote.pdfUrl) {
+                        // Try to download existing PDF first
                         const filename = selectedQuote.pdfUrl.split('/').pop();
-                        window.open(`/api/files/pdf/${filename}`, '_blank');
-                      }}
-                    >
-                      <Download className="mr-2 h-4 w-4" />
-                      Download PDF
-                    </Button>
-                  )}
+                        const pdfUrl = `/api/files/pdf/${filename}`;
+                        
+                        // Check if file exists by trying to access it
+                        try {
+                          const response = await fetch(pdfUrl, { method: 'HEAD' });
+                          if (response.ok) {
+                            window.open(pdfUrl, '_blank');
+                            return;
+                          }
+                        } catch (error) {
+                          console.log('PDF file not found, generating new one...');
+                        }
+                      }
+                      
+                      // Generate new PDF if existing one doesn't exist
+                      try {
+                        const response = await apiRequest("POST", `/api/quotes/${selectedQuote.id}/pdf`);
+                        const data = await response.json();
+                        window.open(data.pdfUrl, '_blank');
+                        toast({
+                          title: "Success",
+                          description: "PDF generated and downloaded successfully!",
+                        });
+                        // Update the selected quote
+                        setSelectedQuote({...selectedQuote, pdfUrl: data.pdfUrl});
+                        // Refresh quotes to update the pdfUrl
+                        queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
+                      } catch (error) {
+                        toast({
+                          title: "Error", 
+                          description: "Failed to generate PDF",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Download PDF
+                  </Button>
                   <Button 
                     variant="outline"
                     onClick={() => handleShareCustomerPortal(selectedQuote.id, selectedQuote.assessment?.customerCompanyName)}
