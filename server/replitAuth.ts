@@ -14,10 +14,18 @@ if (!process.env.REPLIT_DOMAINS) {
 
 const getOidcConfig = memoize(
   async () => {
-    return await client.discovery(
-      new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      process.env.REPL_ID!
+    const issuerUrl = process.env.ISSUER_URL ?? "https://replit.com/oidc";
+    const replId = process.env.REPL_ID!;
+    
+    console.log(`🔧 OIDC Config - Issuer: ${issuerUrl}, Repl ID: ${replId}`);
+    
+    const config = await client.discovery(
+      new URL(issuerUrl),
+      replId
     );
+    
+    console.log(`✅ OIDC Discovery completed for ${replId}`);
+    return config;
   },
   { maxAge: 3600 * 1000 }
 );
@@ -95,7 +103,7 @@ export async function setupAuth(app: Express) {
 
   const domains = process.env.REPLIT_DOMAINS!.split(",");
   
-  // Add custom production domain
+  // Add custom production domain - NOTE: This domain must be registered in Replit OIDC settings
   domains.push('nxtkonektpartners.com');
   
   // Add localhost for development
@@ -126,8 +134,10 @@ export async function setupAuth(app: Express) {
     const hostname = req.get('host') || req.hostname;
     const invitationToken = req.query.invitation as string;
     
-    console.log(`Login attempt for hostname: ${hostname}`);
-    console.log('Available strategies:', Object.keys(passport._strategies || {}));
+    console.log(`🔑 Login attempt for hostname: ${hostname}`);
+    console.log('🔧 Available strategies:', Object.keys(passport._strategies || {}));
+    console.log('🌐 Full URL:', `${req.protocol}://${hostname}${req.originalUrl}`);
+    console.log('🔍 Headers:', JSON.stringify(req.headers, null, 2));
     
     if (invitationToken) {
       console.log(`🎫 Partner invitation login with token: ${invitationToken.substring(0, 8)}...`);
@@ -144,49 +154,68 @@ export async function setupAuth(app: Express) {
       const fallbackStrategy = `replitauth:${hostname.split(':')[0]}`;
       if (passport._strategy(fallbackStrategy)) {
         finalStrategy = fallbackStrategy;
-        console.log(`Using fallback strategy: ${fallbackStrategy}`);
+        console.log(`🔄 Using fallback strategy: ${fallbackStrategy}`);
       } else {
-        console.error(`No authentication strategy found for ${strategyName} or ${fallbackStrategy}`);
+        console.error(`❌ No authentication strategy found for ${strategyName} or ${fallbackStrategy}`);
         return res.redirect('/login-error?reason=no_strategy');
       }
     }
     
-    passport.authenticate(finalStrategy)(req, res, next);
+    console.log(`✅ Using authentication strategy: ${finalStrategy}`);
+    
+    // Add error handling for the authentication middleware
+    const authenticateMiddleware = passport.authenticate(finalStrategy, {
+      failureRedirect: '/login-error?reason=auth_failed',
+      failureMessage: true
+    });
+    
+    authenticateMiddleware(req, res, (err) => {
+      if (err) {
+        console.error('❌ Authentication middleware error:', err);
+        return res.redirect('/login-error?reason=middleware_error');
+      }
+      next();
+    });
   });
 
   app.get("/api/callback", (req, res, next) => {
     const hostname = req.get('host') || req.hostname;
     let strategyName = `replitauth:${hostname}`;
     
-    console.log(`Callback for hostname: ${hostname}, strategy: ${strategyName}`);
+    console.log(`🔄 Callback for hostname: ${hostname}, strategy: ${strategyName}`);
+    console.log('🔍 Callback URL params:', req.query);
+    console.log('🌐 Full callback URL:', `${req.protocol}://${hostname}${req.originalUrl}`);
     
     // Try fallback strategy if primary doesn't exist
     if (!passport._strategy(strategyName)) {
       const fallbackStrategy = `replitauth:${hostname.split(':')[0]}`;
       if (passport._strategy(fallbackStrategy)) {
         strategyName = fallbackStrategy;
-        console.log(`Using fallback strategy for callback: ${fallbackStrategy}`);
+        console.log(`🔄 Using fallback strategy for callback: ${fallbackStrategy}`);
       }
     }
     
     passport.authenticate(strategyName, (err, user, info) => {
       if (err) {
-        console.error('Authentication error:', err);
-        return res.redirect('/login-error?reason=auth_error');
+        console.error('❌ Authentication error:', err);
+        console.error('❌ Full error details:', JSON.stringify(err, null, 2));
+        return res.redirect('/login-error?reason=auth_error&details=' + encodeURIComponent(err.message || 'Unknown error'));
       }
       
       if (!user) {
-        console.error('Authentication failed - no user returned:', info);
-        return res.redirect('/login-error?reason=no_user');
+        console.error('❌ Authentication failed - no user returned:', info);
+        console.error('❌ Info details:', JSON.stringify(info, null, 2));
+        return res.redirect('/login-error?reason=no_user&details=' + encodeURIComponent(JSON.stringify(info)));
       }
       
       req.logIn(user, async (err) => {
         if (err) {
-          console.error('Login session error:', err);
-          return res.redirect('/login-error?reason=session_error');
+          console.error('❌ Login session error:', err);
+          console.error('❌ Session error details:', JSON.stringify(err, null, 2));
+          return res.redirect('/login-error?reason=session_error&details=' + encodeURIComponent(err.message || 'Unknown session error'));
         }
         
-        console.log('User successfully authenticated:', user.claims?.email);
+        console.log('✅ User successfully authenticated:', user.claims?.email);
         
         // Check if this is an invitation-based signup
         const invitationToken = (req.session as any)?.invitationToken;

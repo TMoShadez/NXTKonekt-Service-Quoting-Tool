@@ -4,6 +4,10 @@ import { AlertCircle, RefreshCw } from "lucide-react";
 import nxtKonektLogo from "@assets/NxtKonekt Astro 5_1749972215768.png";
 
 export default function LoginError() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const reason = urlParams.get('reason');
+  const details = urlParams.get('details');
+  
   const handleRetryLogin = () => {
     window.location.href = "/api/login";
   };
@@ -41,8 +45,43 @@ export default function LoginError() {
                 <li>• You denied account access permissions</li>
                 <li>• There was a temporary connection issue</li>
                 <li>• Your session expired during login</li>
+                <li>• The custom domain isn't registered with the authentication provider</li>
               </ul>
             </div>
+            
+            {window.location.hostname === 'nxtkonektpartners.com' && (
+              <div className="text-left bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-6">
+                <p className="text-sm text-yellow-800 font-medium mb-2">⚠️ Custom Domain Authentication</p>
+                <p className="text-sm text-yellow-700 mb-2">
+                  You're accessing from nxtkonektpartners.com, which requires special configuration.
+                </p>
+                <p className="text-sm text-yellow-700">
+                  <strong>Temporary Solution:</strong> Try logging in from the main Replit domain first:
+                </p>
+                <div className="mt-2">
+                  <Button 
+                    onClick={() => window.open('https://f80523b4-52dc-45cc-bda8-89c5a1a9b3dd-00-2vzuokq3tubk4.spock.replit.dev/api/login', '_blank')}
+                    variant="outline"
+                    size="sm"
+                    className="text-yellow-800 border-yellow-300 hover:bg-yellow-100"
+                  >
+                    Login via Replit Domain
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {reason && (
+              <div className="text-left bg-red-50 border border-red-200 p-4 rounded-lg mb-6">
+                <p className="text-sm text-red-800 font-medium mb-2">🔍 Technical Details</p>
+                <p className="text-sm text-red-700 mb-2">Error Type: {reason}</p>
+                {details && (
+                  <p className="text-xs text-red-600 font-mono bg-red-100 p-2 rounded">
+                    {decodeURIComponent(details)}
+                  </p>
+                )}
+              </div>
+            )}
             
             {window.location.hostname.includes('localhost') && (
               <div className="text-left bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
